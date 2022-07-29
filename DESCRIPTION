@@ -1,0 +1,44 @@
+Package: herbivar
+Type: Package
+Title: Quantitative Tools For Variance Explicit Ecology and Herbivory
+Version: 0.1.0
+Authors@R: 
+    person("Vincent", "Pan", , email = "vsbpan@gmail.com",
+             role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9892-7805"))
+Maintainer: Vincent Pan <vsbpan@gmail.com>
+Description: This package makes available several methods used for analyzing variability in 
+    ecological data. Currently, it supports fitting a neutral herbivory model to data using 
+    Maximum Likelihood (ML) and Bayesian Synthetic Likelihood (BSL). It also contains several 
+    helper functions for investigating distributions and wrangling the HerbVar dataset. In addition,
+    using the 'imager' infrastructure, the package also supports automatic processing of leaf images, 
+    mostly in the context of leaf scans, that can retreive rich within leaf herbivory data. The 
+    package is integrated with the 'spatstat' package that allows for spatial analysis of these 
+    data. 
+License: GPL (>= 3)
+Depends:
+    imager
+Imports:
+    stringr,
+    grDevices,
+    spatstat.geom,
+    spatstat.core,
+    dplyr,
+    ggplot2,
+    ggpubr,
+    foreach,
+    doParallel,
+    DescTools,
+    ineq,
+    kSamples,
+    numDeriv,
+    philentropy,
+    purrr,
+    rstan,
+    parallel,
+    extraDistr
+Suggests: 
+    BSL,
+    spatstat
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.0
