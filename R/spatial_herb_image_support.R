@@ -301,7 +301,7 @@ crop_leaf <- function(object, as.mat = FALSE, invalid = NA, rgb.index = 3L, px.s
     object <- as.cimg(object)
   }
 
-  if(spectrum(object) == 1){ #Handle grayscale images
+  if(imager::spectrum(object) == 1){ #Handle grayscale images
     rgb.index <- 1
     other.col.check <- TRUE
   } else {
@@ -923,7 +923,7 @@ split2mat <- function(split_herb){
 is.margin <- function(mat){
   if(!is.matrix(mat)){
     if(is.cimg(mat) || is.array(mat) || is.pixset(mat)){
-      if(spectrum(mat) != 1){
+      if(imager::spectrum(mat) != 1){
         mat <- grayscale(mat)
       }
       mat <- mat[,,1,1]
@@ -970,7 +970,7 @@ hole_perimeter <- function(mat, non_leaf_border = FALSE, px.size = NA){
 
   if(!is.matrix(mat)){
     if(is.cimg(mat) || is.array(mat) || is.pixset(mat)){
-      if(spectrum(mat) != 1){
+      if(imager::spectrum(mat) != 1){
         mat <- grayscale(mat)
       }
       mat <- (mat[,,1,1])
@@ -1045,11 +1045,11 @@ plot.singleton <- function (x, ...){
     "y"
   else "x"
   l <- max(dim(x)[1:2])
-  if (spectrum(x) == 1) {
+  if (imager::spectrum(x) == 1) {
     plot(1:l, as.vector(x), xlab = varying, ylab = "Pixel value",
          type = "l", ...)
   }
-  else if (spectrum(x) == 3) {
+  else if (imager::spectrum(x) == 3) {
     ylim <- range(x)
     plot(1:l, 1:l, type = "n", xlab = varying, ylim = ylim,
          ylab = "Pixel value", ...)

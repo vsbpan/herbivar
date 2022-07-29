@@ -44,4 +44,5 @@ S3method("coef", "generic_null_fit")
 S3method("print","split_herb")
 S3method("plot","singleton")
 S3method("plot","cimg")
+S3method("plot","split_herb")
 
