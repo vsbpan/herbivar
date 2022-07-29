@@ -1,0 +1,1003 @@
+#'@title Neutral 'Bite Size' Distribution Based On Allometry Scaling Laws
+#'@description Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometry scaling laws.
+#' @param x,q a vector of quantities
+#' @param p a vector of probabilities
+#' @param n number of observations to generate.
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param log,log.p logical; if \code{TRUE}, probabilities p are given as \eqn{\log(p)}.
+#' @param lower.tail logical; if \code{TRUE} (default), probabilities are \eqn{P(X \leq x)} otherwise, \eqn{P(X > x)}
+#' @details The neutral 'bite size' distribution has density function \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha}} where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometry scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
+#' @return a vector of numeric values
+#' @rdname allo
+#' @export
+dallo<-function(x,min.phi=0.005,max.phi=1,a=14/9,log = FALSE){
+  # Check if phi is within bound. If so, apply pdf formula, otherwise 0
+  if(a == 1){
+    prob<-ifelse((x<=max.phi)*(x>=min.phi),1/(log(max.phi)-log(min.phi))/x,0)
+  } else {
+    prob<-ifelse((x<=max.phi)*(x>=min.phi),(1-a)/(max.phi^(1-a)-min.phi^(1-a))/x^a,0)
+  }
+  if(log){
+    prob<-log(prob)
+  }
+  return(prob)
+}
+
+#' @rdname allo
+#' @export
+rallo<-function(n,min.phi=0.005,max.phi=1,a=14/9){
+  cdf.prob<-runif(n,min = 0,max = 1)
+  # inverse transform sampling
+  phi <-(cdf.prob*(max.phi^(1-a)-min.phi^(1-a))+min.phi^(1-a))^(1/(1-a))
+  return(phi)
+}
+
+#' @rdname allo
+#' @export
+pallo<- function(q, min.phi = 0.005, max.phi = 1, a = 14/9,
+                 lower.tail = TRUE, log.p = FALSE){
+  p <- (q - min.phi^(1-a))^(1/(1-a))/(max.phi^(1-a)-min.phi^(1-a))
+  if(!lower.tail){
+   p <- 1-p
+  }
+
+  if(log.p){
+    p <- log(p)
+  }
+  return(p)
+}
+
+#' @rdname allo
+#' @export
+qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
+                lower.tail = TRUE, log.p = FALSE){
+  if(log.p){
+    p <- exp(p)
+  }
+  if(!lower.tail){
+    p <- 1 - p
+  }
+  q <- (p*(max.phi^(1-a)-min.phi^(1-a))+min.phi^(1-a))^(1/(1-a))
+  return(q)
+}
+
+#' @title Generate Neutral Herbivory Distribution Based On Allometry Scaling Laws Using Simulation
+#' @description This is the workhorse of \code{ralloT()} that generate draws from the neutral herbivory distribution using simulation. The CDF of the neutral herbivory model is too computationally intensive to calculate, so inverse transform sampling is not implemented.
+#' @details
+#' \eqn{\lambda} of a Poisson distribution is calculated from parameters \eqn{\phi_m}, \eqn{\phi_M}, \eqn{a}, and \eqn{\overline{\phi_{T}'}} and used to draw random number of feeding events on a leaf \eqn{k_i}. \deqn{\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}}}
+#' \eqn{\phi_{Ti}} is then obtained via \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha}}
+#' \eqn{\overline{\phi_{T}'}} is the mean herbivory of the distribution when herbivores are not plant limited. That is, if \eqn{\overline{\phi_{T}}}, which has support \eqn{[x, \infty]}, is not truncated to \eqn{[0, 1]}. \eqn{\overline{\phi_{T}}} and \eqn{\overline{\phi_{T}'}} are often close to each other. For more details on the 'bite size' distribution see \code{?rallo()}.
+#' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited. See details.
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param n.sim the number of random numbers to draw.
+#' @param truncate if \code{TRUE} (default), truncate generated values of \eqn{\phi_T} to \eqn{[0, 1]}.
+#' @return a vector of numeric values
+#' @export
+allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
+                                   n.sim=1000,truncate=T){
+  #Forward approximate simulation (not exact!)
+  lambda<-mean.phi.T*(2-a)/(1-a)*((max.phi^(1-a)-min.phi^(1-a))/(max.phi^(2-a)-min.phi^(2-a)))
+  k<-rpois(n.sim,lambda)
+  phi_T<-vapply(X = k,
+                FUN = function(x) sum(
+                  rallo(n = x,
+                        min.phi = min.phi,
+                        max.phi = max.phi,
+                        a = a)),
+                FUN.VALUE = numeric(1))
+  if(truncate){
+    phi_T[phi_T>1]<-1 # Cut off phi_T if goes over 1. May underestimate mean.phi.T
+  }
+  return(phi_T)
+}
+
+
+#' @title Neutral Herbivory Distribution Based On Allometry Scaling Laws
+#' @description Density, distribution function, quantile function, and random generation for the neutral herbivory distribution based on allometry scaling laws.
+#' @details
+#' The neutral herbivory distribution is a type of compound Poisson distribution taking the form:
+#' \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha},} and \deqn{k \sim Pois(\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}})}
+#' \eqn{\overline{\phi_{T}'}} is the mean herbivory of the distribution when herbivores are not plant limited. That is, if \eqn{\overline{\phi_{T}}}, which has support \eqn{[x, \infty]}, is not truncated to \eqn{[0, 1]}. \eqn{\overline{\phi_{T}}} and \eqn{\overline{\phi_{T}'}} are often close to each other. For more details on the 'bite size' distribution see ?rallo.
+#'
+#' The PDF of \eqn{P(\phi_T)} does not have a closed form solution and is therefore numerically approximated. We first marginalize out \eqn{k} via
+#' \deqn{P(\phi_T)=\sum_{k=0}^\infty P(\phi_T|k) P(k|\lambda ).}
+#' As \eqn{k} increases, \eqn{P(k|\lambda)} becomes vanishingly small, so the infinite sum can be cut off at a rather low \code{k.max} value without loosing much accuracy. \code{k.max.tolerance} sets the tolerance threshold for the cut off in the calculation. More precisely, the function checks to see whether \eqn{P(k.max | \lambda)} is less than the threshold of triviality. If exceeded, the function would throw a warning.
+#'
+#' The calculation of the conditional probability distribution \eqn{P(\phi_T | k)} requires repeated convolutions of the bite size distribution, which is computationally expensive. Thankfully, we can use the Fast Fourier Transformation (FFT) to simplify the calculation significantly. Convolution of functions is simply the product of those functions in the frequency domain that is then back transformed into the time domain.
+#' \deqn{P(\phi_T|k) = \overbrace{P(\phi)*P(\phi)...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
+#' Argument by sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} is approximated with a normal distribution, given the central limit theorem:
+#' \deqn{P(\phi_T | k > 100) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]}), }
+#' where
+#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}},} and
+#' \deqn{\mathbb{Var}[\phi]=\frac{\phi_M^{3-\alpha}-\phi_m^{3-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{3-\alpha}-(\frac{\phi_M^{2-\alpha}-\phi_m^{2-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{2-\alpha})^2.}
+#'
+#' The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
+#'
+#' Because the CDF of the neutral herbivory distribution is too computationally intensive, \code{ralloT()} generates values using random draws from the Poisson and 'bite size' distribution. It is essentially a wrapper for the function \code{allometry.herb.quasi.sim()}. For the same reason, \code{qalloT()} estimates the quantile function by generating n.sim draws from the neutral herbivory distribution then finding the empirical cumulative density function.
+#'
+#'
+#' @param x,q a vector of values of proportion herbivory
+#' @param p a vector of probabilities
+#' @param n the number of observations to generate
+#' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited. See details.
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param k.max The maximum number of convolutions of the neutral 'bite size' distribution in numerical approximation of the PDF of the neutral herbivory distribution. Default is 50.
+#' @param by The grid resolution used in the FFT convolutions. Default is 0.001.
+#' @param k.max.tolerance the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small).
+#' @param k.fft.limit the maximum number of convolutions performed by FFT. For k convolutions above this limit, a Gaussian approximation is used. See details for more information.
+#' @param lower.tail logical; if \code{TRUE} (default), probabilities are \eqn{P(X \leq x)} otherwise, \eqn{P(X > x)}
+#' @param log,log.p if \code{TRUE} (default is \code{FASLE}), return probabilities on the log scale.
+#' @param parallel if \code{TRUE}, use parallel computing supported via the package \code{foreach} to speed up the computation. The number of parallel processes depends on the argument \code{cores}. Ignored if \code{cores} is set  above 1.
+#' @param cores the number of parallel processes in parallel computing.
+#' @param n.sim the number of simulations used to numerically estimate the quantile function. Defaults to 1000.
+#' @param ... addition arguments passed to \code{dalloT()} in \code{palloT()}.
+#' @return A vector of numeric values
+#' @rdname alloT
+#' @export
+ralloT<-function(n,mean.phi.T,min.phi=0.005,max.phi=1,a=14/9){
+  phi.T<-allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
+                                  n.sim = n,
+                                  min.phi = min.phi,
+                                  max.phi = max.phi,
+                                  a = a,
+                                  truncate = T)
+  # while(any(phi.T>1)){
+  #   phi.T[phi.T>1] <- allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
+  #                                              n.sim = sum(phi.T>1),
+  #                                              min.phi = min.phi,
+  #                                              max.phi = max.phi,
+  #                                              a = a,
+  #                                              truncate = F)
+  # }
+  # This method has less numeric error than sampling using dalloT() directly.
+  # If using sample(), the sampling grid resolution needs to be at least <= 0.0001
+  # which is computationally intensive. If the resolution is too low, there would be
+  # a downward bias on the variance and mean approximation
+  return(phi.T)
+}
+
+#' @rdname alloT
+#' @export
+dalloT<-function(x, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9,
+                 k.max = 50, by = 0.001, k.max.tolerance = 1e-5,
+                 k.fft.limit = 100, log = FALSE, parallel = FALSE, cores = 1){
+  if(cores>1){
+    parallel <- TRUE
+    cluster <- makeCluster(cores)
+    registerDoParallel(cluster)
+
+  } else {
+    parallel <- FALSE
+  }
+
+  if(max.phi<=min.phi){
+    prob<-rep(0,length(x))
+  } else {
+    # if(by > 0.01){
+    #   warning("Approximation resolution too low; results are crappy")
+    # }
+    # mean.phi.T is the mean before cutting off at 1 (!!).
+    # mean.phi.T is an overestimation of the true mean, especially at higher values
+    k.vec <- seq_len(k.max) # Set the vector of k that is calculated.
+    # 50 usually does a good approximation
+
+    phi <- seq(from=0,to = 1,by = by) # Generate some x
+    p.phi <- dallo(phi,
+                   min.phi = min.phi,
+                   max.phi = max.phi,
+                   a = a,
+                   log = FALSE) # Calculate the pdf
+    #Add zero padding to get the length to a power of 2 (for computational efficiency)
+    p.phi.length<-2^ceiling(log2(length(p.phi))+2)
+    p.phi<-c(p.phi,rep(0,p.phi.length-length(p.phi)))
+
+    #Rescale p.phi to avoid over or under flow
+    p.phi<-p.phi/sum(p.phi)
+    Ft.p.phi <- fft(p.phi,inverse = FALSE) # Apply FFT
+
+    #Pre-calculate indices
+    phi.T.index<-findInterval(x = x, vec = phi)
+
+    #Find lambda outside of dk.cond.lambda() to save computation
+    lambda<- mean.phi.T/((1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a)))
+
+    #Numeric summation of joint prob from k=0 to k=max_k for each observed x (phi.T)
+    prob<-as.vector(tcrossprod(dk.cond.lambda(k = k.vec,
+                                              k.max.tolerance = k.max.tolerance,
+                                              lambda = lambda,
+                                              log = FALSE),
+                               dalloT.cond.k.fft.conv(phi.T = x,
+                                                      k = k.vec,
+                                                      fft.vec = Ft.p.phi,
+                                                      phi = phi,
+                                                      log = FALSE,
+                                                      min.phi = min.phi,
+                                                      max.phi = max.phi,
+                                                      a = a,
+                                                      k.fft.limit = k.fft.limit,
+                                                      phi.T.index = phi.T.index,
+                                                      parallel = parallel)
+    ))
+  } # Parallel computing only possible with registered cluster
+
+  #Fix scaling issue
+  prob <- ifelse(x == 0,
+                 dpois(0,lambda,log = FALSE),
+                 prob/by)
+
+  if(log){
+    prob<-log(prob)
+  }
+  return(prob)
+
+  on.exit(
+    try({
+      if(!is.null(cluster)){
+        stopImplicitCluster()
+        stopCluster(cluster)
+      }
+    })
+  ) # Stop all connections on exit
+}
+
+#' @rdname alloT
+#' @export
+palloT<-function(q, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9,
+                 by = 0.001, cores = 1, lower.tail = TRUE, log.p = FALSE, ...){
+  lambda<- mean.phi.T/((1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a)))
+  p0 <- dpois(0,lambda = lambda)
+
+  if((by > min.phi & q < min.phi) || by > q){
+    warning("Numeric resolution not high enough, result is unreliable. Lower the 'by' setting.")
+  }
+  if(by < 0.01 && q > 0.1){
+    message("Slow! Be prepared to wait. Go make coffee :) ")
+  }
+  if(cores>1){
+    parallel <- TRUE
+    cluster <- makeCluster(cores)
+    registerDoParallel(cluster)
+
+    p <- foreach(i = q, .combine = "c", .packages = c("herbivar")) %dopar% {
+      upper <- i
+      upper<-ifelse(upper<0,0,upper)
+      foo<-integrate(
+        f = function(x) {dalloT(x = x,
+                                mean.phi.T = mean.phi.T,
+                                min.phi = min.phi,
+                                max.phi = max.phi,
+                                a = a,
+                                by = by,
+                                ...)},
+        lower = 0,
+        upper = upper,
+        subdivisions = 500
+      )
+      return(foo$value)
+    }
+    on.exit(
+      try({
+        stopImplicitCluster()
+        stopCluster(cluster)
+      })
+    )
+  } else {
+    p<-vapply(X = q, FUN = function(q) {
+      q<-ifelse(q<0,0,q)
+      foo<-integrate(
+        f = function(x) {dalloT(x = x,
+                                mean.phi.T = mean.phi.T,
+                                min.phi = min.phi,
+                                max.phi = max.phi,
+                                a = a,
+                                by = by,
+                                ...)},
+        lower = 0,
+        upper = q,
+        subdivisions = 500
+      )
+      return(foo$value)
+    }, FUN.VALUE = numeric(1))
+  }
+  p.true <- p + ifelse(q<0,0,p0)
+
+  if(!lower.tail){
+   p.true <-  1 - p.true
+  }
+
+  if(log.p){
+    p.true <- log(p.true)
+  }
+
+  return(p.true)
+}
+
+#' @rdname alloT
+#' @export
+qalloT<-function(p, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9, n.sim = 1000,
+                 lower.tail = TRUE, log.p = FALSE){
+  if(log.p){
+    p <- exp(p)
+  }
+
+  if(!lower.tail){
+    p <- 1 - p
+  }
+
+  phi.T<-allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
+                                  n.sim = n.sim,
+                                  min.phi = min.phi,
+                                  max.phi = max.phi,
+                                  a = a,
+                                  truncate = TRUE)
+  q <- quantile(phi.T, probs = p, names = FALSE)
+  return(q)
+}
+
+
+
+#' @title Calculate the Conditional Probability Matrix of P(phi.T | k) Via Gaussian Approximation
+#' @description Internal function of \code{dalloT.cond.k.fft.conv()} used to calculate \eqn{P(\phi_T | k)} via Gaussian approximation for very large values of \eqn{k.}
+#' @details
+#' Owing to CLT,
+#' \deqn{P(\phi_T | k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]}),} where
+#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}},} and
+#' \deqn{\mathbb{Var}[\phi]=\frac{\phi_M^{3-\alpha}-\phi_m^{3-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{3-\alpha}-(\frac{\phi_M^{2-\alpha}-\phi_m^{2-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{2-\alpha})^2.}
+#' @return a length(phi.T) X length(k) matrix of probabilities.
+#' @param phi.T a vector of cumulative proportion herbivory
+#' @param k a vector of integer values indicating the number of convolutions to perform
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param log if \code{TRUE} (default is \code{FASLE}), return probabilities on the log scale.
+#' @export
+dalloT.cond.k.gauss.approx<-function(phi.T,k,min.phi=0.005,max.phi=1,a=14/9,log=FALSE){
+  phi.bar<-(1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a))
+  phi.var<-(1-a)/(3-a)*(max.phi^(3-a)-min.phi^(3-a))/(max.phi^(1-a)-min.phi^(1-a))-phi.bar^2
+
+  prob.mat<-(outer(phi.T, k, Vectorize(FUN = function(phi.T, k){
+    dnorm(x = phi.T,mean = k*phi.bar,sd = sqrt(k*phi.var),log = log)
+  }))) # Returns a matrix. Row is phi.T and column is k.
+  return(prob.mat)
+}
+
+
+#' @title Perform k Convolutions of Fourier Transformed Vector
+#' @description Internal function of \code{dalloT.cond.k.fft.conv()} used to perform \eqn{k} convolutions of a supplied Fourier transformed vector. Parallel computing is supported and requires an already registered cluster.
+#' @details
+#' \deqn{P(\phi_T|k) = \overbrace{P(\phi)*P(\phi)...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
+#' @param k a vector of integers indicating the number of convolutions to apply to a Fourier transformed vector
+#' @param fft.vec a Fourier transformed vector on the frequency domain
+#' @param parallel if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 50000, as no computational efficiency would be gained.
+#' @return A \code{length(fft.vec)} x \code{length(k)} matrix of conditional probabilities
+#' @export
+convolve.dist <- function(k, fft.vec, parallel = FALSE){
+  fft.vec.length<-length(fft.vec)
+  if(parallel &&
+     (50000 < fft.vec.length)){ # Only long fft.vec benefits from parallel
+    cond.prob.mat<-foreach(i=k, .combine = cbind) %dopar%{
+      (Re(fft(fft.vec^i,inverse = T))/fft.vec.length)
+    }
+  } else {
+    cond.prob.mat<-sapply(k,function(x){
+      (Re(fft(fft.vec^x,inverse = T))/fft.vec.length)
+    })
+  }
+  return(cond.prob.mat)
+}
+
+#' @title Numerically Estimate Conditional Probability Matrix of P(phi.T | k)
+#' @description Internal function of \code{dalloT()} used to estimate the conditional probability matrix \eqn{P(\phi_T|k)} via FFT or Gaussian approximation.
+#' @param phi.T a vector of cumulative proportion herbivory
+#' @param k a vector of integers indicating the number of convolutions to apply to a Fourier transformed vector
+#' @param fft.vec a Fourier transformed vector on the frequency domain, specifically that of the probability density of phi.
+#' @param phi a numeric vector of the proportion herbivory grid used to generate the \code{fft.vec} with \code{dallo()}. Supplied to find closest matched indices for \code{phi.T} for approximate conditional probabilities of \eqn{P(phi_T | k)}.
+#' @param log if \code{TRUE}, returns probabilities on the log scale.
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param k.fft.limit the maximum number of convolutions performed by FFT. For k convolutions above this limit, a Gaussian approximation is used.
+#' @param parallel if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 50000, as no computational efficiency would be gained.
+#' @param phi.T.index a vector of integers indicating the location where phi.T most closely match the grid of probabilities. If \code{NULL} (default), the indices are calculated using \code{phi.T}, \code{min.phi}, \code{max.phi}, and \code{a}. Supplying a pre-calculated index vector saves a lot of computation when the function is used repeatedly.
+#' @return a \code{length(phi)} X \code{length(k)} matrix of conditional probabilities.
+#' @export
+dalloT.cond.k.fft.conv<-function(phi.T, k, fft.vec, phi, log = FALSE,
+                                 min.phi = 0.005, max.phi = 1,
+                                 a = 14/9, k.fft.limit = 100,
+                                 parallel = FALSE,phi.T.index = NULL){
+  if(max(k)>k.fft.limit){
+    message("Underflow in FFT; switching to gaussian approximation for k > ",k.fft.limit)
+    k1 <- seq(min(k),k.fft.limit, by = 1)
+    k2 <- seq((k.fft.limit+1),max(k),by = 1)
+    # The repeated convolutions approaches a gaussian distribution when k is high
+    # Automatically switch to gaussian approximation above some set threshold.
+    # 100 seems to be a good limit
+    # Might be able to save some computation by feeding in observed data directly to
+    # get the prob, rather than searching in a big matrix
+    # The approximation is not needed for biologically reasonable parameter space (!!)
+    prob.max.gauss.approx<-dalloT.cond.k.gauss.approx(phi.T = phi,
+                                                      k = k2,
+                                                      min.phi = min.phi,
+                                                      max.phi = max.phi,
+                                                      a = a,
+                                                      log = FALSE)
+
+
+    cond.prob.mat<-convolve.dist(k = k1,
+                                 fft.vec =  fft.vec,
+                                 parallel = parallel)[seq_along(phi),]
+    # Values over the upper boundary are cut off with the indexing
+
+    cond.prob.mat<-cbind(cond.prob.mat,prob.max.gauss.approx)
+  } else {
+    cond.prob.mat<-convolve.dist(k = k,
+                                 fft.vec =  fft.vec,
+                                 parallel = parallel)[seq_along(phi),]
+    # Returns a matrix. Row is phi.T and column is k.
+    # Values over the upper boundary are cut off with the indexing
+  }
+
+  # Cut off probabilities added back to phi=1
+   cond.prob.mat[nrow(cond.prob.mat),]<-cond.prob.mat[nrow(cond.prob.mat),]+1-colSums(cond.prob.mat)
+  #cond.prob.mat <- cond.prob.mat/ colSums(cond.prob.mat)
+
+  if(is.null(phi.T.index)){
+    #Check if there is pre-calculated indices
+    phi.T.index<-findInterval(x = phi.T, vec = phi)
+  }
+
+  # For each pairwise combination of phi.T and k, index the corresponding probability and returns a matrix
+  prob.mat<-outer(phi.T.index, k,
+                  Vectorize(
+                    FUN = function(phi.T.index, k){
+                      cond.prob.mat[
+                        phi.T.index,
+                        (k)]
+                    })) # slow
+  prob.mat[(phi.T>1)|(phi.T<0),]<-0 # Set values outside of bounds to zero
+
+  prob.mat[prob.mat<0]<-0 # Fix some numeric errors
+  if(log){
+    prob.mat<-log(prob.mat)
+  }
+  return(prob.mat) # Out puts a matrix of P(phi.T | k)
+  # phi.T is the rows and k is the columns
+}
+
+
+#' @title Numerically Estimate Conditional Probability Matrix of P(k | lambda)
+#' @description Internal function of \code{dalloT()} used to estimate the conditional probability matrix  \eqn{P(k|\lambda)}. Basically a wrapper function for \code{dpois()}.
+#' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited.
+#' @param k a vector of integers indicating the number of convolutions to apply to a Fourier transformed vector
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param log if \code{TRUE}, returns probabilities on the log scale.
+#' @param lambda if \code{NULL} (default), lambda would be estimated from the parameters given. Supplying \code{lambda} is useful to avoid repeated computation when the function is used repeatedly.
+#' @param k.max.tolerance the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small). See details of \code{?dalloT()}
+#' @return a \code{(length(phi.T))} X \code{length(k)} matrix of conditional probabilities.
+#' @export
+dk.cond.lambda<-function(k,mean.phi.T=NULL,min.phi=NULL,max.phi=NULL,
+                         a=NULL,k.max.tolerance=1e-5,lambda=NULL,log=FALSE){
+  if(is.null(lambda)){
+    lambda<-mean.phi.T/((1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a)))
+  }
+  prob<-dpois(x = k,lambda = lambda)
+  if((prob[length(prob)]>k.max.tolerance)||
+     (prob[length(prob)]>prob[length(prob)-1])){
+    warning("Approximation may be unreliable; increase k.max")
+  }
+  if(log){
+    prob<-log(prob)
+  }
+
+  return(prob) # Out puts a vector of P(k | lambda)
+}
+
+#' @title Fit Neutral Herbivory Distribution Using Maximum Likelihood Estimation
+#' @description Estimate unknown parameter(s) in the neutral herbivory model from a vector of observed herbivory data using Maximum Likelihood Estimation (MLE). The likelihood function is of the form
+#' \deqn{\mathcal{L}(\phi_{T1},\phi_{T2},...,\phi_{Tn}|\overline{\phi_T},\phi_M,\phi_m,\alpha)=\prod_i^n P(\phi_{Ti}|\overline{\phi_T},\phi_M,\phi_m,\alpha).}
+#' @details
+#' The order of \code{optim.var}, \code{upper}, \code{lower}, and \code{init} must match exactly. The initial value and bounds must be on the scale of the transformed variable.
+#' @param data.vec A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error.
+#' @param optim.vars A vector of character string indicating the name of the variables to be estimated. Acceptable values are "mean.phi.T" (default), "min.phi", "max.phi", and "a".
+#' @param init A numeric vector of initial values in the order of optim.vars for the optimizer to start searching. Defaults to 0.
+#' @param method The method of maximum likelihood estimation algorithm. Acceptable methods are "Nelder-Mead" (Default), "BFGS", "L-BFGS-B", "Brent", "nlminb", and "nlm". Defaults to "Brent" for one dimensional optimization. For details see \code{?stats::optim()}, \code{?stats::nlminb()}, and \code{?stats::nlm()}
+#' @param k.max The maximum number of convolutions of the neutral 'bite size' distribution in numerical approximation of the PDF of the neutral herbivory distribution. Default is 50.
+#' @param by The grid resolution used in the FFT convolutions. Default is 0.001.
+#' @param k.max.tolerance the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small).
+#' @param k.fft.limit The maximum number of convolutions performed by FFT. For k convolutions above this limit, a Gaussian approximation is used. See details for more information.
+#' @param param.vals A named vector of the default parameter values of the neutral herbivory distribution. Set to \code{NA} if the variable is declared in the \code{optim.vars} argument (i.e. is estimated). "mean.phi.T" defaults to 0.1, "min.phi" to 0.005, "max.phi" to 1, and "a" to 14/9.
+#' @param param.val.trans A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale). Set to \code{NA} if the variable is declared in the \code{optim.vars} argument (i.e. is estimated). Default transformation is x/100 for "mean.phi.T", "min.phi", and "max.phi". Default transformation for "a" is identity.
+#' @param lower,upper A numeric vector indicating the bounds of each estimated variable for the "L-BFGS-B" and "Brent" method. Defaults to -Inf and Inf. If the length of supplied vector is shorter than the number of estimated variables, the first element of the vector is set as the bound for all variables. If the method is "Brent" and the \code{optim.vars = "mean.phi.T"}, the bounds default to 0 and 100.
+#' @param cores The number of parallel processes in parallel computing.
+#' @param id A character string supplied for book keeping purposes. Default is \code{NULL}. Useful for when storing a large number of "fit_allo_herb" objects in a list.
+#' @param ... Additional arguments that are passed to the optimizer functions \code{optim()}, \code{nlminb()}, or \code{nlm()}.
+#' @return
+#' An 'allo_herb_fit' object with the following slots:
+#'
+#' \code{theta.names}: A vector of character string naming the fitted parameters
+#'
+#' \code{par}: the value of fitted parameters on the transformed scale in the order of theta.names
+#'
+#' \code{se}: standard error of fitted parameters on the transformed scale. Quadratic approximation of the standard error will be implemented in the future.
+#'
+#' \code{loglik}: log likelihood of the data given the parameter combinations
+#'
+#' \code{message}: message passed from the optimizer function
+#'
+#' \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
+#'
+#' \code{method}: Method of optimization
+#'
+#' \code{init}: A vector of the used initial values for optimization
+#'
+#' \code{data}: The data to which the model is fitted to
+#'
+#' \code{param.vals}: the default parameter values assumed for the model
+#'
+#' \code{id}: name of model supplied via the id argument
+#'
+#' \code{n}: the sample size
+#'
+#' \code{df}: the degrees of freedom of the model
+#'
+#' \code{num.approx.param}: a named vector of values indicating the parameters used in the numerical approximation of the density function of the neutral herbivory distribution.
+#' @export
+fit_allo_herb<-function(data.vec,
+                             optim.vars=c("mean.phi.T"),
+                             init = 0,
+                             method=c("Nelder-Mead","BFGS",
+                                      "L-BFGS-B","Brent","nlminb","nlm"),
+                             k.max = 50,
+                             by = 0.001,
+                             k.max.tolerance = 1e-5,
+                             k.fft.limit = 100,
+                             param.vals=c("mean.phi.T" = 0.1,
+                                          "min.phi" = 0.005,
+                                          "max.phi" = 1,
+                                          "a" = 14/9),
+                             param.val.trans = c(
+                               "mean.phi.T" = function(x) {x/100},
+                               "min.phi" = function(x) {x/100},
+                               "max.phi" = function(x) {x/100},
+                               "a" = function(x) {x}),
+                             lower = -Inf,
+                             upper = Inf,
+                             cores = 1,
+                             id = NULL, # A name for book keeping purposes
+                             ...){
+  if(!all(optim.vars %in% names(param.vals))){
+     stop("'",
+          paste0(optim.vars[!optim.vars %in% names(param.vals)], collapse = " and "),
+          "' not valid model parameter")
+  }
+
+  if(length(lower)!=length(optim.vars)){
+    lower<-rep(lower[1],length(optim.vars))
+  }
+  if(length(upper)!=length(optim.vars)){
+    upper<-rep(upper[1],length(optim.vars))
+  }
+
+  data.vec <- as.numeric(data.vec)
+  if(any(is.na(data.vec))){
+    message(sum(is.na(data.vec))," NA detected and removed from data")
+    data.vec <- data.vec[!is.na(data.vec)]
+  }
+
+  if(sum(data.vec)==0){
+    stop("Data does not contain non-zero herbivory values; model not identifiable.")
+  }
+
+  if(any(data.vec < 0) || any(data.vec > 1)){
+    stop("Data must be bounded between 0 and 1.")
+  }
+
+
+  method <- method[1]
+
+  if(!any(method%in%c("Nelder-Mead","BFGS",
+                      "L-BFGS-B","Brent","nlminb","nlm"))){
+    stop("method not supported","\n",
+         "supported methods are ",
+         paste0(c("Nelder-Mead","BFGS",
+                  "L-BFGS-B","Brent","nlminb","nlm"),collapse = ", "))
+
+  }
+  if((length(optim.vars)<2) & (method!= "Brent") & (method != "nlminb")){
+    method<-"Brent"
+    message("Overwriting optimizer to Brent for one dimensional optimization")
+  }
+
+  if(length(init)!=length(optim.vars)){
+    stop("Initial values length not equal to number of fitted parameters")
+  }
+  if(length(optim.vars)!=sum(is.na(param.vals))){
+    stop("Number of fitted parameters does not equal to the number of unknown parameters")
+  }
+
+  # if(any(optim.vars%in%c("mean.phi.T","min.phi","max.phi"))){
+  #   message(paste(
+  #     paste0(
+  #       c("mean.phi.T","min.phi","max.phi")[
+  #         c("mean.phi.T","min.phi","max.phi")%in%optim.vars
+  #       ],
+  #       collapse = ", ")
+  #     ,"logit transformed in fitting",
+  #     sep=" ")) # Logit transform the proportions to let the parameter space be
+  #   # unbounded and easier to sample by optimizers
+  # }
+
+  param.vals[(names(param.vals)%in%optim.vars)]<-NA # Fitted values set to NA
+
+  if(method=="L-BFGS-B"){
+    if(("max.phi"%in%optim.vars) &&
+       !is.na(param.vals["min.phi"]) &&
+       (plogis(lower[optim.vars=="max.phi"]) < param.vals["min.phi"])){
+      stop("Lower bound of max.phi needs to be higher than min.phi")
+    }
+    if(("min.phi"%in%optim.vars) &&
+       !is.na(param.vals["max.phi"]) &&
+       (plogis(upper[optim.vars=="min.phi"]) > param.vals["max.phi"])){
+      stop("Upper bound of min.phi needs to be higher than max.phi")
+    }
+  }
+
+  if(method == "Brent" &&
+     (optim.vars == "mean.phi.T")) {
+    if(is.infinite(lower)){
+      lower <- 0
+    }
+    if(is.infinite(upper)){
+      upper <- 100
+    }
+  }
+
+  if(by > 0.01){
+    warning("Approximation resolution too low; results are crappy")
+  } else if((!is.na(param.vals["max.phi"]) && !is.na(param.vals["min.phi"])) &&
+            (param.vals["max.phi"]-param.vals["min.phi"] < by)){
+    stop("Approximation resolution too low; set 'by' to a lower number")
+  }
+
+  if(cores>1){
+    parallel <- TRUE
+    cluster <- makeCluster(cores)
+    registerDoParallel(cluster)
+
+  } else {
+    parallel <- FALSE
+  }
+
+  nll <- function(theta) {
+    nll.out<-sum(dalloT(x = data.vec,
+                        mean.phi.T = ifelse(
+                          is.na(param.vals["mean.phi.T"]),
+                          vapply(X = eval(parse(
+                            text =
+                              paste0("(theta[",
+                                     which(optim.vars=="mean.phi.T"),"])"))),
+                            FUN = param.val.trans[["mean.phi.T"]],
+                            FUN.VALUE = numeric(1)),
+                          param.vals["mean.phi.T"]),
+                        min.phi = ifelse(
+                          is.na(param.vals["min.phi"]),
+                          vapply(X = eval(parse(
+                            text =
+                              paste0("(theta[",
+                                     which(optim.vars=="min.phi"),"])"))),
+                            FUN = param.val.trans[["min.phi"]],
+                            FUN.VALUE = numeric(1)),
+                          param.vals["min.phi"]),
+                        max.phi = ifelse(
+                          is.na(param.vals["max.phi"]),
+                          vapply(X = eval(parse(
+                            text =
+                              paste0("(theta[",
+                                     which(optim.vars=="max.phi"),"])"))),
+                            FUN = param.val.trans[["max.phi"]],
+                            FUN.VALUE = numeric(1)),
+                          param.vals["max.phi"]),
+                        a = ifelse(
+                          is.na(param.vals["a"]),
+                          vapply(X = eval(parse(
+                            text =
+                              paste0("(theta[",
+                                     which(optim.vars=="a"),"])"))),
+                            FUN = param.val.trans[["a"]],
+                            FUN.VALUE = numeric(1)),
+                          param.vals["a"]),
+                        k.max = 50,
+                        by = by,
+                        k.max.tolerance = k.max.tolerance,
+                        k.fft.limit = k.fft.limit,
+                        log = TRUE,
+                        parallel = parallel)*-1)
+    return(nll.out)
+  }
+
+  if(method=="nlminb"){
+    ML.fit<-nlminb(start = init,
+                   objective = nll,
+                   lower = lower,
+                   upper = upper,
+                   ...)
+    hessian <- hessian(nll, ML.fit$par)
+    loglik <- -ML.fit$objective
+    iters <- ML.fit$evaluations
+
+  } else if(method=="nlm") {
+    ML.fit<-nlm(p = init,
+                f = nll,
+                hessian = T,
+                ...)
+    hessian <- ML.fit$hessian
+    loglik <- -ML.fit$minimum
+    iters <- ML.fit$iterations
+    ML.fit$par <- ML.fit$estimate
+    ML.fit$convergence <- ifelse(ML.fit$code > 2 , 1 , 0) # rename the convergence code for consistency
+    ML.fit$message <- paste0("code = ", ML.fit$code)
+
+  } else {
+    ML.fit<-optim2(par = init,
+                  fn = nll,
+                  hessian = T,
+                  method = method,
+                  lower=lower,
+                  upper=upper,
+                  ...)
+    hessian <- ML.fit$hessian
+    loglik <- -ML.fit$value
+    iters <- ML.fit$counts
+  }
+
+
+  allo.herb.fit.out<-list("theta.names" = optim.vars,
+                          "par" = ML.fit$par,
+                          "se" = tryCatch(sqrt(diag(solve(hessian))),
+                                          error = function(e) {
+                                            rep(NA,length(diag(hessian)))
+                                          }),
+                          "loglik" = loglik,
+                          "hessian" = hessian,
+                          "message" = ML.fit$message,
+                          "iters" = iters,
+                          "convergence" = ML.fit$convergence, # > 0 indicates issues
+                          "method" = method,
+                          "init" = init,
+                          "data" = data.vec,
+                          "param.vals" = param.vals,
+                          "param.val.trans" = param.val.trans,
+                          "id" = id,
+                          "n" = length(data.vec),
+                          "df" = length(optim.vars),
+                          "num.approx.param" = c("k.max" = k.max,
+                                                 "resolution" = by,
+                                                 "k.max.tolerance" = k.max.tolerance,
+                                                 "k.fft.limit" = k.fft.limit)
+
+  )
+  if(any(is.na(allo.herb.fit.out$se))){
+    warning("Non-positive definite hessian matrix")
+    #Usually increasing 'by' resolution fixes this issue. But SLOW!
+    allo.herb.fit.out$convergence <- 2
+  } else if(allo.herb.fit.out$convergence!=0){
+    warning("Model did not converge","  ",allo.herb.fit.out$convergence)
+  }
+
+  allo.herb.fit.out<-structure(allo.herb.fit.out,
+                               class=c("allo_herb_fit","list"))
+  return(allo.herb.fit.out)
+
+  on.exit(
+    try({
+      if(!is.null(cluster)){
+        stopImplicitCluster()
+        stopCluster(cluster)
+      }
+    })
+  ) # Stop all connections on exit
+  # Use closeAllConnections() to kill zombie workers
+}
+
+#' @title Print Values
+#' @description Prints fitted object and returns an invisible matrix array of the fitted model coefficients
+#' @param x An object of class 'allo_herb_fit'
+#' @param ... additional arguments
+#' @param trans A string or function of transformation applied on the model coefficients
+#' @param digits A numeric value indicating the number of digits to be displayed in the model coefficients. Default is 3.
+#' @return A matrix array
+#' @export
+print.allo_herb_fit<-function(x, ..., trans = NULL, digits = 3){
+  if(!inherits(x,"allo_herb_fit")){
+    stop("Needs to by of object type 'allo_herb_fit'")
+  }
+  if(is.null(trans)){
+    FUN <- function(x) x
+  } else {
+    FUN <- match.fun(trans)
+  }
+
+  cat("Fitted result on", x$id,"\n")
+  cat("method =",x$method,"\n")
+  cat("n =",length(x$data),"\n")
+  cat("\n")
+  print(c("loglik" = x$loglik, "AIC" = AIC(x), "AICc" = AICc(logLik(x)), "BIC" = BIC(x)))
+  cat("\n")
+  print(c(x$iters,"convergence"=x$convergence))
+  cat("\n")
+  print(noquote(vapply(
+    x$param.val.trans[x$theta.names],
+    function(z){
+      gsub(".*\\{| |\\}","",paste0(deparse(z),collapse = ""))
+    },
+    character(1)
+  )))
+  cat("\n")
+  x$param.vals<-round(x$param.vals,digits = 3)
+  x$param.vals[is.na(x$param.vals)]<-"fitted"
+  print(noquote(x$param.vals))
+  cat("\n")
+  out<-round(
+    apply(as.matrix(
+      data.frame(row.names = x$theta.names,
+                 "Estimate" = x$par,
+                 "Std." = x$se,
+                 "lower" = x$par-x$se*1.96,
+                 "upper" = x$par+x$se*1.96)
+    ), 2, FUN = FUN),
+    digits = digits)
+  if(is.vector(out)){
+    out<-t(as.matrix(out))
+    rownames(out)<-x$theta.names
+  }
+  print(out)
+}
+
+#' @title Extract Log-Likelihood
+#' @description extract log-likelihood
+#' @param object a fitted model object
+#' @param ... additional arguments
+#' @return a 'logLik' object
+#' @rdname logLik
+#' @export
+logLik.allo_herb_fit <- function(object, ...){
+  out <- object$loglik
+  out <- structure(out,
+                   class= "logLik",
+                   nall = length(object$data),
+                   nobs= length(object$data),
+                   df = length(object$theta.names))
+  return(out)
+}
+
+#' @title Akaike's An Information Criterion
+#' @description calculate AIC or BIC for fitted model objects. see \code{stats::AIC()} for more details.
+#' @param object a fitted model object for which there exist a \code{logLik} method to extract the log-likelihood, or an object of class 'logLik'.
+#' @param ... additional arguments passed to \code{stats::AIC()} or \code{stats::BIC()} for additoal fitted model objects.
+#' @param k an atomic numeric value for the penalty. Defaults to 2.
+#' @return if just one object is provided, a numeric value of AIC or BIC is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AIC or BIC.
+#' @rdname AIC
+#' @export
+AIC.allo_herb_fit <- function(object, ..., k = 2){
+  AIC(logLik(object),...,k=k)
+}
+
+#' @title Corrected Akaike's An Information Criterion (AICc)
+#' @description Calculate AICc taking into account small sample size bias
+#' @param object The object from which log likelihood can be extracted
+#' @param logLik An object of calss 'logLik'. Ignored if an object is supplied.
+#' @param k the penalty on model complexity. Default is 2.
+#' @details
+#' The formulat for AICc is given by:
+#' \deqn{AIC_c = -2\ln{\mathcal{L}(x)} + k  d \frac{n}{n - d - 1}}
+#' \eqn{d} is the number of parameters, \eqn{k} is the penalty, \eqn{n} is the sample size, and \eqn{\mathcal{L}(x)} is the likelihood.
+#'
+#' @return A numeric value
+#' @export
+AICc <- function(object = NULL, logLik = NULL, k=2){
+  if(!is.null(object)) {
+    logLik <- logLik(object)
+  }
+  n <- attributes(logLik)$nobs
+  df <- attributes(logLik)$df
+  aicc<-as.numeric(logLik) * -2 + k*df*(n/(n-df-1))
+  if(n <= (df+1)){
+    warning("Sample size too small.")
+  }
+  return(aicc)
+}
+
+
+#' @title Bayesian information criterion
+#' @rdname AIC
+#' @export
+BIC.allo_herb_fit <- function(object,...){
+  BIC(logLik(object),...)
+}
+
+#' @title Extract Model Coefficients
+#' @description extract model coefficients from allo_herb_fit objects
+#' @param object An 'allo_herb_fit' object
+#' @param ... additional arguments
+#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is TRUE.
+#' @return A named vector
+coef.allo_herb_fit<-function(object, ..., backtransform = TRUE){
+  if(backtransform){
+    out<-vapply(seq_along(object$par), function(i){
+      vapply(object$par[i],object$param.val.trans[[object$theta.names[i]]],numeric(1))
+    }, numeric(1))
+  } else {
+    out <- object$par
+  }
+  names(out) <- object$theta.name
+  return(out)
+}
+
+
+
+
+#' @title Calculate Attack Rate From Unlimited Mean Cumulative Proportion Herbivory
+#' @description Convenience function that reparameterizes unlimited mean cumulative proportion herbivory \eqn{\overline{\phi_T'}} as attack rate \eqn{\lambda}.
+#' @details
+#' \deqn{\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}},} where
+#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}.}
+#' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited.
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @return a vector of numeric values
+get_lambda <- function(mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9){
+  mean.phi.T * (2 - a)/(1 - a) *
+    ((max.phi^(1 - a) - min.phi^(1 - a))/(max.phi^(2 - a) - min.phi^(2 - a)))
+}
+
+#' @title Calculate Unlimited Mean Cumulative Proportion Herbivory From Attack Rate
+#' @description Convenience function that reparameterizes attack rate \eqn{\lambda} as unlimited mean cumulative proportion herbivory \eqn{\overline{\phi_T'}}.
+#' @details
+#' \deqn{\overline{\phi_T'} = \overline{\phi}\lambda,} where
+#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}.}
+#' @param lambda the attack rate on the plant or leaf
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @return a vector of numeric values
+get_mean_phi_T <- function(lambda, min.phi = 0.005, max.phi = 1, a = 14/9){
+  lambda / ((2 - a)/(1 - a) *
+              ((max.phi^(1 - a) - min.phi^(1 - a))/(max.phi^(2 - a) - min.phi^(2 - a))))
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

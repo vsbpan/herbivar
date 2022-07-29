@@ -1,0 +1,33 @@
+#install.packages("C:/R Projects/Package Building/herbivar_0.1.0.tar.gz", repos = NULL, type="source")
+#detach("package:herbivar",unload=T)
+# Version date  "2022-07-26 17:48:03 EDT"
+#Sys.time()
+herbivar.version <- function(x){
+  print("2022-07-26 17:48:03 EDT")
+}
+
+.onAttach <- function(...){
+  heart <- ifelse(rbinom(1,1,0.1) == 1, " <3", "")
+  packageStartupMessage("herbivar version date: ",packageDate("herbivar"),"\n",
+                        "Package still in development; use with caution!",heart)
+}
+
+detach.herbivar <- function(x){
+  message("detatching package. . . ")
+  detach("package:herbivar",unload=T)
+  message("goodbye!")
+}
+
+### To do:
+## Modify fit_bite_size to save fitted object / parameter. Create a new object type.
+## Add leaf number support
+## Add lambda argument in alloT functions
+## Add in co-limitation theory
+## Add in Jensen's sim and aiterate
+
+
+#### End ####
+
+
+
+
