@@ -196,6 +196,7 @@ max_scale <- function(object){
 #' @param ws.thresh a threshold for selecting leaf pixels from a watershed transformed image. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "auto".
 #' @param px.size value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.
 #' @details
+#'
 #' @return A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixset'.
 #' @note The code for the watershed method is adapted from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html}. accesse date 2022-07-25.
 clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
