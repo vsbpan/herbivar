@@ -26,7 +26,7 @@ threshold2(
 
 \item{approx.res}{the number of pixels used in threshold approximation. Default is 10000.}
 
-\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when auto thresholding.}
+\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when not auto-thresholding.}
 
 \item{return.thr.only}{if \code{TRUE} (default to \code{FALSE}), return the calculated numeric threshold only, otherwise a selected pixset of the image will be returned.}
 

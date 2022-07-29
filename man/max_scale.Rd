@@ -4,10 +4,10 @@
 \alias{max_scale}
 \title{Maximum Pixel Value of Image}
 \usage{
-max_scale(img)
+max_scale(object)
 }
 \arguments{
-\item{img}{a cimg, pixset, or array}
+\item{object}{a cimg, pixset, matrix, or array}
 }
 \value{
 an atomic integer value

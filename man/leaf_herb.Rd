@@ -15,7 +15,7 @@ leaf_herb(
 
 \item{type}{a vector of character string indicating what values to return. Partial string matching supported. "proportion" and "percent" returns relative proportion herbivory. "pixels" and "px" returns the number of pixels eaten. "mm2" and "real" returns the leaf area eaten in mm2.}
 
-\item{px.size}{value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{mat} object.}
+\item{px.size}{value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.}
 }
 \value{
 a vector of proportion, number of pixels, and milometer squared area of herbivory. The object must have a "px.size" attribute or the \code{px.size} argument must be defined to return values for mm2 leaf area removed.

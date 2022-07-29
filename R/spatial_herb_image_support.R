@@ -653,15 +653,15 @@ hessdet <- function(im,scale=1){
 #'
 #' \code{n_holes}: The number of holes. Holes with proportion area less than \code{min_prop} are excluded.
 #'
-#' \code{hole_prop}: The proportion area of each hole.
+#' \code{hole_prop}: The proportion area of each hole. Returns NA if \code{n_hole} is 0.
 #'
 #' \code{leaf_area}: The leaf area in pixels and mm2.
 #'
-#' \code{is.margin}: A vector of logical values indicating whether each parsed hole is marginal or internal.
+#' \code{is.margin}: A vector of logical values indicating whether each parsed hole is marginal or internal. Returns NA if \code{n_hole} is 0.
 #'
-#' \code{hole_perimeter}: A \code{n_hole} X 2 matrix of values of the perimeter of each parsed hole returned by the function \code{hole_perimeter()}. The \code{non_leaf_border} argument is set to \code{TRUE}.
+#' \code{hole_perimeter}: A \code{n_hole} X 2 matrix of values of the perimeter of each parsed hole returned by the function \code{hole_perimeter()}. The \code{non_leaf_border} argument is set to \code{TRUE}. Returns NA if \code{n_hole} is 0.
 #'
-#' \code{hole_centroid}: A \code{n_hole} X 2 matrix of the the centroid coordinates of each parsed hole.
+#' \code{hole_centroid}: A \code{n_hole} X 2 matrix of the the centroid coordinates of each parsed hole. Returns NA if \code{n_hole} is 0.
 #'
 #' \code{px}: A binary-ized pixset of the supplied \code{object} whose value is above 0.8.
 #'
@@ -715,8 +715,8 @@ analyze_holes <- function(object, min_prop = 10^-4, plot = FALSE,
                                      function(x) {
                                        leaf_herb(x,type="proportion")
                                      }))
-  imlist<-imlist[hole_prop > min_prop]
-  n_holes<-length(imlist)
+  imlist <- imlist[hole_prop > min_prop]
+  n_holes <- length(imlist)
 
   if(plot && n_holes > 20){
     plot <- ifelse(
@@ -737,31 +737,41 @@ analyze_holes <- function(object, min_prop = 10^-4, plot = FALSE,
 
   if(n_holes > 0){
     hole_prop <- hole_prop[hole_prop > min_prop]
+
+    is_margin <- simplify2array(lapply(
+      imlist,
+      FUN = function(x){
+        is.margin(x)
+      }
+    ))
+
+    hole_peri <- do.call("rbind",
+                         lapply(imlist,FUN = function(x) {
+                           hole_perimeter(x,non_leaf_border = TRUE)
+                         }))
+
+    hole_cen <- do.call("rbind",
+                        lapply(
+                          imlist,
+                          FUN = function(x) {
+                            (colMeans(which(x[, , 1, 1] > 0.99, arr.ind = T)))
+                          }
+                        ))
+
   } else {
     hole_prop <- NA
+    is_margin <- NA
+    hole_peri <- NA
+    hole_cen <- NA
   }
 
   out<-list(
     "n_holes" = n_holes,
     "hole_prop" =  hole_prop,
     "leaf_area" = leaf_area(px),
-    "is.margin" = simplify2array(lapply(
-      imlist,
-      FUN = function(x){
-        is.margin(x)
-      }
-    )),
-    "hole_perimeter" = do.call("rbind",
-                               lapply(imlist,FUN = function(x) {
-                                 hole_perimeter(x,non_leaf_border = TRUE)
-                               })),
-    "hole_centroid" = do.call("rbind",
-                              lapply(
-                                imlist,
-                                FUN = function(x) {
-                                  (colMeans(which(x[, , 1, 1] > 0.99, arr.ind = T)))
-                                }
-                              )),
+    "is.margin" = is_margin,
+    "hole_perimeter" = hole_peri,
+    "hole_centroid" = hole_cen,
     "px" = px,
     "min_prop" = min_prop,
     "px.size" = px.size,
@@ -1044,12 +1054,12 @@ hole_perimeter <- function(mat, non_leaf_border = FALSE, px.size = NA){
       stop("Unsupported object type")
     }
   }
+  max.scale <- max_scale(mat)
+  mat_cimg <- as.cimg(mat)
+
   if(max.scale > 1){
     warning("Maximum pixel value is not 1. Try thresholding the image.")
   }
-
-  max.scale <- max_scale(mat)
-  mat_cimg <- as.cimg(mat)
 
   if(!any(is.na(c(mat)))){
     warning("No NA detected; make sure the boundaries are cropped")
@@ -1090,9 +1100,27 @@ print.split_herb <- function(x, ..., digits = 4){
     print(signif(c("total_holes" = x$n_holes, "toal_margin" = sum(x$is.margin), "prop_margin" = sum(x$is.margin)/x$n_holes),digits))
     cat("\n")
     if(!is.null(x$px.size)){
-      print(signif(c("prop_herb" = sum(x$hole_prop), "leaf_area_mm2"= unname(x$leaf_area["mm2"]), "tot_herb_perim_mm2" = sum(x$hole_perimeter[,"mm2"])),digits))
+      print(
+        signif(
+          c("prop_herb" = sum(x$hole_prop),
+            "leaf_area_mm2"= unname(x$leaf_area["mm2"]),
+            "tot_herb_perim_mm2" = tryCatch(sum(x$hole_perimeter[,"mm2"]),
+                                           error = function(e){
+                                             NA
+                                           })
+          ),
+          digits))
     } else {
-      print(signif(c("prop_herb" = sum(x$hole_prop), "leaf_area_px"= unname(x$leaf_area["px"]), "tot_herb_perim_px" = sum(x$hole_perimeter[,"px"])),digits))
+      print(
+        signif(
+          c("prop_herb" = sum(x$hole_prop),
+            "leaf_area_px"= unname(x$leaf_area["px"]),
+            "tot_herb_perim_px" = tryCatch(sum(x$hole_perimeter[,"px"]),
+                                           error = function(e){
+                                             NA
+                                           })
+            ),
+          digits))
     }
 }
 

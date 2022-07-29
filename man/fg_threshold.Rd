@@ -16,13 +16,13 @@ fg_threshold(
 \arguments{
 \item{img}{a cimg object}
 
-\item{fg.thresh}{a threshold for turning the cimg pixels into a selected pixset. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold()}.}
+\item{fg.thresh}{a threshold for turning the cimg pixels into a selected pixset. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold2()}.}
 
 \item{fg.adjust}{used to adjust the automatic threshold. If the auto-threshold is at k, the effective threshold will be at \code{fg.adjust} * k.}
 
 \item{approx.res}{the number of pixels used in threshold approximation. Default is 10000.}
 
-\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when auto thresholding.}
+\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when not auto-thresholding.}
 
 \item{fg.thr}{an internal argument to pass calculated threshold to reduce redundant computation. Must be a numeric value.}
 }

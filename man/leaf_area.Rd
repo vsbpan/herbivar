@@ -9,7 +9,7 @@ leaf_area(object, px.size = NA)
 \arguments{
 \item{object}{an object of type 'split_herb', 'matrix', 'array ', 'cimg', or 'pixset'.}
 
-\item{px.size}{value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{mat} object.}
+\item{px.size}{value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.}
 }
 \value{
 a vector of the number of pixels and milometer squared area of leaf area. The object must have a "px.size" attribute or the \code{px.size} argument must be defined to return values for mm2 leaf area.

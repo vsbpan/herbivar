@@ -9,7 +9,7 @@ cut_kmeans(x, km = c(1L, 2L))
 \arguments{
 \item{x}{a numeric vector. \code{NA}s are automatically removed.}
 
-\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when auto thresholding.}
+\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2).}
 }
 \value{
 an atomic numeric value of boundary threshold

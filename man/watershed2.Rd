@@ -2,7 +2,7 @@
 % Please edit documentation in R/spatial_herb_image_support.R
 \name{watershed2}
 \alias{watershed2}
-\title{Compute Watershed Transform With Gray Scale and Color Image Support}
+\title{Compute Watershed Transform With Grayscale And Color Image Support}
 \usage{
 watershed2(seed, p, spectrum, thr = "auto", approx.res = 10000, km = c(1L, 2L))
 }
@@ -17,11 +17,11 @@ watershed2(seed, p, spectrum, thr = "auto", approx.res = 10000, km = c(1L, 2L))
 
 \item{approx.res}{the number of pixels used in threshold approximation. Default is 10000.}
 
-\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when auto thresholding.}
+\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when not auto-thresholding.}
 }
 \value{
 a pixset
 }
 \description{
-Internal function of \code{clean_leaf()}. A wrapper of \code{watershed()} and \code{threshold()} that handles both gray scale and color images. If available, the blue spectrum of the transformed image is used for thresholding, as blue is a rare color among plats.
+Internal function of \code{clean_leaf()}. A wrapper of \code{watershed()} and \code{threshold()} that handles both grayscale and color images. If available, the blue spectrum of the transformed image is used for thresholding, as blue is a rare color among plats.
 }
