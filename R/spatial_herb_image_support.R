@@ -198,7 +198,7 @@ max_scale <- function(object){
 #' @details
 #'
 #' @return A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixset'.
-#' @note The code for the watershed method is adapted from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html}. accesse date 2022-07-25.
+#' @note The code for the watershed method is adapted from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html}. accessed date 2022-07-25.
 clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
                        fg.adjust = 1, blur.size = 2, plot = TRUE,
                        save.plot.path = NA, save.plot.size = "original",
@@ -640,6 +640,40 @@ hessdet <- function(im,scale=1){
 
 
 
+#' @title Parse Holes And Extract Within Leaf Herbivory Data
+#' @description Split pixels into different herbivory regions ("holes") and measure hole and leaf level data. A pre-processing step for use with subsequent functions such as \code{split2ppp()}, \code{nn_dist()}, \code{pair_dist()}, and
+#' @param object A cimg, pixset, matrix, or array that has been cropped via \code{crop_leaf()}
+#' @param min_prop a numeric value between 0 and 1 indicating the minimum proportion herbivory threshold for inclusion. This gets rid of artifacts in the image that are too small to actually be real herbivory or biologically non-trivial herbivory. Default is 0.0001.
+#' @param plot if \code{TRUE} (default is \code{FALSE}), each hole splitted from the image will be plotted side-by-side. If more than 20 holes are detected, the user will be prompted to decide whether to proceed with plotting. Can be slow if the number of holes and image resolution is high.
+#' @param tolerance a numeric value between 0 and 1 determining if two pixels belong to the same region. Defaults to 0.1.
+#' @param silent if \code{TRUE} (default is \code{FALSE}), suppress messages.
+#' @param image_id a character string supplied to name the returned object for book keeping.
+#' @return
+#' an object of class 'split_herb' and 'list'.
+#'
+#' \code{n_holes}: The number of holes. Holes with proportion area less than \code{min_prop} are excluded.
+#'
+#' \code{hole_prop}: The proportion area of each hole.
+#'
+#' \code{leaf_area}: The leaf area in pixels and mm2.
+#'
+#' \code{is.margin}: A vector of logical values indicating whether each parsed hole is marginal or internal.
+#'
+#' \code{hole_perimeter}: A \code{n_hole} X 2 matrix of values of the perimeter of each parsed hole returned by the function \code{hole_perimeter()}. The \code{non_leaf_border} argument is set to \code{TRUE}.
+#'
+#' \code{hole_centroid}: A \code{n_hole} X 2 matrix of the the centroid coordinates of each parsed hole.
+#'
+#' \code{px}: A binary-ized pixset of the supplied \code{object} whose value is above 0.8.
+#'
+#' \code{min_prop}: The supplied \code{min_prop} argument
+#'
+#' \code{px.size}: The length in millimeter of a pixel. If unsuccessfully extracted from the \code{object} \code{px.size} attribute, only results in pixels will be returned for other function outputs.
+#'
+#' \code{imlist}: A list of images of class \code{imlist} of each parsed hole.
+#'
+#' \code{image_id}: The supplied \code{image_id} argument
+#'
+#' @export
 analyze_holes <- function(object, min_prop = 10^-4, plot = FALSE,
                           tolerance = 0.1, silent = FALSE, image_id = NA){
   if(!any(is.na(c(object)))){
@@ -702,7 +736,7 @@ analyze_holes <- function(object, min_prop = 10^-4, plot = FALSE,
   }
 
   if(n_holes > 0){
-    hole_prop<- hole_prop[hole_prop > min_prop]
+    hole_prop <- hole_prop[hole_prop > min_prop]
   } else {
     hole_prop <- NA
   }
@@ -744,6 +778,38 @@ analyze_holes <- function(object, min_prop = 10^-4, plot = FALSE,
   invisible(out)
 }
 
+
+
+
+
+#' @title Display A List of Images Using Base Graphics
+#' @description Plot different regions of herbivory form an object of class 'split_herb'
+#' @param x a 'split_herb' object
+#' @param prompt if \code{TRUE} (default), display a prompt for user to select whether to proceed with plotting when the number of holes is above 20.
+#' @param ... extra arguments passed to \code{spatstat.geom::plot.imlist()}
+#' @return NULL
+plot.split_herb <- function(x, prompt = TRUE, ...){
+  if(!inherits(x, "split_herb")){
+    stop("Object must of of class 'split_herb'.")
+  }
+
+  if(x$n_holes > 20 && prompt){
+    plot <- ifelse(
+      menu(c("Yes","No"),
+           title = paste0(x$n_holes,
+                          " holes detected; plot will be slow! Proceed with plot?")) == 1,
+      TRUE,
+      FALSE)
+  }
+  if(x$n_holes > 0){
+    x$imlist %>% map_il(function(img){
+      img %>% colorise(.,
+                     px = ~. > 0.99,
+                     col = "violet")
+    }) %>%
+      spatstat.geom::plot.imlist(plotcommand="plot", ...)
+  }
+}
 
 
 nn_dist <- function(object, # expect a matrix with two columns or split_herb
