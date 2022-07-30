@@ -167,7 +167,7 @@ apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
 
   out <- as.data.frame(t(simplify2array(lapply(data.list,function(x, na.rm, probes) {
     probe_distribution(x, na.rm = na.rm, probes = probes)
-  }, na.rm = na.rm, probes = probes))))
+  }, na.rm = na.rm, probes = probes))),row.names = NULL)
   out$id<-names(data.list)
 
   if(
