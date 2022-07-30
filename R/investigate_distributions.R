@@ -159,9 +159,9 @@ apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
                        trivial.rm = TRUE, na.rm = FALSE, add.id = TRUE){
   if(trivial.rm){
     data.list <- data.list[
-      lapply(data.list, FUN = function(x){
+      simplify2array(lapply(data.list, FUN = function(x){
         sum(x) > 0
-      })
+      }))
     ] # All zeros gets thrown out
   }
 
