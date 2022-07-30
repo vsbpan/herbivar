@@ -89,8 +89,8 @@ id.screener<-function(data,variable,cond=T,min.leaves=2,min.plants=2,
 
 #' @export
 get.data.lists<-function(data,variable,id.name,ok.ids,n.sim=NA,
-                         min.phi.prop=F,max.phi.prop=F,min.phi=0.005,max.phi=1,
-                         correct.min.phi=T,try=F,group.n="n.avg",sim.pred=T,...){
+                         min.phi.prop=FALSE,max.phi.prop=FALSE,min.phi=0.005,max.phi=1,
+                         correct.min.phi=FALSE,try=FALSE,group.n="n.avg",sim.pred=TRUE,...){
   variable<-ifelse(variable=="l","percLf",
                    ifelse(variable=="p1","percHerbPlant",
                           ifelse(variable=="p2","percHerbPlant2",
@@ -137,7 +137,7 @@ get.data.lists<-function(data,variable,id.name,ok.ids,n.sim=NA,
         error=function(e){
           message(e,"\n")
           message("error id = ",i,"\n")
-          if(try==T){
+          if(try){
             return(NA)
           } else {
             stop(id.vector[i])
@@ -163,50 +163,64 @@ get.data.lists<-function(data,variable,id.name,ok.ids,n.sim=NA,
 }
 
 
+
+randomize_leaves_engin <- function(data.list, meta.data, summarise.plant){
+  #first column of meta.data is the surveyID
+  #second column of meta.data is the plant id
+  #third column of the meta.data is the number of leaves on that plant
+  data.list.length <- length(data.list)
+  rand.list <- vector(mode = "list", length = data.list.length)
+  survey.ids <- names(data.list)
+  for (i in seq_len(data.list.length)){
+    n.leaves<-length(data.list[[i]])
+    data<-meta.data[meta.data[,1]==survey.ids[i],]
+    rand.list[[i]]<-data.frame(
+      "herb"=data.list[[i]],
+      "group"=rep(data[,2,drop=TRUE],data[,3,drop=TRUE]) %>%
+        sample(size = n.leaves,replace = FALSE)
+    )
+  }
+
+  if(summarise.plant){
+    rand.list <- lapply(rand.list,
+                        function(x){
+                          unname(tapply(x$herb,
+                                        (x$group),
+                                        function(z) {
+                                          mean(z, na.rm = TRUE)
+                                        })
+                          )
+                        })
+
+    names(rand.list) <- survey.ids
+  } else {
+    rand.list <- lapply(rand.list,
+                                 function(x){
+                                   plant.ids <- unique(x$group)
+                                   out <- lapply(plant.ids, function(group, data){
+                                     data[data$group == group, "herb"]
+                                   }, data = x)
+                                   names(out) <- plant.ids
+                                   return(out)
+                                 }) %>%
+      unlist(recursive = FALSE)
+  }
+  return(rand.list)
+}
+
 #' @export
-randomize.leaves<-function(data.list,n.sim=NA,try=F,
-                           meta.data,bind.lists=NULL,...){
-  herb.rand.obs.list<-vector(mode="list",length=length(data.list[[1]]))
-  herb.rand.pred.list<-vector(mode="list",length=length(data.list[[1]]))
-
-  for (i in seq_along(data.list[[1]])){
-    n.leaves<-length(data.list[[1]][[i]])
-    data<-meta.data %>% dplyr::filter(surveyID==names(data.list[[1]])[i])
-    herb.rand.obs.list[[i]]<-data.frame(
-      "herb"=data.list[[1]][[i]],
-      "group"=rep(data$plantID3.long,data$n.avg) %>%
-        sample(size = n.leaves,replace = F)
-    ) %>%
-      group_by(group) %>%
-      summarise(percHerbPlant3=mean(herb)) %>%
-      ungroup() %>%
-      select(percHerbPlant3) %>%
-      unlist() %>%
-      unname()
-  }
-  names(herb.rand.obs.list)<-names(data.list[[1]])
-
-  for (i in seq_along(data.list[[1]])){
-    n.leaves<-length(data.list[[1]][[i]])
-    data<-meta.data %>% dplyr::filter(surveyID==names(data.list[[1]])[i])
-    herb.rand.pred.list[[i]]<-data.frame(
-      "herb"=data.list[[2]][[i]],
-      "group"=rep(data$plantID3.long,data$n.avg) %>%
-        sample(size = n.leaves,replace = F)
-    ) %>%
-      group_by(group) %>%
-      summarise(percHerbPlant3=mean(herb)) %>%
-      ungroup() %>%
-      select(percHerbPlant3) %>%
-      unlist() %>%
-      unname()
-  }
-  names(herb.rand.pred.list)<-names(data.list[[2]])
-
-  out<-list(
-    "herb.rand.obs.list"=herb.rand.obs.list,
-    "herb.rand.pred.list"=herb.rand.pred.list
+randomize_leaves<-function(data.list.list, meta.data, summarise.plant = TRUE, bind.lists = NULL){
+  out <- lapply(
+    data.list.list,
+    FUN = function(x){
+      randomize_leaves_engin(data.list = x,
+                             meta.data = meta.data[,c("surveyID","plantID3.long","n.avg")],
+                             summarise.plant = summarise.plant)
+    }
   )
+  names(out) <- paste0("rand.",names(data.list.list))
+
+
   if(!is.null(bind.lists)){
     for (i in seq_along(bind.lists)){
       bind.lists[[i]]<-bind.lists[[i]][names(out[[1]])]
