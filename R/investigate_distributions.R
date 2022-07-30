@@ -157,21 +157,28 @@ apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
                                              "max","min","median", "Skew",
                                              "Kurt","q25","q75","n","Lasym"),
                        trivial.rm = TRUE, na.rm = FALSE, add.id = TRUE){
-  out <- t(simplify2array(lapply(data.list,function(x, na.rm, probes) {
+  if(trivial.rm){
+    data.list <- data.list[
+      lapply(data.list, FUN = function(x){
+        sum(x) > 0
+      })
+    ] # All zeros gets thrown out
+  }
+
+  out <- as.data.frame(t(simplify2array(lapply(data.list,function(x, na.rm, probes) {
     probe_distribution(x, na.rm = na.rm, probes = probes)
-  }, na.rm = na.rm, probes = probes)))
+  }, na.rm = na.rm, probes = probes))))
   out$id<-names(data.list)
+
   if(
     add.id &&
     all(
       grepl("--",unique(out$id)),
-      na.rm = T)
+      na.rm = TRUE)
   ){
     out$surveyID<-gsub("--.*","",out$id) # Add survey id if data.list is detected at the plant level
   }
-  if(trivial.rm){
-    out<-out[!out$mean==0,] # All zeros gets thrown out
-  }
+
   return(out)
 }
 
