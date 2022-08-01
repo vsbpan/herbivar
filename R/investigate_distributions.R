@@ -106,7 +106,7 @@ cd <- function(x, robust = F, na.rm = F){
 }
 
 
-n <- function(x, na.rm = FALSE){
+N <- function(x, na.rm = FALSE){
   if(na.rm){
     x <- x[!is.na(x)]
   }
@@ -138,7 +138,7 @@ q75 <- function(x, na.rm = FALSE){
 #' @export
 probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
                                            "max","min","median", "Skew",
-                                           "Kurt","q25","q75","n","Lasym"),
+                                           "Kurt","q25","q75","N","Lasym"),
                              na.rm = FALSE){
   if(na.rm){
     x <- x[!is.na(x)]
@@ -155,7 +155,7 @@ probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
 #' @export
 apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
                                              "max","min","median", "Skew",
-                                             "Kurt","q25","q75","n","Lasym"),
+                                             "Kurt","q25","q75","N","Lasym"),
                        trivial.rm = TRUE, na.rm = FALSE, add.id = TRUE){
   if(trivial.rm){
     data.list <- data.list[
@@ -165,10 +165,24 @@ apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
     ] # All zeros gets thrown out
   }
 
-  out <- as.data.frame(t(simplify2array(lapply(data.list,function(x, na.rm, probes) {
+  out <- simplify2array(lapply(data.list,function(x, na.rm, probes) {
     probe_distribution(x, na.rm = na.rm, probes = probes)
-  }, na.rm = na.rm, probes = probes))),row.names = NULL)
+  }, na.rm = na.rm, probes = probes))
+
+  if(length(probes) > 1){
+    out <- t(out)
+  }
+
+  out <- as.data.frame(out,row.names = NULL)
   out$id<-names(data.list)
+
+  colnames(out)[seq_along(probes)] <- do.call("c",lapply(probes,FUN = function(x){
+    if(!is.character(x)){
+      gsub(" ","",paste0(deparse(match.fun(probes)),collapse = ""))
+    } else {
+      x
+    }
+  }))
 
   if(
     add.id &&
@@ -178,6 +192,7 @@ apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
   ){
     out$surveyID<-gsub("--.*","",out$id) # Add survey id if data.list is detected at the plant level
   }
+  rownames(out) <- NULL
 
   return(out)
 }
@@ -312,7 +327,7 @@ get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
                                                     match(test, c("ks","kl","ad"))
                                                   ]],
                                error = function(e) NA)
-      cat(j,"-",i,"\r")
+      cat(j,"-",i,"\r","\r")
     }
     out.list[[j]]<-do.call("rbind",test.list)
   }
