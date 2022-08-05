@@ -434,3 +434,96 @@ get_data_sim<-function(allo.fit.list,n.sim = NULL,digits=2,
 }
 
 
+
+lorenz_curve <- function(x, n = NA, na.rm = FALSE, nboot = FALSE, return.array = FALSE){
+  if(!is.numeric(x)){
+    stop("x must be a numeric vector")
+  }
+  if(na.rm){
+    x <- x[!is.na(x)]
+  }
+  if(any(is.na(x)) || any(x < 0)){
+    return(NA_real_)
+  }
+  if(!is.na(n)){
+    x <- rep(x,n)
+  }
+  x <- sort(x)
+  n <- rep(1, length(x))
+
+  p <- c(0,cumsum(n)/sum(n))
+  mat.exact <- cbind("p" = p,"L" = c(0,cumsum(x)/sum(x)))
+
+  if(nboot > 0){
+    if(is.logical(nboot)){
+      nboot <- 1000
+    }
+    boot.array <- simplify2array(lapply(seq_len(nboot), function(i,x){
+      x.boot <- sample(x,size = length(x), replace = TRUE)
+      x.boot <- sort(x.boot)
+      return(cbind("p" = p,"L" = c(0,cumsum(x.boot)/sum(x.boot))))
+    }, x = x))
+
+    Lc.boot.summary <- cbind(p, t(apply(boot.array[,2,],1,function(x){
+      c(mean(x),sd(x))
+    })))
+    colnames(Lc.boot.summary) <- c("p","L.mean","L.se")
+  } else {
+    Lc.boot.summary <- NULL
+    boot.array <- NULL
+  }
+
+  if(!return.array){
+    boot.array <- NULL
+  }
+
+
+  out <- list("lc" = as.data.frame(mat.exact),
+              "lc_boot_summary" = as.data.frame(Lc.boot.summary),
+              "boot_array" = boot.array)
+
+  out <- structure(out,
+                   class = c("lc","list"))
+  return(out)
+}
+
+plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
+                    xlab = "Proportion of x", ylab = "Cumulative proprotion x",
+                    lc.lwd = 2, lc.col = "red", identity.lwd = 3, identity.col = "black",
+                    ...){
+  if(!inherits(x,"lc")){
+    stop("x must be of class 'lc'")
+  }
+
+  plot(x = x$lc$p, y = x$lc$p,
+       type = "l", col = identity.col, lwd = identity.lwd,
+       xlab = xlab, ylab = ylab, main = main)
+
+  if(spaghetti > 0){
+    if(is.null(x$boot_array)){
+      stop("'boot_array' is empty. Set return.array = TRUE in lorenz_curve()")
+    }
+    nboot <- dim(x$boot_array)[3]
+    if(is.logical(spaghetti)){
+      spaghetti <- nboot
+    }
+    ndraws <- ifelse(spaghetti < nboot, spaghetti, nboot)
+
+    for (i in seq_len(ndraws)){
+      lines(x$boot_array[,"p",i],x$boot_array[,"L",i], col = "grey")
+    }
+    lines(x = x$lc$p, y = x$lc$L, col = lc.col,lwd = lc.lwd)
+  } else {
+    if(!is.null(x$lc_boot_summary)){
+      lines(x = x$lc_boot_summary$p, y = x$lc_boot_summary$L.mean + x$lc_boot_summary$L.se * 1.96,
+            col = "grey", lty = "dashed", lwd = lc.lwd)
+      lines(x = x$lc_boot_summary$p, y = x$lc_boot_summary$L.mean - x$lc_boot_summary$L.se * 1.96,
+            col = "grey", lty = "dashed", lwd = lc.lwd)
+      lines(x = x$lc_boot_summary$p, y = x$lc_boot_summary$L.mean,
+            col = lc.col,lwd = lc.lwd)
+    } else {
+      lines(x = x$lc$p, y = x$lc$L, col = lc.col,lwd = lc.lwd)
+    }
+  }
+}
+

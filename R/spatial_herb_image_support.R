@@ -1134,6 +1134,13 @@ invert <- function(object){
 }
 
 
+#' @title Plot one dimensional image
+#' @description plot one dimensional image with pixel value plotted as a line. Internal function of \code{plot.cimg()}.
+#' @param x the image
+#' @param ... additional arguments passed to \code{plot.default()}
+#' @return NULL
+#' @note The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
+#' @export
 plot.singleton <- function (x, ...){
   varying <- if (width(x) == 1)
     "y"
@@ -1159,6 +1166,25 @@ plot.singleton <- function (x, ...){
 }
 
 
+#' @title Plot Image Using Base Graphics Using Missing Value Handling
+#' @description plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cim()} for more details.
+#' @param x the image
+#' @param frame which frame to display, if the image has depth > 1
+#' @param xlim x plot limits (default: 1 to width)
+#' @param ylim y plot limits (default: 1 to height)
+#' @param ylab x axis label
+#' @param ylab y axis label
+#' @param rescale rescale pixel values so that their range is [0,1]
+#' @param colourscale,colorscale an optional colour scale (default is gray or rgb)
+#' @param interpolate should the image be plotted with antialiasing (default \code{TRUE})
+#' @param axes whether to draw axes (default \code{TRUE})
+#' @param main main title
+#' @param xaxs,yaxs The style of axis interval calculation to be used for the axes. See \code{?par}
+#' @param col.na which colour to use for \code{NA} values, as R rgb code. The default is "rgb(0,0,0,0)", which corresponds to a fully transparent colour.
+#' @param ... additional arguments passed to \code{plot.default()}
+#' @return NULL
+#' @note The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
+#' @export
 plot.cimg <- function(x, frame, xlim = c(1, width(x)),
                       ylim = c(height(x), 1), xlab = "x", ylab = "y",
                       rescale = TRUE, colourscale = NULL,
