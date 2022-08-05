@@ -29,7 +29,7 @@ Gini<-function(x, ...) {
   if(any(x < 0)){
     warning("Vector contains negative one or more values. Interpert with caution.")
   }
-  ineq::Gini(x, ...)
+  DescTools::Gini(x, ...)
 }
 
 #' @export

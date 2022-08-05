@@ -435,7 +435,7 @@ get_data_sim<-function(allo.fit.list,n.sim = NULL,digits=2,
 
 
 
-lorenz_curve <- function(x, n = NULL, na.rm = FALSE, nboot = FALSE, return.array = FALSE){
+lorenz_curve <- function(x, n = NULL, na.rm = FALSE, nboot = 100, return.array = FALSE){
   if(!is.numeric(x)){
     stop("x must be a numeric vector")
   }
