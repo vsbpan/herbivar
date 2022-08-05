@@ -456,7 +456,7 @@ lorenz_curve <- function(x, n = NA, na.rm = FALSE, nboot = FALSE, return.array =
 
   if(nboot > 0){
     if(is.logical(nboot)){
-      nboot <- 1000
+      nboot <- 100
     }
     boot.array <- simplify2array(lapply(seq_len(nboot), function(i,x){
       x.boot <- sample(x,size = length(x), replace = TRUE)
@@ -468,6 +468,7 @@ lorenz_curve <- function(x, n = NA, na.rm = FALSE, nboot = FALSE, return.array =
       c(mean(x),sd(x))
     })))
     colnames(Lc.boot.summary) <- c("p","L.mean","L.se")
+    Lc.boot.summary <- as.data.frame(Lc.boot.summary)
   } else {
     Lc.boot.summary <- NULL
     boot.array <- NULL
@@ -479,7 +480,7 @@ lorenz_curve <- function(x, n = NA, na.rm = FALSE, nboot = FALSE, return.array =
 
 
   out <- list("lc" = as.data.frame(mat.exact),
-              "lc_boot_summary" = as.data.frame(Lc.boot.summary),
+              "lc_boot_summary" = Lc.boot.summary,
               "boot_array" = boot.array)
 
   out <- structure(out,
