@@ -445,7 +445,7 @@ lorenz_curve <- function(x, n = NULL, na.rm = FALSE, nboot = FALSE, return.array
   if(any(is.na(x)) || any(x < 0)){
     return(NA_real_)
   }
-  if(!is.na(n)){
+  if(!is.null(n)){
     x <- rep(x,n)
   }
   x <- sort(x)
