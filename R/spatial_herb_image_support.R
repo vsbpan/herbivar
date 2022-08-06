@@ -641,7 +641,7 @@ hessdet <- function(im,scale=1){
 
 
 #' @title Parse Holes And Extract Within Leaf Herbivory Data
-#' @description Split pixels into different herbivory regions ("holes") and measure hole and leaf level data. A pre-processing step for use with subsequent functions such as \code{split2ppp()}, \code{nn_dist()}, \code{pair_dist()}, and
+#' @description Split pixels into different herbivory regions ("holes") and measure hole and leaf level data. A pre-processing step for use with subsequent functions such as \code{split2ppp()}, \code{nn_dist()}, \code{pair_dist()}, \code{leaf_area()}, and \code{leaf_herb()}
 #' @param object A cimg, pixset, matrix, or array that has been cropped via \code{crop_leaf()}
 #' @param min_prop a numeric value between 0 and 1 indicating the minimum proportion herbivory threshold for inclusion. This gets rid of artifacts in the image that are too small to actually be real herbivory or biologically non-trivial herbivory. Default is 0.0001.
 #' @param plot if \code{TRUE} (default is \code{FALSE}), each hole splitted from the image will be plotted side-by-side. If more than 20 holes are detected, the user will be prompted to decide whether to proceed with plotting. Can be slow if the number of holes and image resolution is high.

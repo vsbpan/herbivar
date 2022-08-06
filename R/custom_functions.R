@@ -19,7 +19,6 @@ detach.herbivar <- function(x){
 }
 
 ### To do:
-## Modify fit_bite_size to save fitted object / parameter. Create a new object type.
 ## Add leaf number support
 ## Add lambda argument in alloT functions
 ## Add in co-limitation theory

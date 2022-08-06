@@ -27,4 +27,5 @@ The aggregation coefficient \eqn{J} is calculated as
 \eqn{J = 0} corresponds to a possion distribution (random)
 \eqn{J < 0} corresponds to a more even distribution (underdispersed)
 \eqn{J > 0} corresponds to a more aggregated distribution (overdispersed)
+@export
 }

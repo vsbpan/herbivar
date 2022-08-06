@@ -52,5 +52,5 @@ an object of class 'split_herb' and 'list'.
 \code{image_id}: The supplied \code{image_id} argument
 }
 \description{
-Split pixels into different herbivory regions ("holes") and measure hole and leaf level data. A pre-processing step for use with subsequent functions such as \code{split2ppp()}, \code{nn_dist()}, \code{pair_dist()}, and
+Split pixels into different herbivory regions ("holes") and measure hole and leaf level data. A pre-processing step for use with subsequent functions such as \code{split2ppp()}, \code{nn_dist()}, \code{pair_dist()}, \code{leaf_area()}, and \code{leaf_herb()}
 }

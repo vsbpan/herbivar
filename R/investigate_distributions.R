@@ -67,6 +67,7 @@ cv<-function(x, method = c(1,2,3,4),na.rm = FALSE){
 #'  \eqn{J = 0} corresponds to a possion distribution (random)
 #'  \eqn{J < 0} corresponds to a more even distribution (underdispersed)
 #'  \eqn{J > 0} corresponds to a more aggregated distribution (overdispersed)
+#'  @export
 
 J.index <- function(x=NULL,mean=NULL,var=NULL, na.rm = F){
   if(any(x < 0)) {
@@ -93,6 +94,7 @@ J.index <- function(x=NULL,mean=NULL,var=NULL, na.rm = F){
 #' The robust version is calculated as
 #' \deqn{CD = \frac{1}{n} \frac{\sum_i^n |m - x_i|}{m}}
 #' where \eqn{m} is the median of the data
+#' @export
 cd <- function(x, robust = F, na.rm = F){
   if(any(x < 0)) {
     warning("Data contain non-positive values")
@@ -106,6 +108,30 @@ cd <- function(x, robust = F, na.rm = F){
 }
 
 
+#' @title Calculate Standard Error of The Mean (SE)
+#' @description calculate standard error for a vector of data
+#' @param x a vector of numeric data
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @return
+#'  A numeric value
+#' @details
+#' The standard error of the mean \eqn{SE}, is calculated as
+#'  \deqn{SE(X) = \sqrt{\frac{\matbb{Var}[X]}{n}}}
+#' @export
+se <- function(x, na.rm = FALSE){
+  if(na.rm){
+    x <- x[!is.na(x)]
+  }
+  sd(x)/sqrt(length(x))
+}
+
+#' @title Get Sample Size
+#' @description Basically an alias for \code{length()}
+#' @param x a vector of numeric data
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @return
+#'  A numeric value
+#' @export
 N <- function(x, na.rm = FALSE){
   if(na.rm){
     x <- x[!is.na(x)]
@@ -113,11 +139,24 @@ N <- function(x, na.rm = FALSE){
   return(length(x))
 }
 
+#' @title Get Median
+#' @description Find median of a vector of numeric data
+#' @param x a vector of numeric data
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @return
+#'  A numeric value
+#' @export
 q50 <- function(x, na.rm = FALSE){
   median(x, na.rm = na.rm)
 }
 
-
+#' @title Get 25th Percentile
+#' @description Find the lower quantile of a vector of numeric data
+#' @param x a vector of numeric data
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @return
+#'  A numeric value
+#' @export
 q25 <- function(x, na.rm = FALSE){
   if(na.rm){
     x <- x[!is.na(x)]
@@ -125,7 +164,13 @@ q25 <- function(x, na.rm = FALSE){
   return(as.numeric(quantile(x,probs = 0.25)))
 }
 
-
+#' @title Get 75th Percentile
+#' @description Find the upper quantile of a vector of numeric data
+#' @param x a vector of numeric data
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @return
+#'  A numeric value
+#' @export
 q75 <- function(x, na.rm = FALSE){
   if(na.rm){
     x <- x[!is.na(x)]
@@ -134,7 +179,19 @@ q75 <- function(x, na.rm = FALSE){
 }
 
 
-
+#' @title Generate Summary Statistics For A Vector of Data
+#' @description Get values for a set of statistical probes.
+#' @param x a vector of numeric data
+#' @param probes a vector of function names, character string, or functions that can be found with \code{match.fun()}. Default probes are \code{mean()}, \code{var()}, \code{cv()}, \code{Gini()}, \code{max()}, \code{min()}, \code{median()}, \code{Skew()}, \code{Kurt()}, \code{q25()}, \code{q75()}, \code{N()}, and \code{Lasym()}.
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @return
+#'  A named vector of numeric values
+#' @examples
+#' x <- runif(100,0.1,1)
+#' probe_distribution(x)
+#' probe_distribution(x, probes = "cv")
+#' probe_distribution(x, probes = c("sd", "length","se"))
+#' probe_distribution(x, probes = c(function(v){sd(v)/length(v)^0.5}))
 #' @export
 probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
                                            "max","min","median", "Skew",
@@ -151,6 +208,7 @@ probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
 
   return(probe.val)
 }
+
 
 #' @export
 apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
@@ -435,6 +493,23 @@ get_data_sim<-function(allo.fit.list,n.sim = NULL,digits=2,
 
 
 
+
+#' @title Calculate Lorenz Curve
+#' @description Calculate Lorenz Curve for a vector of data with known frequencies
+#' @param x a vector of non-negative numeric data
+#' @param n a vector of frequencies the same length as \code{x}. If \code{NULL} (default), the frequencies are assumed to be 1 (as in a vector of untabulated raw data).
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @param nboot an integer value indicating the number of bootstraps to perform to estimate the uncertainty (default to 100). If set below 0 or \code{FALSE}, no bootstraps will be performed. If set to \code{TRUE}, 100 bootstraps will be performed.
+#' @param return.array a logical value indicating whether to save the bootstrapped Lorenz Curves. Default is \code{FALSE}. Must set to \code{TRUE} for spaghetti plot in \code{plot.lc()}.
+#' @return
+#' an object of class "lc" and "list" with three slots:
+#'
+#' \code{lc}: a data.frame of the exact Lorenz Curve calculated from the supplied data
+#'
+#' \code{lc_boot_summary}: a data.frame of the mean and standard error of the Lorenz Curve. If no bootstrap is performed, \code{NULL} is returned.
+#'
+#' \code{boot_array}: an array of the individual Lorenz Curve of each bootstrapped dataset. If \code{return.array = FALSE}, \code{NULL} is returned.
+#' @export
 lorenz_curve <- function(x, n = NULL, na.rm = FALSE, nboot = 100, return.array = FALSE){
   if(!is.numeric(x)){
     stop("x must be a numeric vector")
@@ -488,6 +563,19 @@ lorenz_curve <- function(x, n = NULL, na.rm = FALSE, nboot = 100, return.array =
   return(out)
 }
 
+
+#' @title Plot Lorenz Curve Using Base Graphics
+#' @description Plot Lorenz Curve for an object of class 'lc'. If available, uncertainty from the bootstrap simulation is also plotted either as 95% confidence intervals or as a spaghetti plot.
+#' @param x an object of class 'lc' generated by \code{lorenz_curve()}
+#' @param spaghetti if \code{TRUE}, a spaghetti plot of all simulations in \code{boot_array} is plotted. If an integer value is supplied, the number of curves up to the total number of simulations in \code{boot_array} will be plotted. If \code{FALSE} (default), the 95% confidence interval will be plotted instead.
+#' @param main the title of the plot
+#' @param xlab,ylab the x or y axes label
+#' @param lc.lwd,identity.lwd the thickness of the Lorenz Curve or the identity line (representing perfect equality).
+#' @param lc.col,identity.col the color of the Lorenz Curve or the identity line (representing perfect equality).
+#' @param ... extra arguments passed to \code{plot.default()}
+#' @return
+#' NULL
+#' @export
 plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
                     xlab = "Proportion of x", ylab = "Cumulative proprotion x",
                     lc.lwd = 2, lc.col = "red", identity.lwd = 3, identity.col = "black",

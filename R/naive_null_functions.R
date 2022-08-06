@@ -415,6 +415,11 @@ fit_bite_size<-function(object,
     data.vec <- object
   }
 
+  if(is.na(min.phi)){
+    min.phi <- min(data.vec[data.vec > 0])
+    warning("No min.phi supplied; defaulting to minimum value in data. Might be a bad idea.")
+  }
+
   if(length(family) == 1 && family == "all"){
     family <- supported.families
   } else if(!all(family %in% supported.families)){
@@ -443,13 +448,7 @@ fit_bite_size<-function(object,
   }
 
   if(any(data.vec > 1)){
-    stop("Data must be less than 1.")
-  }
-
-
-  if(is.na(min.phi)){
-    min.phi <- min(data.vec[data.vec > 0])
-    warning("No min.phi supplied; defaulting to minimum value in data. Might be a bad idea.")
+    stop("Data must be less than or equal to 1.")
   }
 
   if(any(data.vec < min.phi) || any(data.vec > 1)){
