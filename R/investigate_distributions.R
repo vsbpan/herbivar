@@ -307,10 +307,7 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
 #' @export
 compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
                              test = c("ks","kl","ad"), digits = 2, kl.by = 0.1){
-  if(!all(test %in% c("ks","kl","ad"))){
-    stop("Invalid test selection. Valid tests are 'ks', 'kl', and 'ad'.")
-  }
-
+  test <- match.arg(test, several.ok = TRUE)
   obs.data<-data.list[[obs.index]]
   pred.data<-data.list[[pred.index]]
 
@@ -356,7 +353,7 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
 #' @export
 get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
                             nboot=1,n.sim=NULL,digits=2){
-  test <- test[1]
+  test <- match.arg(test)
   out.list<-vector(mode="list",length=nboot)
   obs.out<-lapply(allo.fit.list,function(x){
     x$data

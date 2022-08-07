@@ -118,19 +118,8 @@ fit_generic_null<- function(data.vec,
                             method=c("Nelder-Mead","BFGS","L-BFGS-B","nlminb"),
                             id = NULL,
                             ...){
-  method <- method[1]
-  if(!any(method%in%c("Nelder-Mead","BFGS","L-BFGS-B","nlminb"))){
-    stop("method not supported","\n",
-         "supported methods are ",
-         paste0(c("Nelder-Mead","BFGS","L-BFGS-B","nlminb"),collapse = ", "))
-
-  }
-  family <- family[1]
-  if(!any(family%in%c("htlnorm","zoibeta"))){
-    stop("family not supported","\n",
-         "supported families are ",
-         paste0(c("htlnorm","zoibeta"),collapse = ", "))
-  }
+  method <- match.arg(method)
+  family <- match.arg(family)
 
   data.vec <- .herb_data_check(data.vec, min.phi = 0, allow.zero = TRUE)
 
@@ -390,9 +379,6 @@ fit_bite_size<-function(object,
                         min.phi = NA,
                         method = c("Nelder-Mead","BFGS"),
                         IC = "AICc"){
-  supported.families<- c("allo","allo_a","allo_M",
-                         "tlnorm","beta","kumar", "tpareto")
-  supported.methods<-c("Nelder-Mead","BFGS")
 
   if(inherits(object,"split_herb")){
     data.vec <- object$hole_prop
@@ -408,17 +394,8 @@ fit_bite_size<-function(object,
     warning("No min.phi supplied; defaulting to minimum value in data. Might be a bad idea.")
   }
 
-  if(length(family) == 1 && family == "all"){
-    family <- supported.families
-  } else if(!all(family %in% supported.families)){
-    stop("Unexpected 'family' value; supported families are ",
-         paste0(supported.families, collapse = ", "))
-  }
-  method <- method[1]
-  if(!(method %in% supported.methods)){
-    stop("Unexpected 'method'; supported methods are ",
-         paste0(supported.methods, collapse = ", "))
-  }
+  family <- match.arg(family, several.ok = TRUE)
+  method <- match.arg(method)
 
   if(min.phi <= 0 || min.phi >=1){
     stop("min.phi must be between zero and one, not inclusive.")

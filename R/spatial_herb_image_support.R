@@ -345,15 +345,13 @@ leaf_herb <- function(object, type = c("proportion","percent",
     stop("Unsupported object type")
   }
 
-  valid.type = c("proportion","percent",
-                 "pixels","px","mm2","real")
   if(is.na(px.size)){
     px.size <- attr(mat,"px.size")
   }
   if("all"%in%type){
     type <- c("prop","px","real")
   }
-  type <- valid.type[pmatch(type,valid.type)]
+  type <- match.arg(type, several.ok = TRUE)
 
   if(is.array(mat) && any(dim(mat)[c(-1,-2)] > 1)){
     stop("Unexpected dimension present. Matrix should be n X m")
@@ -839,7 +837,7 @@ nn_dist <- function(object, # expect a matrix with two columns or split_herb
     SE_r_E_bar <- 0.26136 / sqrt(object$n_holes * rho)
     c <- (r_A_bar - r_E_bar) / SE_r_E_bar
 
-    alternative <- alternative[1]
+    alternative <- match.arg(alternative)
     if(alternative == "two.sided"){
       p <- pnorm(abs(c),lower.tail = F)*2
     } else if(alternative == "clustered" || alternative == "lesser"){
@@ -920,11 +918,9 @@ split2ppp<-function(split_herb,pt.type = c("centroid","px")){
   if(!inherits(split_herb,"split_herb")){
     stop("Object not of class 'split_herb'")
   }
-  pt.type <- pmatch(pt.type[1],c("centroid","px"))
-  if(is.na(pt.type)){
-    stop("No matched 'pt.type' option.")
-  }
-  if(pt.type == 1){
+  pt.type <- match.arg(pt.type)
+
+  if(pt.type == "centroid"){
     ppp.out<-spatstat.geom::ppp(x = split_herb$hole_centroid[,2],
                                 y= split_herb$hole_centroid[,1],
                                 mask = !is.na((split_herb$px)[,,1,1]),
@@ -969,7 +965,7 @@ split2ppp<-function(split_herb,pt.type = c("centroid","px")){
       #   warning(paste0("Selected points is valid . . . ",ifelse(status,"success!","failed!")),call. = F)
       # }
     }
-  } else if(pt.type == 2){
+  } else if(pt.type == "px"){
     ppp.out <- mat2ppp((split_herb$px)[,,1,1])
   }
   attr(ppp.out,"px.size") <- split_herb$px.size

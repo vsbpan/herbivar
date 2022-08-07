@@ -123,10 +123,11 @@ allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
 #' @param x,q a vector of values of proportion herbivory
 #' @param p a vector of probabilities
 #' @param n the number of observations to generate
-#' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited. See details.
+#' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited. If  \code{NULL}, supplied \code{lambda} value is converted to \code{mean.phi.T}. See details.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
 #' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param lambda An alternative parameterization of mean.phi.T. see \code{?get_lambda()}
 #' @param k.max The maximum number of convolutions of the neutral 'bite size' distribution in numerical approximation of the PDF of the neutral herbivory distribution. Default is 50.
 #' @param by The grid resolution used in the FFT convolutions. Default is 0.001.
 #' @param k.max.tolerance the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small).
@@ -140,7 +141,17 @@ allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
 #' @return A vector of numeric values
 #' @rdname alloT
 #' @export
-ralloT<-function(n,mean.phi.T,min.phi=0.005,max.phi=1,a=14/9){
+ralloT<-function(n, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, lambda = NULL){
+  if(is.null(mean.phi.T)){
+    if(is.null(lambda)){
+      stop("Either 'lambda' or 'mean.phi.T must be specified'.")
+    }
+    mean.phi.T <- get_mean_phi_T(lambda,
+                                 min.phi = min.phi,
+                                 max.phi = max.phi,
+                                 a = a)
+  }
+
   phi.T<-allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
                                   n.sim = n,
                                   min.phi = min.phi,
@@ -164,9 +175,19 @@ ralloT<-function(n,mean.phi.T,min.phi=0.005,max.phi=1,a=14/9){
 
 #' @rdname alloT
 #' @export
-dalloT<-function(x, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9,
+dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, labmda = NULL,
                  k.max = 50, by = 0.001, k.max.tolerance = 1e-5,
                  k.fft.limit = 100, log = FALSE, parallel = FALSE, cores = 1){
+  if(is.null(mean.phi.T)){
+    if(is.null(lambda)){
+      stop("Either 'lambda' or 'mean.phi.T must be specified'.")
+    }
+    mean.phi.T <- get_mean_phi_T(lambda,
+                                 min.phi = min.phi,
+                                 max.phi = max.phi,
+                                 a = a)
+  }
+
   if(cores>1){
     parallel <- TRUE
     cluster <- makeCluster(cores)
@@ -205,7 +226,10 @@ dalloT<-function(x, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9,
     phi.T.index<-findInterval(x = x, vec = phi)
 
     #Find lambda outside of dk.cond.lambda() to save computation
-    lambda<- mean.phi.T/((1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a)))
+    lambda <- get_lambda(mean.phi.T,
+                         min.phi = min.phi,
+                         max.phi = max.phi,
+                         a = a)
 
     #Numeric summation of joint prob from k=0 to k=max_k for each observed x (phi.T)
     prob<-as.vector(tcrossprod(dk.cond.lambda(k = k.vec,
@@ -248,9 +272,22 @@ dalloT<-function(x, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9,
 
 #' @rdname alloT
 #' @export
-palloT<-function(q, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9,
+palloT<-function(q, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, lambda = NULL,
                  by = 0.001, cores = 1, lower.tail = TRUE, log.p = FALSE, ...){
-  lambda<- mean.phi.T/((1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a)))
+  if(is.null(mean.phi.T)){
+    if(is.null(lambda)){
+      stop("Either 'lambda' or 'mean.phi.T must be specified'.")
+    }
+    mean.phi.T <- get_mean_phi_T(lambda,
+                                 min.phi = min.phi,
+                                 max.phi = max.phi,
+                                 a = a)
+  }
+  lambda <- get_lambda(mean.phi.T,
+                           min.phi = min.phi,
+                           max.phi = max.phi,
+                           a = a)
+
   p0 <- dpois(0,lambda = lambda)
 
   if((by > min.phi & q < min.phi) || by > q){
@@ -320,14 +357,24 @@ palloT<-function(q, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9,
 
 #' @rdname alloT
 #' @export
-qalloT<-function(p, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9, n.sim = 1000,
-                 lower.tail = TRUE, log.p = FALSE){
+qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, lambda = NULL,
+                 n.sim = 1000, lower.tail = TRUE, log.p = FALSE){
   if(log.p){
     p <- exp(p)
   }
 
   if(!lower.tail){
     p <- 1 - p
+  }
+
+  if(is.null(mean.phi.T)){
+    if(is.null(lambda)){
+      stop("Either 'lambda' or 'mean.phi.T must be specified'.")
+    }
+    mean.phi.T <- get_mean_phi_T(lambda,
+                                 min.phi = min.phi,
+                                 max.phi = max.phi,
+                                 a = a)
   }
 
   phi.T<-allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
@@ -586,16 +633,8 @@ fit_allo_herb<-function(data.vec,
     upper<-rep(upper[1],length(optim.vars))
   }
 
-  method <- method[1]
+  method <- match.arg(method)
 
-  if(!any(method%in%c("Nelder-Mead","BFGS",
-                      "L-BFGS-B","Brent","nlminb","nlm"))){
-    stop("method not supported","\n",
-         "supported methods are ",
-         paste0(c("Nelder-Mead","BFGS",
-                  "L-BFGS-B","Brent","nlminb","nlm"),collapse = ", "))
-
-  }
   if((length(optim.vars)<2) & (method!= "Brent") & (method != "nlminb")){
     method<-"Brent"
     message("Overwriting optimizer to Brent for one dimensional optimization")
@@ -777,7 +816,7 @@ fit_allo_herb<-function(data.vec,
 #' @param digits A numeric value indicating the number of digits to be displayed in the model coefficients. Default is 3.
 #' @return A matrix array
 #' @export
-print.allo_herb_fit<-function(x, ..., trans = NULL, digits = 3){
+print.allo_herb_fit <- function(x, ..., trans = NULL, digits = 3){
   if(!inherits(x,"allo_herb_fit")){
     stop("Needs to by of object type 'allo_herb_fit'")
   }
