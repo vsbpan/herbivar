@@ -8,12 +8,11 @@ Authors@R:
 Maintainer: Vincent Pan <vsbpan@gmail.com>
 Description: This package makes available several methods used for analyzing variability in 
     ecological data. Currently, it supports fitting a neutral herbivory model to data using 
-    Maximum Likelihood (ML) and Bayesian Synthetic Likelihood (BSL). It also contains several 
-    helper functions for investigating distributions and wrangling the HerbVar dataset. In addition,
-    using the 'imager' infrastructure, the package also supports automatic processing of leaf images, 
-    mostly in the context of leaf scans, that can retreive rich within leaf herbivory data. The 
-    package is integrated with the 'spatstat' package that allows for spatial analysis of these 
-    data. 
+    Maximum Likelihood (ML). It also contains several helper functions for investigating 
+    distributions and wrangling the HerbVar dataset. In addition, using the 'imager' infrastructure, 
+    the package also supports automatic processing of leaf images, mostly in the context of leaf 
+    scans, that can retreive rich within leaf herbivory data. The package is integrated with 
+    the 'spatstat' package that allows for spatial analysis of these data. 
 License: GPL (>= 3)
 Depends:
     imager

@@ -845,36 +845,71 @@ logLik.allo_herb_fit <- function(object, ...){
 #' @param object a fitted model object for which there exist a \code{logLik} method to extract the log-likelihood, or an object of class 'logLik'.
 #' @param ... additional arguments passed to \code{stats::AIC()} or \code{stats::BIC()} for additoal fitted model objects.
 #' @param k an atomic numeric value for the penalty. Defaults to 2.
-#' @return if just one object is provided, a numeric value of AIC or BIC is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AIC or BIC.
+#' @return if just one object is provided, a numeric value of AIC or BIC is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AIC or BIC is returned.
 #' @rdname AIC
 #' @export
 AIC.allo_herb_fit <- function(object, ..., k = 2){
-  AIC(logLik(object),...,k=k)
+  dots <- as.list(match.call())[-1]
+  dots <- dots[!names(dots) == "k"]
+
+  if(length(dots) == 1){
+    return(AIC(logLik(object),..., k = k))
+  } else {
+    out <- do.call("rbind",
+                   lapply(unname(dots), function(x){
+                     loglik <- logLik(eval(x))
+                     df <- attributes(loglik)$df
+                     aic <- AIC(loglik)
+                     return(data.frame("model"= deparse(x), "AIC" = aic, "df"= df))
+                   }))
+
+    out$dAIC <- out$AIC - min(out$AIC)
+    out <- out[order(out$AIC),]
+    return(out)
+  }
 }
 
 #' @title Corrected Akaike's An Information Criterion (AICc)
 #' @description Calculate AICc taking into account small sample size bias
 #' @param object The object from which log likelihood can be extracted
-#' @param logLik An object of calss 'logLik'. Ignored if an object is supplied.
 #' @param k the penalty on model complexity. Default is 2.
 #' @details
 #' The formulat for AICc is given by:
 #' \deqn{AIC_c = -2\ln{\mathcal{L}(x)} + k  d \frac{n}{n - d - 1}}
 #' \eqn{d} is the number of parameters, \eqn{k} is the penalty, \eqn{n} is the sample size, and \eqn{\mathcal{L}(x)} is the likelihood.
 #'
-#' @return A numeric value
+#' @return if just one object is provided, a numeric value of AICc is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AICc is returned.
 #' @export
-AICc <- function(object = NULL, logLik = NULL, k=2){
-  if(!is.null(object)) {
+AICc <- function(object, ..., k = 2){
+  dots <- as.list(match.call())[-1]
+  dots <- dots[!names(dots) == "k"]
+
+  if(length(dots) == 1){
     logLik <- logLik(object)
+    n <- attributes(logLik)$nobs
+    df <- attributes(logLik)$df
+    aicc<-as.numeric(logLik) * -2 + k*df*(n/(n-df-1))
+    if(n <= (df+1)){
+      warning("Sample size too small.")
+    }
+    return(aicc)
+  } else {
+    out <- do.call("rbind",
+                   lapply(unname(dots), function(x){
+                     loglik <- logLik(eval(x))
+                     n <- attributes(loglik)$nobs
+                     df <- attributes(loglik)$df
+                     aicc<-as.numeric(loglik) * -2 + k*df*(n/(n-df-1))
+                     if(n <= (df+1)){
+                       warning("Sample size too small.")
+                     }
+                     return(data.frame("model"= deparse(x), "AICc" = aicc, "df"= df))
+                   }))
+
+    out$dAICc <- out$AICc - min(out$AICc)
+    out <- out[order(out$AICc),]
+    return(out)
   }
-  n <- attributes(logLik)$nobs
-  df <- attributes(logLik)$df
-  aicc<-as.numeric(logLik) * -2 + k*df*(n/(n-df-1))
-  if(n <= (df+1)){
-    warning("Sample size too small.")
-  }
-  return(aicc)
 }
 
 
@@ -882,7 +917,23 @@ AICc <- function(object = NULL, logLik = NULL, k=2){
 #' @rdname AIC
 #' @export
 BIC.allo_herb_fit <- function(object,...){
-  BIC(logLik(object),...)
+  dots <- as.list(match.call())[-1]
+
+  if(length(dots) == 1){
+    return(BIC(logLik(object),...))
+  } else {
+    out <- do.call("rbind",
+                   lapply(unname(dots), function(x){
+                     loglik <- logLik(eval(x))
+                     df <- attributes(loglik)$df
+                     bic <- BIC(loglik)
+                     return(data.frame("model"= deparse(x), "BIC" = bic, "df"= df))
+                   }))
+
+    out$dBIC <- out$BIC - min(out$BIC)
+    out <- out[order(out$BIC),]
+    return(out)
+  }
 }
 
 #' @title Extract Model Coefficients
