@@ -1,9 +1,9 @@
 #install.packages("C:/R Projects/Package Building/herbivar_0.1.0.tar.gz", repos = NULL, type="source")
 #detach("package:herbivar",unload=T)
-# Version date  "2022-07-26 17:48:03 EDT"
+# Version date  "2022-08-07 11:12:31 EDT"
 #Sys.time()
 herbivar.version <- function(x){
-  print("2022-07-26 17:48:03 EDT")
+  print("2022-08-07 11:12:31 EDT")
 }
 
 .onAttach <- function(...){

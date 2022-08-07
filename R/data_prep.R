@@ -164,7 +164,7 @@ get.data.lists<-function(data,variable,id.name,ok.ids,n.sim=NA,
 
 
 
-randomize_leaves_engin <- function(data.list, meta.data, summarise.plant){
+.randomize_leaves_engin <- function(data.list, meta.data, summarise.plant){
   #first column of meta.data is the surveyID
   #second column of meta.data is the plant id
   #third column of the meta.data is the number of leaves on that plant
@@ -213,7 +213,7 @@ randomize_leaves<-function(data.list.list, meta.data, summarise.plant = TRUE, bi
   out <- lapply(
     data.list.list,
     FUN = function(x){
-      randomize_leaves_engin(data.list = x,
+      .randomize_leaves_engin(data.list = x,
                              meta.data = meta.data[,c("surveyID","plantID3.long","n.avg")],
                              summarise.plant = summarise.plant)
     }

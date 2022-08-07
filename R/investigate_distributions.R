@@ -305,21 +305,23 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
 }
 
 #' @export
-compare_dist<-function(data.list=NULL,obs.index=1,pred.index=2,
-                             test=c("ks","kl","ad"),digits=1,kl.by=0.1){
-  if(!is.null(data.list)){
-    obs.data<-data.list[[obs.index]]
-    pred.data<-data.list[[pred.index]]
+compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
+                             test = c("ks","kl","ad"), digits = 2, kl.by = 0.1){
+  if(!all(test %in% c("ks","kl","ad"))){
+    stop("Invalid test selection. Valid tests are 'ks', 'kl', and 'ad'.")
   }
+
+  obs.data<-data.list[[obs.index]]
+  pred.data<-data.list[[pred.index]]
 
   if(any(test%in%"ks")){
     ks.out<-suppressWarnings(ks.test(
-      obs.data %>% round(digits = digits),
-      pred.data %>% round(digits = digits)
+       round(obs.data, digits = digits),
+       round(pred.data, digits = digits)
     ))
     ks.out<-c("ks.D" = unname(ks.out$statistic),"ks.P" = ks.out$p.value)
   } else {
-    ks.out<-NULL
+    ks.out <- NULL
   }
   if(any(test%in%"kl")){
     kl.div<-suppressMessages(KL(
@@ -335,8 +337,8 @@ compare_dist<-function(data.list=NULL,obs.index=1,pred.index=2,
   }
   if(any(test%in%"ad")){
     ad.out<-ad.test(
-      obs.data %>% round(digits = digits),
-      pred.data  %>% round(digits = digits))
+      round(obs.data, digits = digits),
+      round(pred.data, digits = digits))
     ad.out<-c("ad"= (ad.out$ad)[1,1],"ad.P" = (ad.out$ad)[1,3])
   } else {
     ad.out<-NULL
@@ -353,9 +355,9 @@ compare_dist<-function(data.list=NULL,obs.index=1,pred.index=2,
 
 #' @export
 get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
-                            n.boot=1,n.sim=NULL,digits=2){
+                            nboot=1,n.sim=NULL,digits=2){
   test <- test[1]
-  out.list<-vector(mode="list",length=n.boot)
+  out.list<-vector(mode="list",length=nboot)
   obs.out<-lapply(allo.fit.list,function(x){
     x$data
   })
@@ -367,9 +369,9 @@ get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
   n.rows<-length(allo.fit.list)
   test.list<-vector(mode = "list",length=n.rows)
 
-  for (j in seq_len(n.boot)){
+  for (j in seq_len(nboot)){
     herb.data.bind<-c(
-      list("obs"=obs.out),
+      list("obs" = obs.out),
       get_data_sim(
                allo.fit.list = allo.fit.list,
                n.sim = n.sim,
@@ -384,7 +386,7 @@ get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
                                                   digits = digits)[[
                                                     match(test, c("ks","kl","ad"))
                                                   ]],
-                               error = function(e) NA)
+                               error = function(e) NA_real_)
       cat(j,"-",i,"\r","\r")
     }
     out.list[[j]]<-do.call("rbind",test.list)
@@ -396,6 +398,7 @@ get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
   }
   return(out)
 }
+
 
 #' @title Generate Neutral Predictions From Fitted Model
 #' @description generate neutral predictions from fitten model
@@ -417,54 +420,25 @@ get_data_sim<-function(allo.fit.list,n.sim = NULL,digits=2,
                        ){
   if(any(
     unlist(
-      lapply(allo.fit.list,function(x){ !inherits(x,"allo_herb_fit")})
+      lapply(allo.fit.list,function(x){
+        !inherits(x,"allo_herb_fit")
+        })
     )
   )){
-    stop("allo.fit.list contains object of none 'allo_herb_fit' class.")
+    stop("allo.fit.list contains object of non-'allo_herb_fit' class.")
   }
 
     sim.fit.out<-lapply(allo.fit.list,function(x){
-      predicted.draws<-round(ralloT(n = ifelse(is.null(n.sim),
-                        length(x$data),
-                        n.sim),
-             mean.phi.T = ifelse(
-               is.na(new.param["mean.phi.T"]),
-               ifelse(
-                 is.na(x$param.vals["mean.phi.T"]),
-                 match.fun(x$param.val.trans[["mean.phi.T"]])(x$par[(x$theta.names == "mean.phi.T")]),
-                 x$param.vals["mean.phi.T"]
-               ),
-               new.param["mean.phi.T"]
-             ),
-             min.phi = ifelse(
-               is.na(new.param["min.phi"]),
-               ifelse(
-                 is.na(x$param.vals["min.phi"]),
-                 match.fun(x$param.val.trans[["min.phi"]])(x$par[(x$theta.names == "min.phi")]),
-                 x$param.vals["min.phi"]
-               ),
-               new.param["min.phi"]
-             ),
-             max.phi = ifelse(
-               is.na(new.param["max.phi"]),
-               ifelse(
-                 is.na(x$param.vals["max.phi"]),
-                 match.fun(x$param.val.trans[["max.phi"]])(x$par[(x$theta.names == "max.phi")]),
-                 x$param.vals["max.phi"]
-               ),
-               new.param["max.phi"]
-             ),
-             a = ifelse(
-               is.na(new.param["a"]),
-               ifelse(
-                 is.na(x$param.vals["a"]),
-                 match.fun(x$param.val.trans[["a"]])(x$par[(x$theta.names == "a")]),
-                 x$param.vals["a"]
-               ),
-               new.param["a"]
-             )
-      ),
-      digits = digits)
+      predicted.draws<-round(
+        ralloT(n = ifelse(is.null(n.sim),
+                          length(x$data),
+                          n.sim),
+               mean.phi.T = .choose_new_theta_val(x,new.param,"mean.phi.T"),
+               min.phi = .choose_new_theta_val(x,new.param,"min.phi"),
+               max.phi = .choose_new_theta_val(x,new.param,"max.phi"),
+               a = .choose_new_theta_val(x,new.param,"a")
+        ),
+        digits = digits)
       return(predicted.draws)
     })
     names(sim.fit.out)<-do.call("c",
@@ -574,7 +548,7 @@ lorenz_curve <- function(x, n = NULL, na.rm = FALSE, nboot = 100, return.array =
 #' @param lc.col,identity.col the color of the Lorenz Curve or the identity line (representing perfect equality).
 #' @param ... extra arguments passed to \code{plot.default()}
 #' @return
-#' NULL
+#' \code{NULL}
 #' @export
 plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
                     xlab = "Proportion of x", ylab = "Cumulative proprotion x",

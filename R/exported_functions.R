@@ -7,7 +7,9 @@ ad.test <- function(...) {kSamples::ad.test(...)}
 hessian <- function(...) {numDeriv::hessian(...)}
 
 #' @export
-KL<-function(x,test.na=TRUE,unit="log",est.prob=NULL) {philentropy::KL(x,test.na=test.na,unit = unit,est.prob = est.prob)}
+KL<-function(x, test.na = TRUE, unit = "log", est.prob = NULL) {
+  philentropy::KL(x, test.na = test.na, unit = unit, est.prob = est.prob)
+}
 
 #' @export
 makeCluster <- function(...) {parallel::makeCluster(...)}
@@ -15,14 +17,6 @@ makeCluster <- function(...) {parallel::makeCluster(...)}
 #' @export
 stopCluster<-function(...){parallel::stopCluster(...)}
 
-#' @export
-ess_bulk<-function(...) {rstan::ess_bulk(...)}
-
-#' @export
-ess_tail<-function(...) {rstan::ess_tail(...)}
-
-#' @export
-Rhat<-function(...) {rstan::Rhat(...)}
 
 #' @export
 Gini<-function(x, ...) {

@@ -33,11 +33,9 @@ Imports:
     numDeriv,
     philentropy,
     purrr,
-    rstan,
     parallel,
     extraDistr
 Suggests: 
-    BSL,
     spatstat
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

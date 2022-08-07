@@ -198,7 +198,7 @@ max_scale <- function(object){
 #' @details
 #'
 #' @return A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixset'.
-#' @note The code for the watershed method is adapted from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html}. accessed date 2022-07-25.
+#' @note The code for the watershed method is adapted from Simon Barthelme's vignette https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html. accessed date 2022-07-25.
 clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
                        fg.adjust = 1, blur.size = 2, plot = TRUE,
                        save.plot.path = NA, save.plot.size = "original",
@@ -215,7 +215,7 @@ clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
   }
 
   bg <- (!threshold2(object,thr = bg.thresh, approx.res = approx.res, km = km))
-  fg <- fg_threshold(img,fg.thresh = fg.thresh,fg.adjust = fg.adjust,
+  fg <- fg_threshold(object,fg.thresh = fg.thresh,fg.adjust = fg.adjust,
                      approx.res = approx.res, km = km)
   fg.thr <- attr(fg, "threshold")
 
@@ -1167,12 +1167,12 @@ plot.singleton <- function (x, ...){
 
 
 #' @title Plot Image Using Base Graphics Using Missing Value Handling
-#' @description plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cim()} for more details.
+#' @description plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cimg()} for more details.
 #' @param x the image
 #' @param frame which frame to display, if the image has depth > 1
 #' @param xlim x plot limits (default: 1 to width)
 #' @param ylim y plot limits (default: 1 to height)
-#' @param ylab x axis label
+#' @param xlab x axis label
 #' @param ylab y axis label
 #' @param rescale rescale pixel values so that their range is [0,1]
 #' @param colourscale,colorscale an optional colour scale (default is gray or rgb)
@@ -1181,9 +1181,10 @@ plot.singleton <- function (x, ...){
 #' @param main main title
 #' @param xaxs,yaxs The style of axis interval calculation to be used for the axes. See \code{?par}
 #' @param col.na which colour to use for \code{NA} values, as R rgb code. The default is "rgb(0,0,0,0)", which corresponds to a fully transparent colour.
+#' @param asp aspect ratio.
 #' @param ... additional arguments passed to \code{plot.default()}
 #' @return NULL
-#' @note The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
+#' @note The code for the function is obtained from Simon Barthelme's imager:::plot.singleton(). version 0.42.13.
 #' @export
 plot.cimg <- function(x, frame, xlim = c(1, width(x)),
                       ylim = c(height(x), 1), xlab = "x", ylab = "y",

@@ -132,19 +132,7 @@ fit_generic_null<- function(data.vec,
          paste0(c("htlnorm","zoibeta"),collapse = ", "))
   }
 
-  data.vec <- as.numeric(data.vec)
-  if(any(is.na(data.vec))){
-    message(sum(is.na(data.vec))," NA detected and removed from data")
-    data.vec <- data.vec[!is.na(data.vec)]
-  }
-
-  if(sum(data.vec)==0){
-    stop("Data does not contain non-zero herbivory values; model not identifiable.")
-  }
-
-  if(any(data.vec < 0) || any(data.vec > 1)){
-    stop("Data must be bounded between 0 and 1.")
-  }
+  data.vec <- .herb_data_check(data.vec, min.phi = 0, allow.zero = TRUE)
 
   if(family == "htlnorm"){
     optim.vars <- c("theta","meanlog","sdlog")
@@ -432,30 +420,12 @@ fit_bite_size<-function(object,
          paste0(supported.methods, collapse = ", "))
   }
 
-  data.vec <- as.numeric(data.vec)
-  if(any(is.na(data.vec))){
-    message(sum(is.na(data.vec))," NA detected and removed from data")
-    data.vec <- data.vec[!is.na(data.vec)]
-  }
-
   if(min.phi <= 0 || min.phi >=1){
     stop("min.phi must be between zero and one, not inclusive.")
   }
 
-  if(any(data.vec < min.phi)){
-    message(sum(data.vec < min.phi)," values less than min.phi detected and removed from data")
-    data.vec <- data.vec[data.vec >= min.phi]
-  }
+  data.vec <- .herb_data_check(data.vec, min.phi = min.phi, allow.zero = FALSE)
 
-  if(any(data.vec > 1)){
-    stop("Data must be less than or equal to 1.")
-  }
-
-  if(any(data.vec < min.phi) || any(data.vec > 1)){
-    message(sum(data.vec < min.phi  | data.vec > 1),
-            " invalid entries detected and removed from data")
-    data.vec <- data.vec[!(data.vec < min.phi | data.vec > 1)]
-  }
   n <- length(data.vec)
   if(n < 3){
     warning("Sample size too low. Some models not identifiable.")
@@ -715,34 +685,6 @@ fit_bite_size<-function(object,
   }
 
   invisible(out.final)
-}
-
-
-#' @title General-Purpose Optimization With Error Handling
-#' @description A wrapper function of \code{stats::optim()} with error handling.
-#' @param silent if \code{TRUE}, no message is returned. Default to \code{TRUE}.
-#' @param ... extra arguments passed to \code{optim()}
-#' @return a list
-#' @export
-optim2 <- function(silent=TRUE,...){
-  mcall<-match.call()
-  tryCatch(
-    if(silent){
-     suppressWarnings(optim(...))
-    } else{
-      optim(...)
-    },
-           error = function(e){
-             if(!silent){
-               message("Optimization failed: \n", deparse(mcall))
-             }
-             list("par" = NA,
-                  "value" = NA,
-                  "counts" = c("function" = NA, "gradient" = NA),
-                  "convergence" = 1,
-                  "message" = "Model did not converge",
-                  "hessian" = NA)
-           })
 }
 
 

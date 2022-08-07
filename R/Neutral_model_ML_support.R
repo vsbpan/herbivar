@@ -586,21 +586,6 @@ fit_allo_herb<-function(data.vec,
     upper<-rep(upper[1],length(optim.vars))
   }
 
-  data.vec <- as.numeric(data.vec)
-  if(any(is.na(data.vec))){
-    message(sum(is.na(data.vec))," NA detected and removed from data")
-    data.vec <- data.vec[!is.na(data.vec)]
-  }
-
-  if(sum(data.vec)==0){
-    stop("Data does not contain non-zero herbivory values; model not identifiable.")
-  }
-
-  if(any(data.vec < 0) || any(data.vec > 1)){
-    stop("Data must be bounded between 0 and 1.")
-  }
-
-
   method <- method[1]
 
   if(!any(method%in%c("Nelder-Mead","BFGS",
@@ -623,32 +608,11 @@ fit_allo_herb<-function(data.vec,
     stop("Number of fitted parameters does not equal to the number of unknown parameters")
   }
 
-  # if(any(optim.vars%in%c("mean.phi.T","min.phi","max.phi"))){
-  #   message(paste(
-  #     paste0(
-  #       c("mean.phi.T","min.phi","max.phi")[
-  #         c("mean.phi.T","min.phi","max.phi")%in%optim.vars
-  #       ],
-  #       collapse = ", ")
-  #     ,"logit transformed in fitting",
-  #     sep=" ")) # Logit transform the proportions to let the parameter space be
-  #   # unbounded and easier to sample by optimizers
-  # }
+  param.val.trans <- lapply(param.val.trans, function(x){
+    match.fun(x)
+  })
 
   param.vals[(names(param.vals)%in%optim.vars)]<-NA # Fitted values set to NA
-
-  if(method=="L-BFGS-B"){
-    if(("max.phi"%in%optim.vars) &&
-       !is.na(param.vals["min.phi"]) &&
-       (plogis(lower[optim.vars=="max.phi"]) < param.vals["min.phi"])){
-      stop("Lower bound of max.phi needs to be higher than min.phi")
-    }
-    if(("min.phi"%in%optim.vars) &&
-       !is.na(param.vals["max.phi"]) &&
-       (plogis(upper[optim.vars=="min.phi"]) > param.vals["max.phi"])){
-      stop("Upper bound of min.phi needs to be higher than max.phi")
-    }
-  }
 
   if(method == "Brent" &&
      (optim.vars == "mean.phi.T")) {
@@ -660,6 +624,32 @@ fit_allo_herb<-function(data.vec,
     }
   }
 
+  min.phi <- param.vals["min.phi"]
+  max.phi <- param.vals["max.phi"]
+  lower.min.phi <- param.val.trans[["min.phi"]](lower[optim.vars == "min.phi"])
+  lower.max.phi <- param.val.trans[["max.phi"]](lower[optim.vars == "max.phi"])
+  upper.min.phi <- param.val.trans[["min.phi"]](upper[optim.vars == "min.phi"])
+
+  data.vec <- .herb_data_check(data.vec,
+                               min.phi = ifelse(is.na(min.phi),
+                                                lower.min.phi,
+                                                min.phi),
+                               allow.zero = TRUE)
+
+  if(method == "L-BFGS-B" || method == "Brent"){
+    if(("max.phi"%in%optim.vars) &&
+       !is.na(min.phi) &&
+       (lower.max.phi < min.phi)){
+      stop("Lower bound of max.phi needs to be higher than min.phi")
+    }
+    if(("min.phi"%in%optim.vars) &&
+       !is.na(max.phi) &&
+       (upper.min.phi > max.phi)){
+      stop("Upper bound of min.phi needs to be higher than max.phi")
+    }
+  }
+
+
   if(by > 0.01){
     warning("Approximation resolution too low; results are crappy")
   } else if((!is.na(param.vals["max.phi"]) && !is.na(param.vals["min.phi"])) &&
@@ -667,7 +657,7 @@ fit_allo_herb<-function(data.vec,
     stop("Approximation resolution too low; set 'by' to a lower number")
   }
 
-  if(cores>1){
+  if(cores > 1){
     parallel <- TRUE
     cluster <- makeCluster(cores)
     registerDoParallel(cluster)
@@ -678,48 +668,20 @@ fit_allo_herb<-function(data.vec,
 
   nll <- function(theta) {
     nll.out<-sum(dalloT(x = data.vec,
-                        mean.phi.T = ifelse(
-                          is.na(param.vals["mean.phi.T"]),
-                          vapply(X = eval(parse(
-                            text =
-                              paste0("(theta[",
-                                     which(optim.vars=="mean.phi.T"),"])"))),
-                            FUN = param.val.trans[["mean.phi.T"]],
-                            FUN.VALUE = numeric(1)),
-                          param.vals["mean.phi.T"]),
-                        min.phi = ifelse(
-                          is.na(param.vals["min.phi"]),
-                          vapply(X = eval(parse(
-                            text =
-                              paste0("(theta[",
-                                     which(optim.vars=="min.phi"),"])"))),
-                            FUN = param.val.trans[["min.phi"]],
-                            FUN.VALUE = numeric(1)),
-                          param.vals["min.phi"]),
-                        max.phi = ifelse(
-                          is.na(param.vals["max.phi"]),
-                          vapply(X = eval(parse(
-                            text =
-                              paste0("(theta[",
-                                     which(optim.vars=="max.phi"),"])"))),
-                            FUN = param.val.trans[["max.phi"]],
-                            FUN.VALUE = numeric(1)),
-                          param.vals["max.phi"]),
-                        a = ifelse(
-                          is.na(param.vals["a"]),
-                          vapply(X = eval(parse(
-                            text =
-                              paste0("(theta[",
-                                     which(optim.vars=="a"),"])"))),
-                            FUN = param.val.trans[["a"]],
-                            FUN.VALUE = numeric(1)),
-                          param.vals["a"]),
-                        k.max = 50,
+                        mean.phi.T = .choose_theta_val(param.vals, param.val.trans,
+                                                       optim.vars, "mean.phi.T"),
+                        min.phi = .choose_theta_val(param.vals, param.val.trans,
+                                                    optim.vars, "min.phi"),
+                        max.phi = .choose_theta_val(param.vals, param.val.trans,
+                                                    optim.vars, "max.phi"),
+                        a = .choose_theta_val(param.vals, param.val.trans,
+                                              optim.vars, "a"),
+                        k.max = k.max,
                         by = by,
                         k.max.tolerance = k.max.tolerance,
                         k.fft.limit = k.fft.limit,
                         log = TRUE,
-                        parallel = parallel)*-1)
+                        parallel = parallel))*-1
     return(nll.out)
   }
 

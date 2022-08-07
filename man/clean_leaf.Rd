@@ -54,5 +54,5 @@ A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixse
 get a binary-ized image of a leaf scan, removing background artifacts and eaten sections of the leaf.
 }
 \note{
-The code for the watershed method is adapted from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html}. accessed date 2022-07-25.
+The code for the watershed method is adapted from Simon Barthelme's vignette https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html. accessed date 2022-07-25.
 }

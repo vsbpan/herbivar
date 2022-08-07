@@ -33,6 +33,8 @@
 
 \item{ylim}{y plot limits (default: 1 to height)}
 
+\item{xlab}{x axis label}
+
 \item{ylab}{y axis label}
 
 \item{rescale}{rescale pixel values so that their range is \link{0,1}}
@@ -47,13 +49,15 @@
 
 \item{xaxs, yaxs}{The style of axis interval calculation to be used for the axes. See \code{?par}}
 
+\item{asp}{aspect ratio.}
+
 \item{col.na}{which colour to use for \code{NA} values, as R rgb code. The default is "rgb(0,0,0,0)", which corresponds to a fully transparent colour.}
 
 \item{...}{additional arguments passed to \code{plot.default()}}
 }
 \description{
-plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cim()} for more details.
+plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cimg()} for more details.
 }
 \note{
-The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
+The code for the function is obtained from Simon Barthelme's imager:::plot.singleton(). version 0.42.13.
 }

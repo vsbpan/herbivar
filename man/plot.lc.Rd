@@ -32,6 +32,9 @@
 
 \item{...}{extra arguments passed to \code{plot.default()}}
 }
+\value{
+\code{NULL}
+}
 \description{
 Plot Lorenz Curve for an object of class 'lc'. If available, uncertainty from the bootstrap simulation is also plotted either as 95\% confidence intervals or as a spaghetti plot.
 }
