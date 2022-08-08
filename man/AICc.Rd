@@ -4,17 +4,15 @@
 \alias{AICc}
 \title{Corrected Akaike's An Information Criterion (AICc)}
 \usage{
-AICc(object = NULL, logLik = NULL, k = 2)
+AICc(object, ..., k = 2)
 }
 \arguments{
 \item{object}{The object from which log likelihood can be extracted}
 
-\item{logLik}{An object of calss 'logLik'. Ignored if an object is supplied.}
-
 \item{k}{the penalty on model complexity. Default is 2.}
 }
 \value{
-A numeric value
+if just one object is provided, a numeric value of AICc is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AICc is returned.
 }
 \description{
 Calculate AICc taking into account small sample size bias

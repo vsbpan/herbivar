@@ -24,7 +24,7 @@
 \item{k}{an atomic numeric value for the penalty. Defaults to 2.}
 }
 \value{
-if just one object is provided, a numeric value of AIC or BIC is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AIC or BIC.
+if just one object is provided, a numeric value of AIC or BIC is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AIC or BIC is returned.
 }
 \description{
 calculate AIC or BIC for fitted model objects. see \code{stats::AIC()} for more details.

@@ -7,14 +7,22 @@
 \alias{qalloT}
 \title{Neutral Herbivory Distribution Based On Allometry Scaling Laws}
 \usage{
-ralloT(n, mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9)
-
-dalloT(
-  x,
-  mean.phi.T,
+ralloT(
+  n,
+  mean.phi.T = NULL,
   min.phi = 0.005,
   max.phi = 1,
   a = 14/9,
+  lambda = NULL
+)
+
+dalloT(
+  x,
+  mean.phi.T = NULL,
+  min.phi = 0.005,
+  max.phi = 1,
+  a = 14/9,
+  labmda = NULL,
   k.max = 50,
   by = 0.001,
   k.max.tolerance = 1e-05,
@@ -26,10 +34,11 @@ dalloT(
 
 palloT(
   q,
-  mean.phi.T,
+  mean.phi.T = NULL,
   min.phi = 0.005,
   max.phi = 1,
   a = 14/9,
+  lambda = NULL,
   by = 0.001,
   cores = 1,
   lower.tail = TRUE,
@@ -39,10 +48,11 @@ palloT(
 
 qalloT(
   p,
-  mean.phi.T,
+  mean.phi.T = NULL,
   min.phi = 0.005,
   max.phi = 1,
   a = 14/9,
+  lambda = NULL,
   n.sim = 1000,
   lower.tail = TRUE,
   log.p = FALSE
@@ -51,13 +61,15 @@ qalloT(
 \arguments{
 \item{n}{the number of observations to generate}
 
-\item{mean.phi.T}{The mean herbivory of the distribution when herbivores are not plant limited. See details.}
+\item{mean.phi.T}{The mean herbivory of the distribution when herbivores are not plant limited. If  \code{NULL}, supplied \code{lambda} value is converted to \code{mean.phi.T}. See details.}
 
 \item{min.phi}{the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5\%).}
 
 \item{max.phi}{the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100\%).}
 
 \item{a}{the combined allometry scaling coefficient. Defaults to 14/9.}
+
+\item{lambda}{An alternative parameterization of mean.phi.T. see \code{?get_lambda()}}
 
 \item{x, q}{a vector of values of proportion herbivory}
 
