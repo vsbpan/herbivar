@@ -18,7 +18,7 @@ adjust_prop(
 
 \item{nudge.method}{a character value indicating the method of getting rid of 0's and 1's. Valid options are "replace" (default), "smithson", "add", "subtract", and "drop". see details.}
 
-\item{nudge.size}{a numeric value of the size of a small nudge (\eqn{epsilon}). Valid character values can also be supplied to choose the method for estimating \eqn(epsilon). Valid methods are "macmillan" (default), "warton_min", and "warton_max". see details.}
+\item{nudge.size}{a numeric value of the size of a small nudge (\eqn{epsilon}). Valid character values can also be supplied to choose the method for estimating \eqn{epsilon}. Valid methods are "macmillan" (default), "warton_min", and "warton_max". see details.}
 
 \item{trans}{a character value indicating the transformation to be applied to the nudged data. Valid options are "identity" (default-- no transformation), "logit", "empirical_logit", "probit", and "log". See details.}
 
