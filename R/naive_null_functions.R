@@ -76,6 +76,8 @@ rhtlnorm<-function(n,theta,meanlog,sdlog,endpoint=1){
 #' \deqn{f(x) = (1 - p_1) (1 - p_0) \frac{x^{\alpha-1}(1-x)^{\beta-1}}{B(\alpha, \beta)}}
 #' @rdname zoibeta
 #' @return A vector of probability densities
+#' @references
+#' Ospina, R., and S. L. P. Ferrari. 2008. Inflated beta distributions. Statistical Papers 51:111.
 dzoibeta<-function(x,p0,p1,alpha,beta,log=FALSE){
   p <- ifelse(
     x == 0,
