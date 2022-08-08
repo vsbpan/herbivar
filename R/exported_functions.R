@@ -26,34 +26,6 @@ Gini<-function(x, ...) {
   DescTools::Gini(x, ...)
 }
 
-#' @export
-Lasym<-function(x, ...) {
-  if(any(x < 0)){
-    warning("Vector contains negative one or more values. Interpert with caution.")
-  }
-  ineq::Lasym(x, ...)
-}
-
-#' @export
-Atkinson<-function(...) {ineq::Atkinson(...)}
-
-#' @export
-Theil<-function(...) {ineq::Theil(...)}
-
-
-#' @export
-ineq<-function(...) {ineq::ineq(...)}
-
-
-#' @export
-Kolm<-function(...) {ineq::Kolm(...)}
-
-#' @export
-RS<-function(...) {ineq::RS(...)}
-
-#' @export
-entropy<-function(...) {ineq::entropy(...)}
-
 
 #' @export
 Skew<-function(...) {DescTools::Skew(...)}

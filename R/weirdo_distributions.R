@@ -1,6 +1,6 @@
 #' @title Continuous Bernoulli Distribution
 #' @description Density, distribution function, quantile function, and random generation for a one parameter continuous Bernoulli distribution
-#' @param x,q a vector of quantities defined for \eqn{0 \leq X \leq 1}
+#' @param x,q a vector of quantities defined for \eqn{0 < X < 1}
 #' @param n number of observations to generate
 #' @param lambda the shape parameter \eqn{0 < \lambda < 1}
 #' @param log,log.p a logical value indicating whether to log transform the probabilities. Default is \code{FALSE}.
@@ -8,7 +8,7 @@
 #' @param p a vector of probabilities
 #' @return a vector of numeric values
 #' @details
-#' The continuous Bernoulli distribution is a one parameter distribution (\eqn{\lambda \in (0,1)}) that has support \eqn{x \in [0,1]}.
+#' The continuous Bernoulli distribution is a one parameter distribution (\eqn{\lambda \in (0,1)}) that has support \eqn{x \in (0,1)}.
 #'
 #' The density function is defined as:
 #' \deqn{P(X = x) = C(\lambda) \lambda^x (1 - \lambda)^{1-x},}
@@ -23,6 +23,9 @@
 #' if \eqn{\lambda = \frac{1}{2}}, otherwise,
 #' \deqn{P(X \leq x) = \frac{\lambda^x (1-\lambda)^{1-x} + \lambda - 1}{2 \lambda - 1}.}
 #'
+#'
+#' @references
+#' Loaiza-Ganem, G., and J. P. Cunningham. 2019. The continuous Bernoulli: fixing a pervasive error in variational autoencoders. Page Advances in Neural Information Processing Systems. Curran Associates, Inc.
 #' @rdname cb
 #' @export
 dcb <- function(x, lambda, log = FALSE){
@@ -35,9 +38,10 @@ dcb <- function(x, lambda, log = FALSE){
     C <- 2*atanh(1-2*lambda)/(1-2*lambda)
   }
 
-  # x has support on the boundaries!!
+  p <- ifelse(x >= 1 | x <= 0,
+              0,
+              C * lambda^x*(1-lambda)^(1-x))
 
-  p <- C * lambda^x*(1-lambda)^(1-x)
   if(log){
     p <- log(p)
   }
@@ -50,11 +54,23 @@ pcb <- function(q, lambda, lower.tail = TRUE, log.p = FALSE){
   if(lambda >=1 || lambda <= 0){
     stop("lambda must be between 0 and 1, not inclusive.")
   }
+
   if(lambda == 0.5){
     p <- q
   } else {
     p <- (lambda^q * (1-lambda)^(1-q) + lambda - 1) / (2*lambda - 1)
   }
+
+  p <- ifelse(
+    q <= 0,
+    0,
+    ifelse(
+      q >= 1,
+      1,
+      p
+    )
+  )
+
   if(!lower.tail){
     p <- 1-p
   }
@@ -82,6 +98,11 @@ qcb <- function(p, lambda, lower.tail = TRUE, log.p = FALSE){
   } else {
     q <- log(p*(2*lambda - 1) + 1, base = lambda)
   }
+
+  q <- ifelse(p >= 1 | p <= 0,
+              NaN,
+              q)
+
   return(q)
 }
 

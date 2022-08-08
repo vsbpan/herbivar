@@ -16,7 +16,7 @@ qcb(p, lambda, lower.tail = TRUE, log.p = FALSE)
 rcb(n, lambda)
 }
 \arguments{
-\item{x, q}{a vector of quantities defined for \eqn{0 \leq X \leq 1}}
+\item{x, q}{a vector of quantities defined for \eqn{0 < X < 1}}
 
 \item{lambda}{the shape parameter \eqn{0 < \lambda < 1}}
 
@@ -35,7 +35,7 @@ a vector of numeric values
 Density, distribution function, quantile function, and random generation for a one parameter continuous Bernoulli distribution
 }
 \details{
-The continuous Bernoulli distribution is a one parameter distribution (\eqn{\lambda \in (0,1)}) that has support \eqn{x \in [0,1]}.
+The continuous Bernoulli distribution is a one parameter distribution (\eqn{\lambda \in (0,1)}) that has support \eqn{x \in (0,1)}.
 
 The density function is defined as:
 \deqn{P(X = x) = C(\lambda) \lambda^x (1 - \lambda)^{1-x},}
@@ -49,4 +49,7 @@ The cumulative density function is defined as
 \deqn{P(X \leq x) = x}
 if \eqn{\lambda = \frac{1}{2}}, otherwise,
 \deqn{P(X \leq x) = \frac{\lambda^x (1-\lambda)^{1-x} + \lambda - 1}{2 \lambda - 1}.}
+}
+\references{
+Loaiza-Ganem, G., and J. P. Cunningham. 2019. The continuous Bernoulli: fixing a pervasive error in variational autoencoders. Page Advances in Neural Information Processing Systems. Curran Associates, Inc.
 }

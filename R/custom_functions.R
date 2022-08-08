@@ -8,7 +8,7 @@ herbivar.version <- function(x){
 
 .onAttach <- function(...){
   heart <- ifelse(rbinom(1,1,0.1) == 1, " <3", "")
-  packageStartupMessage("herbivar version date: ",packageDate("herbivar"),"\n",
+  packageStartupMessage("herbivar version date: ",utils::packageDate("herbivar"),"\n",
                         "Package still in development; use with caution!",heart)
 }
 

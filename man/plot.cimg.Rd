@@ -20,7 +20,7 @@
   xaxs = "i",
   yaxs = "i",
   asp = 1,
-  col.na = rgb(0, 0, 0, 0),
+  col.na = grDevices::rgb(0, 0, 0, 0),
   ...
 )
 }
@@ -37,7 +37,7 @@
 
 \item{ylab}{y axis label}
 
-\item{rescale}{rescale pixel values so that their range is \link{0,1}}
+\item{rescale}{rescale pixel values so that their range is \eqn{[0,1]}}
 
 \item{colourscale, colorscale}{an optional colour scale (default is gray or rgb)}
 
@@ -47,7 +47,7 @@
 
 \item{main}{main title}
 
-\item{xaxs, yaxs}{The style of axis interval calculation to be used for the axes. See \code{?par}}
+\item{xaxs, yaxs}{The style of axis interval calculation to be used for the axes. See \code{?par()}}
 
 \item{asp}{aspect ratio.}
 
@@ -59,5 +59,5 @@
 plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cimg()} for more details.
 }
 \note{
-The code for the function is obtained from Simon Barthelme's imager:::plot.singleton(). version 0.42.13.
+The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
 }

@@ -1,34 +1,16 @@
 exportPattern("^[[:alpha:]]+")
-importFrom(grDevices,"png","dev.off","as.raster","rgb")
-importFrom(spatstat.geom,"plot.imlist","ppp")
-importFrom(spatstat.core, "clarkevans","hopskel","allstats","Lest","Kest",
-           "Gest","Jest","Fest","envelope.ppp", "clarkevans.test")
-importFrom(imager, "imeval","as.cimg","is.pixset","is.cimg","boundary","as.imlist", "save.image",
-           "map_il","spectrum","isoblur","imhessian","label","threshold", "load.image", "nPix",
+importFrom(imager, "imeval","as.cimg","is.pixset","is.cimg","boundary","as.imlist",
+           "map_il","isoblur","imhessian","label","threshold", "load.image", "nPix",
            "as.pixset","grayscale","enorm","imgradient","medianblur","watershed","colorise",
-           "frame", "depth", "height","width","channel")
-importFrom(stringr,"str_match")
-importFrom(graphics, "hist", "lines", "par", "rasterImage", "title", "axis", "plot.new",
-           "plot.window")
+           "depth", "height","width","channel")
 importFrom(stats, "density", "dnorm", "dpois", "ecdf", "fft",
                 "filter", "integrate", "ks.test", "median", "nlm", "nlminb",
                 "optim", "plogis", "quantile", "rpois", "runif", "sd",
                 "var", "BIC", "AIC", "logLik","dbeta","dlnorm","plnorm","qlnorm",
-                "rbeta","rbinom","pnorm","dist","kmeans")
-importFrom(utils, "packageDate","menu","combn","globalVariables")
+                "rbeta","rbinom","pnorm","dist","kmeans","qlogis","qnorm")
 importFrom(dplyr,"%>%","group_by","select","ungroup","summarise","mutate_if",
            "mutate","left_join","right_join","summarise_all","bind_rows","bind_cols")
-importFrom(ggplot2,"labs","geom_col","theme_bw","ggplot","geom_line","aes","geom_point")
-importFrom(DescTools,"Skew","Kurt","Gini")
-importFrom(ineq, "entropy","Kolm","Theil","Atkinson","RS", "ineq", "Lasym")
-importFrom(kSamples,"ad.test")
-importFrom(philentropy,"KL")
-importFrom(numDeriv,"hessian")
-importFrom(purrr,"map")
-importFrom(parallel,"makeCluster","stopCluster")
-importFrom(foreach,"%dopar%","foreach")
-importFrom(doParallel,"stopImplicitCluster","registerDoParallel")
-importFrom(ggpubr,"ggarrange")
+importFrom(foreach,"%dopar%")
 
 S3method("print", "allo_herb_fit")
 S3method("logLik", "allo_herb_fit")

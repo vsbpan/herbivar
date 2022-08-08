@@ -1,6 +1,6 @@
 #' @export
 fit_generic_null<- function(data.vec,
-                            family = c("htlnorm","zoibeta","cb"),
+                            family = c("htlnorm","zoibeta"),
                             init = 0,
                             lower = -Inf,
                             upper = Inf,
@@ -43,17 +43,7 @@ fit_generic_null<- function(data.vec,
                     log = TRUE))
 
     }
-  } else if(family == "cb"){
-    optim.vars <- c("lambda")
-    param.val.trans = c("lambda" = function(x) {plogis(x)})
-    nll <- function(theta){
-      -sum(dcb(x = data.vec,
-                    lambda = plogis(theta[1]),
-                    log = TRUE))
-
-    }
   }
-
 
   if(length(lower) != length(optim.vars) ){
     lower <- rep(lower, length(optim.vars))
@@ -257,6 +247,9 @@ fit_bite_size<-function(object,
                         min.phi = NA,
                         method = c("Nelder-Mead","BFGS"),
                         IC = "AICc"){
+
+  supported.families <- c("allo","allo_a","allo_M",
+                          "tlnorm","beta","kumar", "tpareto")
 
   if(inherits(object,"split_herb")){
     data.vec <- object$hole_prop

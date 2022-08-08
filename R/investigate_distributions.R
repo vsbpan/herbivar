@@ -178,6 +178,92 @@ q75 <- function(x, na.rm = FALSE){
   return(as.numeric(quantile(x,probs = 0.75)))
 }
 
+#' @title Lorenz Asymmetry Coefficient
+#' @description Calculate Lorenz Asymmetry Coefficient (also known as \eqn{S}) for a vector of data. The statistic identifies which quantile of \code{x} contribute most to the total inequality.
+#' @param x a vector of non-negative numeric values
+#' @param n a vector of frequencies the same length as \code{x}. If \code{NULL} (default), the frequencies are assumed to be 1 (as in a vector of untabulated raw data).
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @param interval a logical value indicating whether to return an interval when there are x values exactly equal to the mean. If \code{FALSE} (default), the midpoint is returned.
+#' @note Part of the code for this function is adapted from Achim Zeileis's \code{ineq::Lasym()} version 0.2-13.
+#' @return a single numeric value if \eqn{x_i \neq \hat\mu} for all values of \code{x} or if \code{interval = FALSE}. Otherwise, a vector of length two is returned.
+#' @details
+#' The Lorenz Asymmetry Coefficient \eqn{S} is a complementary statistic to the Gini coefficient that describes the Lorenz curve. Whereas the Gini coefficient is a measure of inequality, the asymmetry coefficient is is a measure of which half of the \code{x} quantile contribute most to the inequality. If \eqn{S = 1}, the Lorenz curve is symmetrical. If \eqn{S < 1}, the point where the Lorenz curve is parallel to the line of equality is below the axis of symmetry. This means that the lower half of the population contribute most to the inequality. If \eqn{S > 1}, the point where the Lorenz curve is parallelt to the line of equality is above the axis of symmetry. This means that the upper half of the population contribute most to the inequality. See example plot.
+#'
+#'
+#' For a vector of ordered non-negative value \eqn{(x_1, x_2, ..., x_m, x_{m+1}, ..., x_n)}, the sample Lorenz Asymmetry is defined as:
+#' \deqn{S = F(\hat\mu) + L(\hat\mu)}
+#'
+#' where
+#' \deqn{\delta = \frac{\hat\mu - x_m}{x_{m+1} - x_m},}
+#'
+#' \deqn{F(\hat\mu) = \frac{m + \delta}{n},}
+#'
+#' \deqn{L(\hat\mu) = \frac{L_m + \delta x_{m+1}}{L_m}.}
+#'
+#' \eqn{\hat\mu} is the mean of \eqn{x}, \eqn{n} is the sample size, \eqn{m} is the number of elements where \eqn{x_m < \hat\mu}, and \eqn{L_i = \sum_{j=1}^i x_j}.
+#'
+#'
+#' If one or more values of \eqn{x_i = \hat\mu}, the closed interval is calculated instead:
+#'
+#' \deqn{[ \frac{m}{n} + \frac{L_m}{L_n}, \frac{m + a}{n} + \frac{L_{m+a}}{L_n} ],}
+#' where \eqn{a} is the number of elements of the vector \eqn{x} that satisfies \eqn{x_i = \hat\mu}.
+#'
+#' @references
+#' Damgaard, C., and J. Weiner. 2000. Describing Inequality in Plant Size or Fecundity. Ecology 81:1139–1142.
+#'
+#' @examples
+#' x <- rbeta(1000,1,0.2)
+#' hist(x)
+#' plot(lorenz_curve(x))
+#' abline(a=1,b=-1) # Line of symmetry
+#' lac(x) # S = 0.48
+#'
+#' x2 <- rallo(1000,a=3)
+#' hist(x2)
+#' plot(lorenz_curve(x2))
+#' abline(a=1,b=-1) # Line of symmetry
+#' lac(x2) # S = 1.24
+
+#'
+#' @export
+lac <- function(x, n = NULL, interval = FALSE, na.rm = FALSE) {
+  if(!is.numeric(x)){
+    stop("x must be a numeric vector")
+  }
+  if(na.rm){
+    x <- x[!is.na(x)]
+  }
+  if(any(is.na(x)) || any(x < 0)){
+    return(NA_real_)
+  }
+  if(!is.null(n)){
+    x <- rep(x,n)
+  }
+  x <- sort(x)
+  mu <- mean(x)
+  xlow <- x < mu
+  xeq <- x == mu
+  m <- sum(xlow)
+  n <- length(x)
+  Lm <- sum(x[xlow])
+  Ln <- sum(x)
+
+
+  if (any(xeq)) {
+    a <- sum(xeq)
+    Lma <- sum(x[xlow | xeq])
+    s <- c(m/n + Lm/Ln, (m + a)/n + Lma/Ln)
+    if (!interval)
+      s <- mean(s) #hmmm
+  } else {
+    xm <- max(x[xlow])
+    xm1 <- min(x[!xlow])
+    delta <- (mu - xm)/(xm1 - xm)
+    s <- (m + delta)/n + (Lm + delta * xm1)/Ln
+  }
+  return(s)
+}
+
 
 #' @title Generate Summary Statistics For A Vector of Data
 #' @description Get values for a set of statistical probes.
@@ -195,7 +281,7 @@ q75 <- function(x, na.rm = FALSE){
 #' @export
 probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
                                            "max","min","median", "Skew",
-                                           "Kurt","q25","q75","N","Lasym"),
+                                           "Kurt","q25","q75","N","lac"),
                              na.rm = FALSE){
   if(na.rm){
     x <- x[!is.na(x)]
@@ -213,7 +299,7 @@ probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
 #' @export
 apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
                                              "max","min","median", "Skew",
-                                             "Kurt","q25","q75","N","Lasym"),
+                                             "Kurt","q25","q75","N","lac"),
                        trivial.rm = TRUE, na.rm = FALSE, add.id = TRUE){
   if(trivial.rm){
     data.list <- data.list[
@@ -270,7 +356,7 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
   if(any(type%in%"hist")){
     data.tally.list<-vector(mode="list",length=length(data.list))
     for (i in seq_along(data.list)){
-      data.tally.list[[i]]<-hist(data.list[[i]],
+      data.tally.list[[i]]<-graphics::hist(data.list[[i]],
                                  breaks = seq(0,1,by=by),
                                  plot = F)
       data.tally.list[[i]]<-data.frame(
@@ -280,27 +366,27 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
     }
     tally.data<-do.call("rbind",data.tally.list)
     g<-tally.data %>%
-      group_by(type) %>%
-      mutate(y=y/sum(y)) %>%
-      ggplot(aes(x=x,y=(y)^0.1,group=type))+
-      geom_col(aes(fill=type,color=NULL),alpha=0.5,position = "dodge")+
-      geom_line(stat="smooth",aes(color=type),size=1)+
-      labs(y="Pr(Prop. herbivory)^0.1",
+      dplyr::group_by(type) %>%
+      dplyr::mutate(y=y/sum(y)) %>%
+      ggplot2::ggplot(ggplot2::aes(x=x,y=(y)^0.1,group=type))+
+      ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge")+
+      ggplot2::geom_line(stat="smooth",ggplot2::aes(color=type),size=1)+
+      ggplot2::labs(y="Pr(Prop. herbivory)^0.1",
            x="Prop. herbivory",
            color="Data",
            fill="Data")+
-      theme_bw(base_size=15)
+      ggplot2::theme_bw(base_size=15)
     g2<-tally.data %>%
-      group_by(type) %>%
-      mutate(y=y/sum(y)) %>%
-      ggplot(aes(x=x,y=(y),group=type))+
-      geom_col(aes(fill=type,color=NULL),alpha=0.5,position = "dodge")+
-      labs(y="Pr(Prop. herbivory)",
+      dplyr::group_by(type) %>%
+      dplyr::mutate(y=y/sum(y)) %>%
+      ggplot2::ggplot(ggplot2::aes(x=x,y=(y),group=type))+
+      ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge")+
+      ggplot2::labs(y="Pr(Prop. herbivory)",
            x="Prop. herbivory",
            color="Data",
            fill="Data")+
-      theme_bw(base_size=15)
-    return(ggarrange(g,g2,common.legend = T,legend = "top"))
+      ggplot2::theme_bw(base_size=15)
+    return(ggpubr::ggarrange(g,g2,common.legend = T,legend = "top"))
   }
 }
 
@@ -570,19 +656,22 @@ plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
     ndraws <- ifelse(spaghetti < nboot, spaghetti, nboot)
 
     for (i in seq_len(ndraws)){
-      lines(x$boot_array[,"p",i],x$boot_array[,"L",i], col = "grey")
+      graphics::lines(x$boot_array[,"p",i],x$boot_array[,"L",i], col = "grey")
     }
-    lines(x = x$lc$p, y = x$lc$L, col = lc.col,lwd = lc.lwd)
+    graphics::lines(x = x$lc$p, y = x$lc$L, col = lc.col,lwd = lc.lwd)
   } else {
     if(!is.null(x$lc_boot_summary)){
-      lines(x = x$lc_boot_summary$p, y = x$lc_boot_summary$L.mean + x$lc_boot_summary$L.se * 1.96,
+      graphics::lines(x = x$lc_boot_summary$p,
+                      y = x$lc_boot_summary$L.mean + x$lc_boot_summary$L.se * 1.96,
             col = "grey", lty = "dashed", lwd = lc.lwd)
-      lines(x = x$lc_boot_summary$p, y = x$lc_boot_summary$L.mean - x$lc_boot_summary$L.se * 1.96,
+      graphics::lines(x = x$lc_boot_summary$p,
+                      y = x$lc_boot_summary$L.mean - x$lc_boot_summary$L.se * 1.96,
             col = "grey", lty = "dashed", lwd = lc.lwd)
-      lines(x = x$lc_boot_summary$p, y = x$lc_boot_summary$L.mean,
+      graphics::lines(x = x$lc_boot_summary$p,
+                      y = x$lc_boot_summary$L.mean,
             col = lc.col,lwd = lc.lwd)
     } else {
-      lines(x = x$lc$p, y = x$lc$L, col = lc.col,lwd = lc.lwd)
+      graphics::lines(x = x$lc$p, y = x$lc$L, col = lc.col,lwd = lc.lwd)
     }
   }
 }

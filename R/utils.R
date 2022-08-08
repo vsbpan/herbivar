@@ -66,17 +66,6 @@ combine.data.lists<-function(data.list,data.list2){
 }
 
 
-.choose_theta_val <- function(param.vals,param.val.trans,optim.vars,theta.name){
-  ifelse(
-    is.na(param.vals[theta.name]),
-    param.val.trans[[theta.name]](eval(parse(
-      text =
-        paste0("theta[",
-               which(optim.vars==theta.name),"]")))),
-    param.vals[theta.name])
-}
-
-
 #' @title General-Purpose Optimization With Error Handling
 #' @description A wrapper function of \code{stats::optim()} with error handling.
 #' @param silent if \code{TRUE}, no message is returned. Default to \code{TRUE}.

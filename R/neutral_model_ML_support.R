@@ -8,8 +8,20 @@
 #' @param a the combined allometry scaling coefficient. Defaults to 14/9.
 #' @param log,log.p logical; if \code{TRUE}, probabilities p are given as \eqn{\log(p)}.
 #' @param lower.tail logical; if \code{TRUE} (default), probabilities are \eqn{P(X \leq x)} otherwise, \eqn{P(X > x)}
-#' @details The neutral 'bite size' distribution has density function \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha}} where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometry scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
+#' @details
+#' The neutral 'bite size' distribution has density function \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometry scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
+#'
+#' The cumulative density function is
+#' \deqn{P(\phi \leq q) = \frac{q^{1-\alpha} - \phi_m^{1-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}}
+#'
 #' @return a vector of numeric values
+#' @references
+#' Hutchinson, G. E., and R. H. MacArthur. 1959. A Theoretical Ecological Model of Size Distributions Among Species of Animals. The American Naturalist 93:117–125.
+#'
+#' Kleiber, M. 1932. Body size and metabolism. Hilgardia 6:315–353.
+#'
+#' May, R. M. 1978. The dynamics and diversity of insect faunas. Page in L. A. Mound and N. Waloff, editors. Diversity of insect faunas. Published for the Royal Entomological Society by Blackwell Scientific Publications; Distributed by Halsted Press, Oxford England; New York.
+#'
 #' @rdname allo
 #' @export
 dallo<-function(x,min.phi=0.005,max.phi=1,a=14/9,log = FALSE){
@@ -36,9 +48,15 @@ rallo<-function(n,min.phi=0.005,max.phi=1,a=14/9){
 
 #' @rdname allo
 #' @export
-pallo<- function(q, min.phi = 0.005, max.phi = 1, a = 14/9,
+pallo <- function(q, min.phi = 0.005, max.phi = 1, a = 14/9,
                  lower.tail = TRUE, log.p = FALSE){
-  p <- (q - min.phi^(1-a))^(1/(1-a))/(max.phi^(1-a)-min.phi^(1-a))
+  p <- ifelse(q > 1,
+              1,
+              ifelse(q < min.phi,
+              0,
+              (q^(1-a) - min.phi^(1-a)) / (max.phi^(1-a) - min.phi^(1-a))
+              )
+              )
   if(!lower.tail){
    p <- 1-p
   }
@@ -59,7 +77,10 @@ qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
   if(!lower.tail){
     p <- 1 - p
   }
-  q <- (p*(max.phi^(1-a)-min.phi^(1-a))+min.phi^(1-a))^(1/(1-a))
+  q <- ifelse(p > 1 | p < 0,
+              NaN,
+              (p*(max.phi^(1-a)-min.phi^(1-a))+min.phi^(1-a))^(1/(1-a)))
+
   return(q)
 }
 
@@ -175,7 +196,7 @@ ralloT<-function(n, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 
 #' @rdname alloT
 #' @export
-dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, labmda = NULL,
+dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, lambda = NULL,
                  k.max = 50, by = 0.001, k.max.tolerance = 1e-5,
                  k.fft.limit = 100, log = FALSE, parallel = FALSE, cores = 1){
   if(is.null(mean.phi.T)){
@@ -191,7 +212,7 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
   if(cores>1){
     parallel <- TRUE
     cluster <- makeCluster(cores)
-    registerDoParallel(cluster)
+    doParallel::registerDoParallel(cluster)
 
   } else {
     parallel <- FALSE
@@ -263,7 +284,7 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
   on.exit(
     try({
       if(!is.null(cluster)){
-        stopImplicitCluster()
+        doParallel::stopImplicitCluster()
         stopCluster(cluster)
       }
     })
@@ -273,7 +294,7 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' @rdname alloT
 #' @export
 palloT<-function(q, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, lambda = NULL,
-                 by = 0.001, cores = 1, lower.tail = TRUE, log.p = FALSE, ...){
+                 by = 0.01, cores = 1, lower.tail = TRUE, log.p = FALSE, ...){
   if(is.null(mean.phi.T)){
     if(is.null(lambda)){
       stop("Either 'lambda' or 'mean.phi.T must be specified'.")
@@ -299,9 +320,9 @@ palloT<-function(q, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
   if(cores>1){
     parallel <- TRUE
     cluster <- makeCluster(cores)
-    registerDoParallel(cluster)
+    doParallel::registerDoParallel(cluster)
 
-    p <- foreach(i = q, .combine = "c", .packages = c("herbivar")) %dopar% {
+    p <- foreach::foreach(i = q, .combine = "c", .packages = c("herbivar")) %dopar% {
       upper <- i
       upper<-ifelse(upper<0,0,upper)
       foo<-integrate(
@@ -320,7 +341,7 @@ palloT<-function(q, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     }
     on.exit(
       try({
-        stopImplicitCluster()
+        doParallel::stopImplicitCluster()
         stopCluster(cluster)
       })
     )
@@ -383,7 +404,11 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
                                   max.phi = max.phi,
                                   a = a,
                                   truncate = TRUE)
-  q <- quantile(phi.T, probs = p, names = FALSE)
+  q <- ifelse(
+    p > 1 | p < 0,
+    NaN,
+    quantile(phi.T, probs = p, names = FALSE)
+  )
   return(q)
 }
 
@@ -428,7 +453,7 @@ convolve.dist <- function(k, fft.vec, parallel = FALSE){
   fft.vec.length<-length(fft.vec)
   if(parallel &&
      (50000 < fft.vec.length)){ # Only long fft.vec benefits from parallel
-    cond.prob.mat<-foreach(i=k, .combine = cbind) %dopar%{
+    cond.prob.mat <- foreach::foreach(i=k, .combine = cbind) %dopar%{
       (Re(fft(fft.vec^i,inverse = T))/fft.vec.length)
     }
   } else {
@@ -643,15 +668,16 @@ fit_allo_herb<-function(data.vec,
   if(length(init)!=length(optim.vars)){
     stop("Initial values length not equal to number of fitted parameters")
   }
-  if(length(optim.vars)!=sum(is.na(param.vals))){
-    stop("Number of fitted parameters does not equal to the number of unknown parameters")
-  }
 
   param.val.trans <- lapply(param.val.trans, function(x){
     match.fun(x)
   })
 
   param.vals[(names(param.vals)%in%optim.vars)]<-NA # Fitted values set to NA
+
+  if(length(optim.vars)!=sum(is.na(param.vals))){
+    stop("Number of fitted parameters does not equal to the number of unknown parameters")
+  }
 
   if(method == "Brent" &&
      (optim.vars == "mean.phi.T")) {
@@ -699,7 +725,7 @@ fit_allo_herb<-function(data.vec,
   if(cores > 1){
     parallel <- TRUE
     cluster <- makeCluster(cores)
-    registerDoParallel(cluster)
+    doParallel::registerDoParallel(cluster)
 
   } else {
     parallel <- FALSE
@@ -707,14 +733,34 @@ fit_allo_herb<-function(data.vec,
 
   nll <- function(theta) {
     nll.out<-sum(dalloT(x = data.vec,
-                        mean.phi.T = .choose_theta_val(param.vals, param.val.trans,
-                                                       optim.vars, "mean.phi.T"),
-                        min.phi = .choose_theta_val(param.vals, param.val.trans,
-                                                    optim.vars, "min.phi"),
-                        max.phi = .choose_theta_val(param.vals, param.val.trans,
-                                                    optim.vars, "max.phi"),
-                        a = .choose_theta_val(param.vals, param.val.trans,
-                                              optim.vars, "a"),
+                        mean.phi.T = ifelse(
+                          is.na(param.vals["mean.phi.T"]),
+                          param.val.trans[["mean.phi.T"]](eval(parse(
+                            text =
+                              paste0("theta[",
+                                     which(optim.vars=="mean.phi.T"),"]")))),
+                          param.vals["mean.phi.T"]),
+                        min.phi = ifelse(
+                          is.na(param.vals["min.phi"]),
+                          param.val.trans[["min.phi"]](eval(parse(
+                            text =
+                              paste0("theta[",
+                                     which(optim.vars=="min.phi"),"]")))),
+                          param.vals["min.phi"]),
+                        max.phi = ifelse(
+                          is.na(param.vals["max.phi"]),
+                          param.val.trans[["max.phi"]](eval(parse(
+                            text =
+                              paste0("theta[",
+                                     which(optim.vars=="max.phi"),"]")))),
+                          param.vals["max.phi"]),
+                        a = ifelse(
+                          is.na(param.vals["a"]),
+                          param.val.trans[["a"]](eval(parse(
+                            text =
+                              paste0("theta[",
+                                     which(optim.vars=="a"),"]")))),
+                          param.vals["a"]),
                         k.max = k.max,
                         by = by,
                         k.max.tolerance = k.max.tolerance,
@@ -800,7 +846,7 @@ fit_allo_herb<-function(data.vec,
   on.exit(
     try({
       if(!is.null(cluster)){
-        stopImplicitCluster()
+        doParallel::stopImplicitCluster()
         stopCluster(cluster)
       }
     })
@@ -882,7 +928,7 @@ logLik.allo_herb_fit <- function(object, ...){
 #' @title Akaike's An Information Criterion
 #' @description calculate AIC or BIC for fitted model objects. see \code{stats::AIC()} for more details.
 #' @param object a fitted model object for which there exist a \code{logLik} method to extract the log-likelihood, or an object of class 'logLik'.
-#' @param ... additional arguments passed to \code{stats::AIC()} or \code{stats::BIC()} for additoal fitted model objects.
+#' @param ... additional arguments passed to \code{stats::AIC()} or \code{stats::BIC()} for additional fitted model objects.
 #' @param k an atomic numeric value for the penalty. Defaults to 2.
 #' @return if just one object is provided, a numeric value of AIC or BIC is returned. If multiple objects are provided, a data.frame with rows corresponding to the objects and columns representing the number of parameters in the model and the AIC or BIC is returned.
 #' @rdname AIC
@@ -911,6 +957,7 @@ AIC.allo_herb_fit <- function(object, ..., k = 2){
 #' @title Corrected Akaike's An Information Criterion (AICc)
 #' @description Calculate AICc taking into account small sample size bias
 #' @param object The object from which log likelihood can be extracted
+#' @param ... additional fitted model objects.
 #' @param k the penalty on model complexity. Default is 2.
 #' @details
 #' The formulat for AICc is given by:

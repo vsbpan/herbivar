@@ -252,24 +252,24 @@ clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
   ws <- medianblur(ws,blur.size)
 
   if(!is.na(save.plot.path)){
-    par.default <- par("mfrow","mar")
+    par.default <- graphics::par("mfrow","mar")
     if(save.plot.size == "original"){
       save.plot.size <- c(nrow(object)*2, ncol(object))
     }
-    png(save.plot.path,width = save.plot.size[1],
+    grDevices::png(save.plot.path,width = save.plot.size[1],
         height = save.plot.size[2])
-    par(mfrow=c(1,2),mar=c(4,2,0.5,0.5))
+    graphics::par(mfrow=c(1,2),mar=c(4,2,0.5,0.5))
     plot(object)
     plot(ws)
-    dev.off()
-    par(par.default)
+    grDevices::dev.off()
+    graphics::par(par.default)
   }
   if(plot){
-    par.default <- par("mfrow","mar")
-    par(mfrow=c(1,2),mar=c(4,2,0.5,0.5))
+    par.default <- graphics::par("mfrow","mar")
+    graphics::par(mfrow=c(1,2),mar=c(4,2,0.5,0.5))
     plot(object)
     plot(ws)
-    par(par.default)
+    graphics::par(par.default)
   }
   if(return.cimg){
     ws <- as.cimg(ws)
@@ -314,7 +314,7 @@ crop_leaf <- function(object, as.mat = FALSE, invalid = NA, rgb.index = 3L, px.s
   if(as.mat){
     out <- object[,,,rgb.index]
   } else {
-    if(spectrum(object) > 1){
+    if(imager::spectrum(object) > 1){
       out<-grayscale(object)
     } else {
       out <- object
@@ -718,7 +718,7 @@ analyze_holes <- function(object, min_prop = 10^-4, plot = FALSE,
 
   if(plot && n_holes > 20){
     plot <- ifelse(
-      menu(c("Yes","No"),
+      utils::menu(c("Yes","No"),
            title = paste0(n_holes,
                           " holes detected; plot will be slow! Proceed with plot?")) == 1,
       TRUE,
@@ -803,7 +803,7 @@ plot.split_herb <- function(x, prompt = TRUE, ...){
 
   if(x$n_holes > 20 && prompt){
     plot <- ifelse(
-      menu(c("Yes","No"),
+      utils::menu(c("Yes","No"),
            title = paste0(x$n_holes,
                           " holes detected; plot will be slow! Proceed with plot?")) == 1,
       TRUE,
@@ -902,7 +902,7 @@ pair_dist<-function(object){
     }
   }
   cen.dist<- dist(object)
-  out <- data.frame(t(combn(attr(cen.dist,"Size"),2)),as.vector(cen.dist))
+  out <- data.frame(t(utils::combn(attr(cen.dist,"Size"),2)),as.vector(cen.dist))
   names(out) <- c("cent1","cent2","dist")
   return(out)
 }
@@ -1170,23 +1170,23 @@ plot.singleton <- function (x, ...){
 #' @param ylim y plot limits (default: 1 to height)
 #' @param xlab x axis label
 #' @param ylab y axis label
-#' @param rescale rescale pixel values so that their range is [0,1]
+#' @param rescale rescale pixel values so that their range is \eqn{[0,1]}
 #' @param colourscale,colorscale an optional colour scale (default is gray or rgb)
 #' @param interpolate should the image be plotted with antialiasing (default \code{TRUE})
 #' @param axes whether to draw axes (default \code{TRUE})
 #' @param main main title
-#' @param xaxs,yaxs The style of axis interval calculation to be used for the axes. See \code{?par}
+#' @param xaxs,yaxs The style of axis interval calculation to be used for the axes. See \code{?par()}
 #' @param col.na which colour to use for \code{NA} values, as R rgb code. The default is "rgb(0,0,0,0)", which corresponds to a fully transparent colour.
 #' @param asp aspect ratio.
 #' @param ... additional arguments passed to \code{plot.default()}
 #' @return NULL
-#' @note The code for the function is obtained from Simon Barthelme's imager:::plot.singleton(). version 0.42.13.
+#' @note The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
 #' @export
 plot.cimg <- function(x, frame, xlim = c(1, width(x)),
                       ylim = c(height(x), 1), xlab = "x", ylab = "y",
                       rescale = TRUE, colourscale = NULL,
                       colorscale = NULL, interpolate = TRUE, axes = TRUE, main = "",
-                      xaxs = "i", yaxs = "i", asp = 1, col.na = rgb(0, 0, 0, 0),
+                      xaxs = "i", yaxs = "i", asp = 1, col.na = grDevices::rgb(0, 0, 0, 0),
                       ...) {
   v <- unique(c(x))
   if(length(v[!is.na(v)]) < 2){
@@ -1201,7 +1201,7 @@ plot.cimg <- function(x, frame, xlim = c(1, width(x)),
       warning("Showing first frame")
       frame <- 1
     }
-    im <- frame(x, frame)
+    im <- imager::frame(x, frame)
   }
   if (1 %in% dim(im)[1:2]) {
     plot.singleton(im, ...)
@@ -1211,22 +1211,22 @@ plot.cimg <- function(x, frame, xlim = c(1, width(x)),
       plot(1, 1, xlim = xlim, ylim = ylim, xlab = xlab,
            ylab = ylab, type = "n", xaxs = xaxs, yaxs = yaxs,
            axes = axes, ...)
-      as.raster(im, rescale = rescale, colorscale = colorscale,
+      grDevices::as.raster(im, rescale = rescale, colorscale = colorscale,
                 colourscale = colourscale, col.na = col.na) %>%
-        rasterImage(1, height(im), width(im), 1, interpolate = interpolate)
-      title(main)
+        graphics::rasterImage(1, height(im), width(im), 1, interpolate = interpolate)
+      graphics::title(main)
     }
     else if (is.numeric(asp)) {
-      plot.new()
-      plot.window(xlim = xlim, ylim = ylim, asp = asp,
+      graphics::plot.new()
+      graphics::plot.window(xlim = xlim, ylim = ylim, asp = asp,
                   xaxs = xaxs, yaxs = yaxs, ...)
-      rst <- as.raster(im, rescale = rescale, colorscale = colorscale,
+      rst <- grDevices::as.raster(im, rescale = rescale, colorscale = colorscale,
                        colourscale = colourscale, col.na = col.na)
-      rasterImage(rst, 1, nrow(rst), ncol(rst), 1, interpolate = interpolate)
-      title(main)
+      graphics::rasterImage(rst, 1, nrow(rst), ncol(rst), 1, interpolate = interpolate)
+      graphics::title(main)
       if (axes) {
-        axis(1)
-        axis(2)
+        graphics::axis(1)
+        graphics::axis(2)
       }
     }
     else {
