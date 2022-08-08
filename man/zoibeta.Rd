@@ -26,7 +26,7 @@ rzoibeta(n, p0, p1, alpha, beta)
 A vector of probability densities
 }
 \description{
-Density function of a four parameter zero-one-inflated beta distribution. The beta distribution does not have defined probabilities at 0 or 1 so this extension takes care of that.
+Density function and random number generation of a four parameter zero-one-inflated beta distribution. The beta distribution does not have defined probabilities at 0 or 1 so this extension takes care of that.
 }
 \details{
 The density function is defined as:

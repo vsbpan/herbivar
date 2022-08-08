@@ -12,12 +12,21 @@
 #'
 #' @references
 #' Kubinec, R. 2022. Ordered Beta Regression: A Parsimonious, Well-Fitting Model for Continuous Data with Lower and Upper Bounds. Political Analysis:1–18.
+#'
 #' Macmillan, N. A., and C. D. Creelman. 2004. Detection Theory: A User’s Guide. Second edition. Psychology Press, New York.
+#'
 #' Smithson, M., and J. Verkuilen. 2006. A better lemon squeezer? Maximum-likelihood regression with beta-distributed dependent variables. Psychological Methods 11:54–71.
+#'
 #' Warton, D. I., and F. K. C. Hui. 2011. The arcsine is asinine: the analysis of proportions in ecology. Ecology 92:3–10.
 #' @export
 #'
 #' @examples
+#' x <- c(0,runif(0,0,1),NA,1,1,1)
+#' adjust_prop(x, nudge.method = "replace", nudge.size = 0.01)
+#'
+#' adjust_prop(x, nudge.method = "replace", nudge.size = "macmillan", trans = "logit")
+#'
+#'
 adjust_prop <- function(x,
                      nudge.method = c("replace","smithson", "add", "subtract", "drop"),
                      nudge.size = c("macmillan", "warton_min", "warton_max"),
@@ -159,4 +168,112 @@ adjust_prop <- function(x,
                        )
   return(x.trans)
 }
+
+
+
+
+#' @title Continuous Bernoulli Distribution
+#' @description Density, distribution function, quantile function, and random generation for a one parameter continuous Bernoulli distribution
+#' @param x,q a vector of quantities defined for \eqn{0 \leq X \leq 1}
+#' @param n number of observations to generate
+#' @param lambda the shape parameter \eqn{0 < \lambda < 1}
+#' @param log,log.p a logical value indicating whether to log transform the probabilities. Default is \code{FALSE}.
+#' @param lower.tail logical; if \code{TRUE} (default), probabilities are \eqn{P(X \leq x)} otherwise, \eqn{P(X > x)}
+#' @param p a vector of probabilities
+#' @return a vector of numeric values
+#' @details
+#' The continuous Bernoulli distribution is a one parameter distribution (\eqn{\lambda \in (0,1)}) that has support \eqn{x \in [0,1]}.
+#'
+#' The density function is defined as:
+#' \deqn{P(X = x) = C(\lambda) \lambda^x (1 - \lambda)^{1-x},}
+#'
+#' where \eqn{C(\lambda)} is defined as
+#' \deqn{C(\lambda) = 2}
+#' if \eqn{\lambda = \frac{1}{2}}, otherwise,
+#' \deqn{C(\lambda) = \frac{2 \tanh^{-1}(1-2\lambda)}{1-2\lambda}.}
+#'
+#' The cumulative density function is defined as
+#' \deqn{P(X \leq x) = x}
+#' if \eqn{\lambda = \frac{1}{2}}, otherwise,
+#' \deqn{P(X \leq x) = \frac{\lambda^x (1-\lambda)^{1-x} + \lambda - 1}{2 \lambda - 1}.}
+#'
+#' @rdname cb
+#' @export
+dcb <- function(x, lambda, log = FALSE){
+  if(lambda >=1 || lambda <= 0){
+    stop("lambda must be between 0 and 1, not inclusive.")
+  }
+  if(lambda == 0.5){
+    C <- 2
+  } else {
+    C <- 2*atanh(1-2*lambda)/(1-2*lambda)
+  }
+
+  # x has support on the boundaries!!
+
+  p <- C * lambda^x*(1-lambda)^(1-x)
+  if(log){
+    p <- log(p)
+  }
+  return(p)
+}
+
+#' @rdname cb
+#' @export
+pcb <- function(q, lambda, lower.tail = TRUE, log.p = FALSE){
+  if(lambda >=1 || lambda <= 0){
+    stop("lambda must be between 0 and 1, not inclusive.")
+  }
+  if(lambda == 0.5){
+    p <- q
+  } else {
+    p <- (lambda^q * (1-lambda)^(1-q) + lambda - 1) / (2*lambda - 1)
+  }
+  if(!lower.tail){
+    p <- 1-p
+  }
+
+  if(log.p){
+    p <- log(p)
+  }
+  return(p)
+}
+
+#' @rdname cb
+#' @export
+qcb <- function(p, lambda, lower.tail = TRUE, log.p = FALSE){
+  if(lambda >=1 || lambda <= 0){
+    stop("lambda must be between 0 and 1, not inclusive.")
+  }
+  if(log.p){
+    p <- exp(p)
+  }
+  if(!lower.tail){
+    p <- 1 - p
+  }
+  if(lambda == 0.5){
+    q <- p
+  } else {
+    q <- log(p*(2*lambda - 1) + 1, base = lambda)
+  }
+  return(q)
+}
+
+#' @rdname cb
+#' @export
+rcb <- function(n, lambda){
+  if(lambda >=1 || lambda <= 0){
+    stop("lambda must be between 0 and 1, not inclusive.")
+  }
+  x <- qcb(p = runif(n,0,1), lambda = lambda, lower.tail = TRUE, log.p = FALSE)
+  return(x)
+}
+
+#' @title Ordered Beta Distribution ??
+#'
+
+
+
+
+
 

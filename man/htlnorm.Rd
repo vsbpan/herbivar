@@ -26,7 +26,7 @@ rhtlnorm(n, theta, meanlog, sdlog, endpoint = 1)
 A vector of probability densities
 }
 \description{
-Density function of a three parameter truncated log-normal hurdle distribution. The log-normal distribution does not normally have support at zero and has an upper bound at positive infinity. Setting up the distribution as a hurdle model takes care of zeros in data. The truncation sets the upper bound to 1 or any arbitrary user defined value.
+Density function and random number generation of a three parameter truncated log-normal hurdle distribution. The log-normal distribution does not normally have support at zero and has an upper bound at positive infinity. Setting up the distribution as a hurdle model takes care of zeros in data. The truncation sets the upper bound to 1 or any arbitrary user defined value.
 }
 \details{
 The density function is defined as:

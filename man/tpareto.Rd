@@ -26,7 +26,7 @@ rtpareto(n, a, b, endpoint = 1)
 a vector of numeric values
 }
 \description{
-Find density of truncated Pareto distribution
+Density function and random number generation of a three parameter truncated Pareto distribution
 }
 \details{
 The density function is defined as:

@@ -32,9 +32,20 @@ a vector of numeric value with the same length as \code{x}
 \description{
 Adjusts proportion data to get rid of 0's and 1's, and optionally transforms the resulting adjusted proportion.
 }
+\examples{
+x <- c(0,runif(0,0,1),NA,1,1,1)
+adjust_prop(x, nudge.method = "replace", nudge.size = 0.01)
+
+adjust_prop(x, nudge.method = "replace", nudge.size = "macmillan", trans = "logit")
+
+
+}
 \references{
 Kubinec, R. 2022. Ordered Beta Regression: A Parsimonious, Well-Fitting Model for Continuous Data with Lower and Upper Bounds. Political Analysis:1–18.
+
 Macmillan, N. A., and C. D. Creelman. 2004. Detection Theory: A User’s Guide. Second edition. Psychology Press, New York.
+
 Smithson, M., and J. Verkuilen. 2006. A better lemon squeezer? Maximum-likelihood regression with beta-distributed dependent variables. Psychological Methods 11:54–71.
+
 Warton, D. I., and F. K. C. Hui. 2011. The arcsine is asinine: the analysis of proportions in ecology. Ecology 92:3–10.
 }

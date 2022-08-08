@@ -1,5 +1,5 @@
 #' @title Truncated Log-Normal Hurdle Distribution
-#' @description Density function of a three parameter truncated log-normal hurdle distribution. The log-normal distribution does not normally have support at zero and has an upper bound at positive infinity. Setting up the distribution as a hurdle model takes care of zeros in data. The truncation sets the upper bound to 1 or any arbitrary user defined value.
+#' @description Density function and random number generation of a three parameter truncated log-normal hurdle distribution. The log-normal distribution does not normally have support at zero and has an upper bound at positive infinity. Setting up the distribution as a hurdle model takes care of zeros in data. The truncation sets the upper bound to 1 or any arbitrary user defined value.
 #' @param x A vector of numeric values
 #' @param n integer value indicating the number of observations to generate
 #' @param theta A numeric value between zero and one (inclusive) that defines the probability of non-zero values
@@ -58,7 +58,7 @@ rhtlnorm<-function(n,theta,meanlog,sdlog,endpoint=1){
 
 
 #' @title Zero-One-Inflated Beta Distribution
-#' @description Density function of a four parameter zero-one-inflated beta distribution. The beta distribution does not have defined probabilities at 0 or 1 so this extension takes care of that.
+#' @description Density function and random number generation of a four parameter zero-one-inflated beta distribution. The beta distribution does not have defined probabilities at 0 or 1 so this extension takes care of that.
 #' @param x A vector of numeric values
 #' @param n number of observations to generate
 #' @param p0 The probability that \eqn{x = 0}. Must be between 0 and 1
@@ -319,7 +319,7 @@ coef.generic_null_fit<-function(object, ..., backtransform = T){
 
 
 #' @title Truncated Pareto Distribution
-#' @description Find density of truncated Pareto distribution
+#' @description Density function and random number generation of a three parameter truncated Pareto distribution
 #' @param x a vector of quantities
 #' @param n integer value indicating the number of observations to generate
 #' @param a the exponent of the Pareto distribution
