@@ -1,119 +1,6 @@
-#' @title Truncated Log-Normal Hurdle Distribution
-#' @description Density function and random number generation of a three parameter truncated log-normal hurdle distribution. The log-normal distribution does not normally have support at zero and has an upper bound at positive infinity. Setting up the distribution as a hurdle model takes care of zeros in data. The truncation sets the upper bound to 1 or any arbitrary user defined value.
-#' @param x A vector of numeric values
-#' @param n integer value indicating the number of observations to generate
-#' @param theta A numeric value between zero and one (inclusive) that defines the probability of non-zero values
-#' @param meanlog,sdlog Mean and standard deviation of the distribution on the log scale.
-#' @param endpoint A numeric value indicating the upper bound of the distribution
-#' @param log a logical value indicating whether to log transform the probabilities. Default is \code{FALSE}.
-#' @details
-#' The density function is defined as:
-#'
-#' If \eqn{x = 0}
-#' \deqn{f(x) = \theta}
-#' If \eqn{x > 0}
-#' \deqn{f(x) = (1 - \theta) \frac{g(x, \mu, \sigma)}{G(x = b; \mu ,\sigma)} }
-#' where the log-normal PDF is defined as
-#' \deqn{ g(x; \mu , \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}} \exp{(-\frac{(\ln{x}-\mu)^2}{2\sigma^2})} }
-#' and the log-normal CDF is \eqn{G(x = b; \mu ,\sigma)}.\eqn{b} is the upper bound (endpoint), \eqn{\mu} is the mean, \eqn{\sigma} is the standard deviation, and \eqn{\theta} is the proportion of zeros.
-#' @rdname htlnorm
-#' @return A vector of probability densities
-dhtlnorm<-function(x,theta,meanlog,sdlog,endpoint =1,log=FALSE){
-  p <- ifelse(
-    x == 0,
-    theta,
-    (1-theta) * ifelse(
-      x <= endpoint,
-      dlnorm(x, meanlog = meanlog, sdlog = sdlog) /
-        plnorm(endpoint,meanlog = meanlog,sdlog = sdlog),
-      0)
-  )
-
-  if(log){
-    p <- log(p)
-  }
-  return(p)
-}
-
-#' @title Truncated Log-Normal Hurdle Distribution
-#' @rdname htlnorm
-#' @export
-rhtlnorm<-function(n,theta,meanlog,sdlog,endpoint=1){
-  out <- ifelse(
-    rbinom(n, size = 1, prob = theta) == 1,
-    0,
-    qlnorm(
-      p =
-        runif(n = n, #Inverse sampling but shrink original support to location of truncation
-              min = 0,
-              max = plnorm(q = endpoint,
-                           meanlog = meanlog,
-                           sdlog = sdlog)),
-      meanlog = meanlog,
-      sdlog = sdlog
-    )
-  )
-  return(out)
-}
-
-
-#' @title Zero-One-Inflated Beta Distribution
-#' @description Density function and random number generation of a four parameter zero-one-inflated beta distribution. The beta distribution does not have defined probabilities at 0 or 1 so this extension takes care of that.
-#' @param x A vector of numeric values
-#' @param n number of observations to generate
-#' @param p0 The probability that \eqn{x = 0}. Must be between 0 and 1
-#' @param p1 The conditional probability that \eqn{x = 1} given \eqn{x \neq 0}. Must be between 0 and 1.
-#' @param alpha,beta The shape parameters of the beta distribution. Must be greater than 0.
-#' @param log a logical value indicating whether to log transform the probabilities. Default is \code{FALSE}.
-#' @details
-#' The density function is defined as:
-#'
-#' If \eqn{x = 0}
-#' \deqn{f(x) = p_0}
-#' If \eqn{x = 1}
-#' \deqn{f(x) = p_1 (1 - p_0)}
-#' If \eqn{x \neq 0,1}
-#' \deqn{f(x) = (1 - p_1) (1 - p_0) \frac{x^{\alpha-1}(1-x)^{\beta-1}}{B(\alpha, \beta)}}
-#' @rdname zoibeta
-#' @return A vector of probability densities
-#' @references
-#' Ospina, R., and S. L. P. Ferrari. 2008. Inflated beta distributions. Statistical Papers 51:111.
-dzoibeta<-function(x,p0,p1,alpha,beta,log=FALSE){
-  p <- ifelse(
-    x == 0,
-    p0,
-    ifelse(
-      x == 1,
-      p1 * (1 - p0),
-      (1 - p1) * (1 - p0) * dbeta(x, shape1 = alpha, shape2 = beta)
-    )
-  )
-  if(log){
-    p <- log(p)
-  }
-  return(p)
-}
-
-#' @title Zero-One-Inflated Beta Distribution
-#' @rdname zoibeta
-#' @export
-rzoibeta<-function(n,p0,p1,alpha,beta){
-  out<-ifelse(
-    rbinom(n = n,size = 1,prob = p0) == 1,
-    0,
-    ifelse(
-      rbinom(n = n, size = 1, prob = p1) == 1,
-      1,
-      rbeta(n,alpha,beta)))
-  return(out)
-}
-
-
-
-
 #' @export
 fit_generic_null<- function(data.vec,
-                            family = c("htlnorm","zoibeta"),
+                            family = c("htlnorm","zoibeta","cb"),
                             init = 0,
                             lower = -Inf,
                             upper = Inf,
@@ -156,7 +43,18 @@ fit_generic_null<- function(data.vec,
                     log = TRUE))
 
     }
+  } else if(family == "cb"){
+    optim.vars <- c("lambda")
+    param.val.trans = c("lambda" = function(x) {plogis(x)})
+    nll <- function(theta){
+      -sum(dcb(x = data.vec,
+                    lambda = plogis(theta[1]),
+                    log = TRUE))
+
+    }
   }
+
+
   if(length(lower) != length(optim.vars) ){
     lower <- rep(lower, length(optim.vars))
   }
@@ -167,7 +65,7 @@ fit_generic_null<- function(data.vec,
     init <- rep(init, length(optim.vars))
   }
 
-  if(method=="nlminb"){
+  if(method == "nlminb"){
     ML.fit<-nlminb(start = init,
                    objective = nll,
                    lower = lower,
@@ -289,14 +187,47 @@ logLik.generic_null_fit <- function(object,...){
 #' @rdname AIC
 #' @export
 AIC.generic_null_fit <- function(object,...,k=2){
-  AIC(logLik(object),k=k,...)
+  dots <- as.list(match.call())[-1]
+  dots <- dots[!names(dots) == "k"]
+
+  if(length(dots) == 1){
+    return(AIC(logLik(object),..., k = k))
+  } else {
+    out <- do.call("rbind",
+                   lapply(unname(dots), function(x){
+                     loglik <- logLik(eval(x))
+                     df <- attributes(loglik)$df
+                     aic <- AIC(loglik)
+                     return(data.frame("model"= deparse(x), "AIC" = aic, "df"= df))
+                   }))
+
+    out$dAIC <- out$AIC - min(out$AIC)
+    out <- out[order(out$AIC),]
+    return(out)
+  }
 }
 
 #' @title Bayesian information criterion
 #' @rdname AIC
 #' @export
 BIC.generic_null_fit <- function(object,...){
-  BIC(logLik(object),...)
+  dots <- as.list(match.call())[-1]
+
+  if(length(dots) == 1){
+    return(BIC(logLik(object),...))
+  } else {
+    out <- do.call("rbind",
+                   lapply(unname(dots), function(x){
+                     loglik <- logLik(eval(x))
+                     df <- attributes(loglik)$df
+                     bic <- BIC(loglik)
+                     return(data.frame("model"= deparse(x), "BIC" = bic, "df"= df))
+                   }))
+
+    out$dBIC <- out$BIC - min(out$BIC)
+    out <- out[order(out$BIC),]
+    return(out)
+  }
 }
 
 #' @title Extract Model Coefficients
@@ -316,61 +247,6 @@ coef.generic_null_fit<-function(object, ..., backtransform = T){
   names(out) <- object$theta.name
   return(out)
 }
-
-
-#' @title Truncated Pareto Distribution
-#' @description Density function and random number generation of a three parameter truncated Pareto distribution
-#' @param x a vector of quantities
-#' @param n integer value indicating the number of observations to generate
-#' @param a the exponent of the Pareto distribution
-#' @param b the minimum value of \code{x}
-#' @param endpoint a numeric value where the Pareto distribution is truncated. Default value is 1.
-#' @param log a logical value indicating whether to log transform the probabilities. Default is \code{FALSE}.
-#' @details
-#' The density function is defined as:
-#'
-#' If \eqn{x < B}
-#' \deqn{P(x) = \frac{a b^a}{x^{a+1}}\frac{1}{F(x = B; a, b)},}
-#' otherwise,
-#' \deqn{P(x) = 0,}
-#' where \eqn{B} is the end point where the Pareto distribution is truncated, \eqn{b} is the minimum value of x, \eqn{a} is the exponent of the Pareto distribution, and \eqn{F(x = B; a, b)} is the CDF of the Pareto distribution defined as
-#' \deqn{F(x) = 1 - (\frac{b}{x})^a}
-#'
-#' @return a vector of numeric values
-#' @rdname tpareto
-#' @export
-dtpareto<-function(x, a, b, endpoint = 1, log = FALSE){
-  prob<-ifelse(
-    x <= endpoint,
-    extraDistr::dpareto(x, a = a, b = b) /
-      extraDistr::ppareto(endpoint, a = a, b = b),
-    0)
-  if(log){
-    prob <- log(prob)
-  }
-  return(prob)
-}
-
-
-#' @title Truncated Pareto Distribution
-#' @rdname tpareto
-#' @export
-rtpareto<-function(n, a, b, endpoint = 1){
-  x<-extraDistr::qpareto(
-    p =
-      runif(n = n, #Inverse sampling but shrink original support to location of truncation
-            min = 0,
-            max = extraDistr::ppareto(q = endpoint,
-                                      a = a,
-                                      b = b)),
-    a = a,
-    b = b
-  )
-  x[x>endpoint] <- NaN
-  return(x)
-}
-
-
 
 
 
