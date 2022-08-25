@@ -25,6 +25,13 @@
 #'  \deqn{CV_4 = CV_1 + \frac{CV_1^3}{N}+ \frac{CV_1}{4N}+ \frac{CV_1^2\gamma_1}{2N} + \frac{CV_1\gamma_2}{8N}}
 #'  \eqn{\gamma_2} is Pearson's measure of kurtosis
 #'
+#' @references
+#'
+#' Bao, Y. 2009. Finite-Sample Moments of the Coefficient of Variation. Econometric Theory 25:291–297.
+#'
+#' Sokal, R. R., and J. F. Rohlf. 1995. Biometry: The Principles and Practices of Statistics in Biological Research. Third edition. Freeman, New York.
+#'
+#' Yang, J., J. Lu, Y. Chen, E. Yan, J. Hu, X. Wang, and G. Shen. 2020. Large Underestimation of Intraspecific Trait Variation and Its Improvements. Frontiers in Plant Science 11.
 #'
 #' @export
 cv<-function(x, method = c(1,2,3,4),na.rm = FALSE){
