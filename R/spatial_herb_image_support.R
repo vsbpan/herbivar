@@ -200,7 +200,7 @@ max_scale <- function(object){
 #' @return A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixset'.
 #' @note The code for the watershed method is adapted from Simon Barthelme's vignette https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html. accessed date 2022-07-25.
 #' @examples
-#' file_path <- system.file("extdata/IMG_20220726_0004.png",package="herbivar")
+#' file_path <- system.file("extdata/raw_scan.jpg",package="herbivar")
 #' img <- load.image(file_path) %>%
 #'    crop(empty.rm = "auto", cut_edge = 10) %>%
 #'    add_px_size("dpi:300") %>%
