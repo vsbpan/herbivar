@@ -1,5 +1,3 @@
-#install.packages("C:/R Projects/Package Building/herbivar_0.1.0.tar.gz", repos = NULL, type="source")
-#detach("package:herbivar",unload=T)
 herbivar.version <- function(x){
   utils::packageDate("herbivar")
   message("Still in development; use with caution!")
@@ -30,10 +28,6 @@ reintall.herbivar <- function(...){
 ## Add lambda argument in alloT functions
 ## Add in co-limitation theory
 ## Add in jiterate and aiterate
-
-
-#### End ####
-
 
 
 
