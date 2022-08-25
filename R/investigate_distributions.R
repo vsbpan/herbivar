@@ -69,7 +69,7 @@ cv<-function(x, method = c(1,2,3,4),na.rm = FALSE){
 #'  \eqn{J > 0} corresponds to a more aggregated distribution (overdispersed)
 #'  @export
 
-J.index <- function(x=NULL,mean=NULL,var=NULL, na.rm = F){
+J.index <- function(x=NULL,mean=NULL,var=NULL, na.rm = FALSE){
   if(any(x < 0)) {
     warning("Data contain non-positive values")
   }
@@ -95,7 +95,7 @@ J.index <- function(x=NULL,mean=NULL,var=NULL, na.rm = F){
 #' \deqn{CD = \frac{1}{n} \frac{\sum_i^n |m - x_i|}{m}}
 #' where \eqn{m} is the median of the data
 #' @export
-cd <- function(x, robust = F, na.rm = F){
+cd <- function(x, robust = FALSE, na.rm = FALSE){
   if(any(x < 0)) {
     warning("Data contain non-positive values")
   }
