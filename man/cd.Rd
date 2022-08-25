@@ -4,7 +4,7 @@
 \alias{cd}
 \title{Calculate Coefficient of Dispersion (CD)}
 \usage{
-cd(x, robust = F, na.rm = F)
+cd(x, robust = FALSE, na.rm = FALSE)
 }
 \arguments{
 \item{x}{a vector of numeric data}

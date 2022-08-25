@@ -3,7 +3,7 @@
 #' @param  x
 #'  A vector of numeric values
 #' @param  method
-#'  A value indicating the type of CV estimator
+#'  A character value indicating the type of CV estimator. Valid options are "standard", "Sokal", "Breunig", and "Bao".
 #' @param  na.rm
 #'  A logical value indicating whether to ignore \code{NA} values in the \code{x} vector
 #' @return
@@ -11,17 +11,17 @@
 #' @details
 #'  The method option selects one of four CV estimators investigated by Yang et al. (2020).
 #'
-#'  **CV1**: This is the conventional CV estimator:
+#'  **standard**: This is the conventional CV estimator:
 #'  \deqn{CV_1 = \frac{\sigma}{\mu}}
 #'
-#'  **CV2**: This assumes the sample is normally distributed and corrects for the bias using the sample size as in Sokal and Rohlf (1995):
+#'  **Sokal**: This assumes the sample is normally distributed and corrects for the bias using the sample size as in Sokal and Rohlf (1995):
 #'  \deqn{CV_2 = CV_1 + \frac{CV_1}{4N}}
 #'
-#'  **CV3**: This implements Breunig's (2001) method:
+#'  **Breunig**: This implements Breunig's (2001) method:
 #'  \deqn{CV_3 = CV_1 \sqrt{1- \frac{CV_1}{N}(3CV_1 -2\gamma_1)}}
 #'  \eqn{\gamma_1} is Pearson's measure of skewness
 #'
-#'  **CV4**: This implements Bao's (2009) method:
+#'  **Bao**: This implements Bao's (2009) method:
 #'  \deqn{CV_4 = CV_1 + \frac{CV_1^3}{N}+ \frac{CV_1}{4N}+ \frac{CV_1^2\gamma_1}{2N} + \frac{CV_1\gamma_2}{8N}}
 #'  \eqn{\gamma_2} is Pearson's measure of kurtosis
 #'
@@ -29,31 +29,36 @@
 #'
 #' Bao, Y. 2009. Finite-Sample Moments of the Coefficient of Variation. Econometric Theory 25:291–297.
 #'
+#' Breunig, R. 2001. An almost unbiased estimator of the coefficient of variation. Economics Letters 70:15–19.
+#'
 #' Sokal, R. R., and J. F. Rohlf. 1995. Biometry: The Principles and Practices of Statistics in Biological Research. Third edition. Freeman, New York.
 #'
 #' Yang, J., J. Lu, Y. Chen, E. Yan, J. Hu, X. Wang, and G. Shen. 2020. Large Underestimation of Intraspecific Trait Variation and Its Improvements. Frontiers in Plant Science 11.
 #'
 #' @export
-cv<-function(x, method = c(1,2,3,4),na.rm = FALSE){
+cv<-function(x, method = c("standard","Sokal","Breunig","Bao"),na.rm = FALSE){
   if(isTRUE(any(x < 0))) {
     warning("Data contain non-positive values")
   }
   if(na.rm){
     x <- x[!is.na(x)]
   }
+
+  method <- match.arg(method)
+
   cv1<-sd(x)/mean(x)
-  if(method[1] == 1) {
+  if(method[1] == "standard") {
     return(cv1)
   } else
-    if(method[1] == 2) {
+    if(method[1] == "Sokal") {
       cv2<- cv1 + cv1 / (4 * length(x))
       return(cv2)
     } else
-      if(method[1] == 3) {
+      if(method[1] == "Breunig") {
         cv3 <- cv1*sqrt(1-cv1/length(x)*(3*cv1 - 2 * Skew(x)))
         return(cv3)
       } else
-        if(method[1] == 4){
+        if(method[1] == "Bao"){
           N <- length(x)
           cv4 <- cv1 + cv1^3/N + cv1/(4*N) + cv1^2*Skew(x)/(2*N) + cv1*Kurt(x)/(8*N)
           return(cv4)

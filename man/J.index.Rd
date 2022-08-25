@@ -4,7 +4,7 @@
 \alias{J.index}
 \title{Calculate Aggregation Coefficient}
 \usage{
-J.index(x = NULL, mean = NULL, var = NULL, na.rm = F)
+J.index(x = NULL, mean = NULL, var = NULL, na.rm = FALSE)
 }
 \arguments{
 \item{x}{a vector of numeric data}

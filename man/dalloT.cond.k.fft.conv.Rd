@@ -25,7 +25,7 @@ dalloT.cond.k.fft.conv(
 
 \item{fft.vec}{a Fourier transformed vector on the frequency domain, specifically that of the probability density of phi.}
 
-\item{phi}{a numeric vector of the proportion herbivory grid used to generate the \code{fft.vec} with \code{dallo()}. Supplied to find closest matched indices for \code{phi.T} for approximate conditional probabilities of \eqn{P(phi_T | k)}.}
+\item{phi}{a numeric vector of the proportion herbivory grid used to generate the \code{fft.vec} with \code{dallo()}. Supplied to find closest matched indices for \code{phi.T} for approximate conditional probabilities of \eqn{P(\phi_T | k)}.}
 
 \item{log}{if \code{TRUE}, returns probabilities on the log scale.}
 

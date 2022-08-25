@@ -4,12 +4,12 @@
 \alias{cv}
 \title{Calculate Coefficient of Variation (CV)}
 \usage{
-cv(x, method = c(1, 2, 3, 4), na.rm = FALSE)
+cv(x, method = c("standard", "Sokal", "Breunig", "Bao"), na.rm = FALSE)
 }
 \arguments{
 \item{x}{A vector of numeric values}
 
-\item{method}{A value indicating the type of CV estimator}
+\item{method}{A character value indicating the type of CV estimator. Valid options are "standard", "Sokal", "Breunig", and "Bao".}
 
 \item{na.rm}{A logical value indicating whether to ignore \code{NA} values in the \code{x} vector}
 }
@@ -22,17 +22,26 @@ calculate the CV for a vector of data
 \details{
 The method option selects one of four CV estimators investigated by Yang et al. (2020).
 
-\strong{CV1}: This is the conventional CV estimator:
+\strong{standard}: This is the conventional CV estimator:
 \deqn{CV_1 = \frac{\sigma}{\mu}}
 
-\strong{CV2}: This assumes the sample is normally distributed and corrects for the bias using the sample size as in Sokal and Rohlf (1995):
+\strong{Sokal}: This assumes the sample is normally distributed and corrects for the bias using the sample size as in Sokal and Rohlf (1995):
 \deqn{CV_2 = CV_1 + \frac{CV_1}{4N}}
 
-\strong{CV3}: This implements Breunig's (2001) method:
+\strong{Breunig}: This implements Breunig's (2001) method:
 \deqn{CV_3 = CV_1 \sqrt{1- \frac{CV_1}{N}(3CV_1 -2\gamma_1)}}
 \eqn{\gamma_1} is Pearson's measure of skewness
 
-\strong{CV4}: This implements Bao's (2009) method:
+\strong{Bao}: This implements Bao's (2009) method:
 \deqn{CV_4 = CV_1 + \frac{CV_1^3}{N}+ \frac{CV_1}{4N}+ \frac{CV_1^2\gamma_1}{2N} + \frac{CV_1\gamma_2}{8N}}
 \eqn{\gamma_2} is Pearson's measure of kurtosis
+}
+\references{
+Bao, Y. 2009. Finite-Sample Moments of the Coefficient of Variation. Econometric Theory 25:291–297.
+
+Breunig, R. 2001. An almost unbiased estimator of the coefficient of variation. Economics Letters 70:15–19.
+
+Sokal, R. R., and J. F. Rohlf. 1995. Biometry: The Principles and Practices of Statistics in Biological Research. Third edition. Freeman, New York.
+
+Yang, J., J. Lu, Y. Chen, E. Yan, J. Hu, X. Wang, and G. Shen. 2020. Large Underestimation of Intraspecific Trait Variation and Its Improvements. Frontiers in Plant Science 11.
 }
