@@ -30,6 +30,5 @@ get_data_sim(
 A list of list of vectors of numeric values.
 }
 \description{
-generate neutral predictions from fitten model
-This is a convenience function generates predicted distribution from a list of fitted models
+This is a convenience function that generates predicted distribution from a list of fitted models
 }

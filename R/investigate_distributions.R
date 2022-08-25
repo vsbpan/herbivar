@@ -484,8 +484,7 @@ get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
 
 
 #' @title Generate Neutral Predictions From Fitted Model
-#' @description generate neutral predictions from fitten model
-#' This is a convenience function generates predicted distribution from a list of fitted models
+#' @description This is a convenience function that generates predicted distribution from a list of fitted models
 #' @param allo.fit.list A list of "allo_herb_fit" objects.
 #' @param n.sim A numeric value indicating number of points to draw from the neutral distribution for each "allo_herb_fit" object. If \code{NULL}, the original sample size of the data will be used.
 #' @param digits A numeric value indicating the number of digits to round data values to

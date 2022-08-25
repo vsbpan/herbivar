@@ -2,7 +2,7 @@
 % Please edit documentation in R/neutral_model_ML_support.R
 \name{allometry.herb.quasi.sim}
 \alias{allometry.herb.quasi.sim}
-\title{Generate Neutral Herbivory Distribution Based On Allometry Scaling Laws Using Simulation}
+\title{Generate Neutral Herbivory Distribution Based On Allometric Scaling Laws Using Simulation}
 \usage{
 allometry.herb.quasi.sim(
   mean.phi.T,
@@ -20,7 +20,7 @@ allometry.herb.quasi.sim(
 
 \item{max.phi}{the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100\%).}
 
-\item{a}{the combined allometry scaling coefficient. Defaults to 14/9.}
+\item{a}{the combined allometric scaling coefficient. Defaults to 14/9.}
 
 \item{n.sim}{the number of random numbers to draw.}
 

@@ -24,7 +24,7 @@ dk.cond.lambda(
 
 \item{max.phi}{the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100\%).}
 
-\item{a}{the combined allometry scaling coefficient. Defaults to 14/9.}
+\item{a}{the combined allometric scaling coefficient. Defaults to 14/9.}
 
 \item{k.max.tolerance}{the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small). See details of \code{?dalloT()}}
 

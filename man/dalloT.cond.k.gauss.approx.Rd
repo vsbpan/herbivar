@@ -22,7 +22,7 @@ dalloT.cond.k.gauss.approx(
 
 \item{max.phi}{the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100\%).}
 
-\item{a}{the combined allometry scaling coefficient. Defaults to 14/9.}
+\item{a}{the combined allometric scaling coefficient. Defaults to 14/9.}
 
 \item{log}{if \code{TRUE} (default is \code{FASLE}), return probabilities on the log scale.}
 }

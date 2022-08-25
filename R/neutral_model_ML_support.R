@@ -1,21 +1,23 @@
-#'@title Neutral 'Bite Size' Distribution Based On Allometry Scaling Laws
-#'@description Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometry scaling laws.
+#'@title Neutral 'Bite Size' Distribution Based On Allometric Scaling Laws
+#'@description Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometric scaling laws.
 #' @param x,q a vector of quantities
 #' @param p a vector of probabilities
 #' @param n number of observations to generate.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @param log,log.p logical; if \code{TRUE}, probabilities p are given as \eqn{\log(p)}.
 #' @param lower.tail logical; if \code{TRUE} (default), probabilities are \eqn{P(X \leq x)} otherwise, \eqn{P(X > x)}
 #' @details
-#' The neutral 'bite size' distribution has density function \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometry scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
+#' The neutral 'bite size' distribution has density function \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometric scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
 #'
 #' The cumulative density function is
 #' \deqn{P(\phi \leq q) = \frac{q^{1-\alpha} - \phi_m^{1-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}}
 #'
 #' @return a vector of numeric values
 #' @references
+#' Damuth, J. 1981. Population density and body size in mammals. Nature 290:699–700.
+#'
 #' Hutchinson, G. E., and R. H. MacArthur. 1959. A Theoretical Ecological Model of Size Distributions Among Species of Animals. The American Naturalist 93:117–125.
 #'
 #' Kleiber, M. 1932. Body size and metabolism. Hilgardia 6:315–353.
@@ -84,7 +86,7 @@ qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
   return(q)
 }
 
-#' @title Generate Neutral Herbivory Distribution Based On Allometry Scaling Laws Using Simulation
+#' @title Generate Neutral Herbivory Distribution Based On Allometric Scaling Laws Using Simulation
 #' @description This is the workhorse of \code{ralloT()} that generate draws from the neutral herbivory distribution using simulation. The CDF of the neutral herbivory model is too computationally intensive to calculate, so inverse transform sampling is not implemented.
 #' @details
 #' \eqn{\lambda} of a Poisson distribution is calculated from parameters \eqn{\phi_m}, \eqn{\phi_M}, \eqn{a}, and \eqn{\overline{\phi_{T}'}} and used to draw random number of feeding events on a leaf \eqn{k_i}. \deqn{\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}}}
@@ -93,7 +95,7 @@ qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
 #' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited. See details.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @param n.sim the number of random numbers to draw.
 #' @param truncate if \code{TRUE} (default), truncate generated values of \eqn{\phi_T} to \eqn{[0, 1]}.
 #' @return a vector of numeric values
@@ -117,8 +119,8 @@ allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
 }
 
 
-#' @title Neutral Herbivory Distribution Based On Allometry Scaling Laws
-#' @description Density, distribution function, quantile function, and random generation for the neutral herbivory distribution based on allometry scaling laws.
+#' @title Neutral Herbivory Distribution Based On Allometric Scaling Laws
+#' @description Density, distribution function, quantile function, and random generation for the neutral herbivory distribution based on allometric scaling laws.
 #' @details
 #' The neutral herbivory distribution is a type of compound Poisson distribution taking the form:
 #' \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha},} and \deqn{k \sim Pois(\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}})}
@@ -147,7 +149,7 @@ allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
 #' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited. If  \code{NULL}, supplied \code{lambda} value is converted to \code{mean.phi.T}. See details.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @param lambda An alternative parameterization of mean.phi.T. see \code{?get_lambda()}
 #' @param k.max The maximum number of convolutions of the neutral 'bite size' distribution in numerical approximation of the PDF of the neutral herbivory distribution. Default is 50.
 #' @param by The grid resolution used in the FFT convolutions. Default is 0.001.
@@ -426,7 +428,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' @param k a vector of integer values indicating the number of convolutions to perform
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @param log if \code{TRUE} (default is \code{FASLE}), return probabilities on the log scale.
 #' @export
 dalloT.cond.k.gauss.approx<-function(phi.T,k,min.phi=0.005,max.phi=1,a=14/9,log=FALSE){
@@ -473,7 +475,7 @@ convolve.dist <- function(k, fft.vec, parallel = FALSE){
 #' @param log if \code{TRUE}, returns probabilities on the log scale.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @param k.fft.limit the maximum number of convolutions performed by FFT. For k convolutions above this limit, a Gaussian approximation is used.
 #' @param parallel if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 50000, as no computational efficiency would be gained.
 #' @param phi.T.index a vector of integers indicating the location where phi.T most closely match the grid of probabilities. If \code{NULL} (default), the indices are calculated using \code{phi.T}, \code{min.phi}, \code{max.phi}, and \code{a}. Supplying a pre-calculated index vector saves a lot of computation when the function is used repeatedly.
@@ -549,7 +551,7 @@ dalloT.cond.k.fft.conv<-function(phi.T, k, fft.vec, phi, log = FALSE,
 #' @param k a vector of integers indicating the number of convolutions to apply to a Fourier transformed vector
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @param log if \code{TRUE}, returns probabilities on the log scale.
 #' @param lambda if \code{NULL} (default), lambda would be estimated from the parameters given. Supplying \code{lambda} is useful to avoid repeated computation when the function is used repeatedly.
 #' @param k.max.tolerance the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small). See details of \code{?dalloT()}
@@ -1057,7 +1059,7 @@ coef.allo_herb_fit<-function(object, ..., backtransform = TRUE){
 #' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @return a vector of numeric values
 get_lambda <- function(mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9){
   mean.phi.T * (2 - a)/(1 - a) *
@@ -1072,7 +1074,7 @@ get_lambda <- function(mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9){
 #' @param lambda the attack rate on the plant or leaf
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
-#' @param a the combined allometry scaling coefficient. Defaults to 14/9.
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @return a vector of numeric values
 get_mean_phi_T <- function(lambda, min.phi = 0.005, max.phi = 1, a = 14/9){
   lambda / ((2 - a)/(1 - a) *

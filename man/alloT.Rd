@@ -5,7 +5,7 @@
 \alias{dalloT}
 \alias{palloT}
 \alias{qalloT}
-\title{Neutral Herbivory Distribution Based On Allometry Scaling Laws}
+\title{Neutral Herbivory Distribution Based On Allometric Scaling Laws}
 \usage{
 ralloT(
   n,
@@ -67,7 +67,7 @@ qalloT(
 
 \item{max.phi}{the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100\%).}
 
-\item{a}{the combined allometry scaling coefficient. Defaults to 14/9.}
+\item{a}{the combined allometric scaling coefficient. Defaults to 14/9.}
 
 \item{lambda}{An alternative parameterization of mean.phi.T. see \code{?get_lambda()}}
 
@@ -99,7 +99,7 @@ qalloT(
 A vector of numeric values
 }
 \description{
-Density, distribution function, quantile function, and random generation for the neutral herbivory distribution based on allometry scaling laws.
+Density, distribution function, quantile function, and random generation for the neutral herbivory distribution based on allometric scaling laws.
 }
 \details{
 The neutral herbivory distribution is a type of compound Poisson distribution taking the form:

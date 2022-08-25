@@ -33,7 +33,7 @@ dalloT.cond.k.fft.conv(
 
 \item{max.phi}{the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100\%).}
 
-\item{a}{the combined allometry scaling coefficient. Defaults to 14/9.}
+\item{a}{the combined allometric scaling coefficient. Defaults to 14/9.}
 
 \item{k.fft.limit}{the maximum number of convolutions performed by FFT. For k convolutions above this limit, a Gaussian approximation is used.}
 

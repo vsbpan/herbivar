@@ -13,7 +13,7 @@ get_lambda(mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9)
 
 \item{max.phi}{the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100\%).}
 
-\item{a}{the combined allometry scaling coefficient. Defaults to 14/9.}
+\item{a}{the combined allometric scaling coefficient. Defaults to 14/9.}
 }
 \value{
 a vector of numeric values
