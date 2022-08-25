@@ -27,3 +27,5 @@ S3method("plot","singleton")
 S3method("plot","cimg")
 S3method("plot","split_herb")
 S3method("plot","lc")
+S3method("print", "bite_size_fit")
+

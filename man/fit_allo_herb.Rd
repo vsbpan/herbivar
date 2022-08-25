@@ -50,7 +50,7 @@ fit_allo_herb(
 
 \item{param.vals}{A named vector of the default parameter values of the neutral herbivory distribution. Set to \code{NA} if the variable is declared in the \code{optim.vars} argument (i.e. is estimated). "mean.phi.T" defaults to 0.1, "min.phi" to 0.005, "max.phi" to 1, and "a" to 14/9.}
 
-\item{param.val.trans}{A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale). Set to \code{NA} if the variable is declared in the \code{optim.vars} argument (i.e. is estimated). Default transformation is x/100 for "mean.phi.T", "min.phi", and "max.phi". Default transformation for "a" is identity.}
+\item{param.val.trans}{A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale). Set to \code{NA} if the variable is not declared in the \code{optim.vars} argument (i.e. is not estimated). Default transformation is x/100 for "mean.phi.T", "min.phi", and "max.phi". Default transformation for "a" is identity.}
 
 \item{lower, upper}{A numeric vector indicating the bounds of each estimated variable for the "L-BFGS-B" and "Brent" method. Defaults to -Inf and Inf. If the length of supplied vector is shorter than the number of estimated variables, the first element of the vector is set as the bound for all variables. If the method is "Brent" and the \code{optim.vars = "mean.phi.T"}, the bounds default to 0 and 100.}
 
@@ -71,6 +71,10 @@ An 'allo_herb_fit' object with the following slots:
 
 \code{loglik}: log likelihood of the data given the parameter combinations
 
+\code{hessian}: The Hessian matrix
+
+\code{iters}: The number of times the likelihood function or its gradient is evaluated.
+
 \code{message}: message passed from the optimizer function
 
 \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
@@ -80,6 +84,8 @@ An 'allo_herb_fit' object with the following slots:
 \code{init}: A vector of the used initial values for optimization
 
 \code{data}: The data to which the model is fitted to
+
+\code{param.val.trans}: A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale).
 
 \code{param.vals}: the default parameter values assumed for the model
 

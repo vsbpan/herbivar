@@ -1,5 +1,5 @@
 herbivar.version <- function(x){
-  utils::packageDate("herbivar")
+  print(utils::packageDate("herbivar"))
   message("Still in development; use with caution!")
 }
 
@@ -15,9 +15,10 @@ detach.herbivar <- function(x){
   message("goodbye!")
 }
 
-reintall.herbivar <- function(...){
+reinstall.herbivar <- function(...){
   detach.herbivar()
   install.packages("C:/R Projects/Package Building/herbivar_0.1.0.tar.gz", repos = NULL, type="source")
+  .rs.restartR()
   library(herbivar)
 }
 

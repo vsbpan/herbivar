@@ -1,3 +1,43 @@
+#' @title Fit Non-Neutral Generic Null Models Using Maximum Likelihood Estimation
+#' @description Estimate unknown parameters in non-neutral generic null herbivory models from a vector of observed herbivory data using Maximum Likelihood Estimation (MLE).
+#' @param data.vec A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error.
+#' @param family The generic null distribution. Valid options are "htlnorm" for hurdle truncated log-normal distribution, and "zoibeta" for zero-one-inflated beta distribution. see \code{?dzoibeta()} and \code{?dhtlnorm()}
+#' @param init Initial value for optimizer to start. Defaults to 0.
+#' @param lower,upper A numeric vector indicating the bounds of each estimated variable for the "L-BFGS-B" and "Brent" method. Defaults to \code{-Inf} and \code{Inf}.
+#' @param method The method of maximum likelihood estimation algorithm. Acceptable methods are "Nelder-Mead" (Default), "BFGS", "L-BFGS-B", "Brent", and "nlminb". Defaults to "Brent" for one dimensional optimization. For details see \code{?stats::optim()} and \code{?stats::nlminb()}.
+#' @param id A character string supplied for book keeping purposes. Default is \code{NULL}. Useful for when storing a large number of "generic_null_fit" objects in a list.
+#' @param ... Additional arguments that are passed to the optimizer functions \code{optim()} or \code{nlminb()}.
+#' @return
+#' An 'generic_null_fit' object with the following slots:
+#'
+#' \code{theta.names}: A vector of character string naming the fitted parameters
+#'
+#' \code{par}: the value of fitted parameters on the transformed scale in the order of theta.names
+#'
+#' \code{se}: standard error of fitted parameters on the transformed scale. Quadratic approximation of the standard error will be implemented in the future.
+#'
+#' \code{loglik}: log likelihood of the data given the parameter combinations
+#'
+#' \code{hessian}: The Hessian matrix
+#'
+#' \code{iters}: The number of times the likelihood function or its gradient is evaluated.
+#'
+#' \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
+#'
+#' \code{method}: Method of optimization
+#'
+#' \code{init}: A vector of the used initial values for optimization
+#'
+#' \code{data}: The data to which the model is fitted to
+#'
+#' \code{param.val.trans}: A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale).
+#'
+#' \code{id}: name of model supplied via the id argument
+#'
+#' \code{n}: the sample size
+#'
+#' \code{df}: the degrees of freedom of the model
+
 #' @export
 fit_generic_null<- function(data.vec,
                             family = c("htlnorm","zoibeta"),
@@ -239,17 +279,90 @@ coef.generic_null_fit<-function(object, ..., backtransform = T){
 }
 
 
-
+#' @title Fit A 'Bite Size' Distribution To Data
+#' @description Fit multiple distributions to a vector of data using maximum likelihood.
+#' @param object A vector of proportion 'bite sizes' between zero and one, not inclusive. If an object of class 'split_herb' is supplied, the \code{hole_prop} vector will be extracted.
+#' @param family A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", and "cb". See details.
+#' @param min.phi The minimum proportion 'bite size'. If \code{NA} (default), the minimum non-zero value in the data is used. If \code{NA} and \code{object} supplied is of class 'split_herb', the \code{min_prop} is extracted from the \code{object}.
+#' @param method Optimizer used to find the maximum likelihood estimates. Valid options are "Nelder-Mead" (default) and "BFGS".
+#' @param IC An information criteria used to rank the fitted distributions. Default is "AICc".
+#'
+#' @details
+#'
+#' ## allo
+#' Neutral 'bite size' distribution with zero degree of freedom.
+#' \deqn{P(\phi| \phi_M = 1, \phi_m = min.phi, \alpha = \frac{14}{9}) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}}.
+#'
+#'
+#' ## allo_a
+#' Neutral 'bite size' distribution with one degree of freedom, allowing \eqn{\alpha} to be fitted.
+#' \deqn{P(\phi| \phi_M = 1, \phi_m = min.phi, \alpha) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}}.
+#'
+#'
+#' ## allo_M
+#' Neutral 'bite size' distribution with one degree of freedom, allowing \eqn{\phi_M} to be fitted.
+#' \deqn{P(\phi| \phi_M, \phi_m = min.phi, \alpha = \frac{14}{9}) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}}.
+#'
+#'
+#' ## tlnorm
+#' Truncated log-normal distribution with two degrees of freedom.
+#' \deqn{P(\phi) = \frac{g(\phi, \mu, \sigma)}{G(\phi = 1; \mu ,\sigma)} }
+#' The log-normal PDF is defined as
+#' \deqn{ g(\phi; \mu , \sigma) = \frac{1}{\phi \sigma \sqrt{2 \pi}} \exp{(-\frac{(\ln{\phi}-\mu)^2}{2\sigma^2})} }
+#' and the log-normal CDF is \eqn{G(\phi = 1; \mu ,\sigma)}, \eqn{\mu} is the mean, \eqn{\sigma} is the standard deviation.
+#'
+#'
+#' ## beta
+#' Beta distribution with two degrees of freedom.
+#' \deqn{P(\phi) = \frac{\Gamma(a+b)}{\Gamma(a)\Gamma(b)}\phi^{a-1}(1-\phi)^{b-1}}
+#' \eqn{a} and \eqn{b} are the two shape parameters.
+#'
+#'
+#' ## kumar
+#' Kumaraswamy distribution with two degrees of freedom.
+#' \deqn{P(\phi) = ab\phi^{a-1}(1-\phi^{a-1})(1-\phi^{a})^{b-1}}
+#' \eqn{a} and \eqn{b} are the two shape parameters.
+#'
+#'
+#' ## tpareto
+#' Truncated Pareto distribution with two degrees of freedom.
+#' \deqn{P(x) = \frac{a b^a}{\phi^{a+1}}\frac{1}{1 - (\frac{b}{1})^a},}.
+#' \eqn{a} is the exponent of the Pareto distribution and \eqn{b} is the minimum value of \eqn{\phi}.
+#'
+#'
+#' ## cb
+#' Continuous Bernoulli distribution with one degree of freedom.
+#' \deqn{P(\phi) = C(\lambda) \lambda^\phi (1 - \lambda)^{1-\phi},}
+#' \eqn{C(\lambda)} is defined as
+#' \deqn{C(\lambda) = 2}
+#' if \eqn{\lambda = \frac{1}{2}}, otherwise,
+#' \deqn{C(\lambda) = \frac{2 \tanh^{-1}(1-2\lambda)}{1-2\lambda}.}
+#'
+#' \eqn{\lambda} is the rate parameter.
+#'
+#' @return
+#' A object of class 'bite_size_fit' and 'list'
+#'
+#'
+#' \code{models}:
+#' A named list of model fit details, including MLE values, SE, log likelihood, and convergence code.
+#'
+#' \code{settings}:
+#' A named list of function inputs, including the original vector of data, \code{min.phi}, \code{method}, and \code{family}.
+#'
+#' \code{summary}:
+#' A matrix array of ordered IC values of fitted models.
+#'
 #' @export
 fit_bite_size<-function(object,
                         family = c("allo","allo_a","allo_M",
-                                   "tlnorm","beta","kumar", "tpareto"),
+                                   "tlnorm","beta","kumar", "tpareto", "cb"),
                         min.phi = NA,
                         method = c("Nelder-Mead","BFGS"),
                         IC = "AICc"){
 
   supported.families <- c("allo","allo_a","allo_M",
-                          "tlnorm","beta","kumar", "tpareto")
+                          "tlnorm","beta","kumar", "tpareto", "cb")
 
   if(inherits(object,"split_herb")){
     data.vec <- object$hole_prop
@@ -506,8 +619,41 @@ fit_bite_size<-function(object,
     tpareto_out <- NULL
   }
 
+  if("cb" %in% family){
+    cb.fit<-optim2(par = ,
+                      fn = function(theta){
+                        -sum(dcb(x = data.vec,
+                                lambda = plogis(theta[1]),
+                                log = T))
+                      }, method = method,
+                      hessian = T)
+
+    cb.loglik<- structure(-cb.fit$value,
+                             class= "logLik",
+                             nall = n,
+                             nobs= n,
+                             df = 2)
+
+    cb_out<-list("param" = c("lambda_logit"=cb.fit$par[1]),
+                    "se" = tryCatch(sqrt(diag(solve(cb.fit$hessian))),
+                                    error = function(e) {
+                                      rep(NA,length(diag(cb.fit$hessian)))
+                                    }) ,
+                    "logLik" = cb.loglik)
+    cb_out$convergence <- ifelse(
+      any(is.na((cb_out$se))) ||
+        cb.fit$convergence > 0 ||
+        any(!is.finite(cb.fit$value)),
+      1,
+      0
+    )
+  } else {
+    cb_out <- NULL
+  }
+
   out<-list(allo_out, allo_a_out, allo_M_out,
-            tlnorm_out, beta_out, kumar_out, tpareto_out)
+            tlnorm_out, beta_out, kumar_out,
+            tpareto_out, cb_out)
   out<-out[!simplify2array(lapply(out,is.null))]
   names(out) <- supported.families[supported.families %in% family]
 
@@ -520,19 +666,38 @@ fit_bite_size<-function(object,
   out.tab<-out.tab[,order(out.tab[1,]),drop=FALSE]
   out.tab<-rbind(out.tab[1,]-out.tab[1,1],out.tab)[c(2,1,3,4),,drop=FALSE]
   rownames(out.tab) <- c(IC,paste0("d",IC),"df","convergence")
-  print(t(out.tab))
 
   out.final<-list("models" = out,
                   "settings" = list("data" = data.vec,
                          "min.phi" = min.phi,
                          "method" = method,
                          "family" = family),
-                  "summary" = out.tab)
+                  "summary" = t(out.tab))
   if(any(out.tab[4,] == 1)){
     warning("Model did not converge (1).")
   }
 
-  invisible(out.final)
+  out.final <- structure(out.final,
+            class = c("bite_size_fit","list"))
+
+  return(out.final)
 }
+
+#' @title Print Values
+#' @description Prints fitted object and returns an invisible matrix array of the fitted model coefficients
+#' @param x An object of class 'bite_size_fit'
+#' @param ... additional arguments
+#' @return A matrix array
+#' @export
+print.bite_size_fit <- function(x,...){
+  if(inherits(x,"bite_size_fit")){
+    print(x$summary)
+    invisible(x$summary)
+  } else {
+    stop("Object must be of class 'bite_size_fit'.")
+  }
+}
+
+
 
 

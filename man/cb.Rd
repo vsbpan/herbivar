@@ -38,7 +38,7 @@ Density, distribution function, quantile function, and random generation for a o
 The continuous Bernoulli distribution is a one parameter distribution (\eqn{\lambda \in (0,1)}) that has support \eqn{x \in (0,1)}.
 
 The density function is defined as:
-\deqn{P(X = x) = C(\lambda) \lambda^x (1 - \lambda)^{1-x},}
+\deqn{P(x) = C(\lambda) \lambda^x (1 - \lambda)^{1-x},}
 
 where \eqn{C(\lambda)} is defined as
 \deqn{C(\lambda) = 2}

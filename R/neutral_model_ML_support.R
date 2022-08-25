@@ -586,7 +586,7 @@ dk.cond.lambda<-function(k,mean.phi.T=NULL,min.phi=NULL,max.phi=NULL,
 #' @param k.max.tolerance the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small).
 #' @param k.fft.limit The maximum number of convolutions performed by FFT. For k convolutions above this limit, a Gaussian approximation is used. See details for more information.
 #' @param param.vals A named vector of the default parameter values of the neutral herbivory distribution. Set to \code{NA} if the variable is declared in the \code{optim.vars} argument (i.e. is estimated). "mean.phi.T" defaults to 0.1, "min.phi" to 0.005, "max.phi" to 1, and "a" to 14/9.
-#' @param param.val.trans A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale). Set to \code{NA} if the variable is declared in the \code{optim.vars} argument (i.e. is estimated). Default transformation is x/100 for "mean.phi.T", "min.phi", and "max.phi". Default transformation for "a" is identity.
+#' @param param.val.trans A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale). Set to \code{NA} if the variable is not declared in the \code{optim.vars} argument (i.e. is not estimated). Default transformation is x/100 for "mean.phi.T", "min.phi", and "max.phi". Default transformation for "a" is identity.
 #' @param lower,upper A numeric vector indicating the bounds of each estimated variable for the "L-BFGS-B" and "Brent" method. Defaults to -Inf and Inf. If the length of supplied vector is shorter than the number of estimated variables, the first element of the vector is set as the bound for all variables. If the method is "Brent" and the \code{optim.vars = "mean.phi.T"}, the bounds default to 0 and 100.
 #' @param cores The number of parallel processes in parallel computing.
 #' @param id A character string supplied for book keeping purposes. Default is \code{NULL}. Useful for when storing a large number of "fit_allo_herb" objects in a list.
@@ -602,6 +602,10 @@ dk.cond.lambda<-function(k,mean.phi.T=NULL,min.phi=NULL,max.phi=NULL,
 #'
 #' \code{loglik}: log likelihood of the data given the parameter combinations
 #'
+#' \code{hessian}: The Hessian matrix
+#'
+#' \code{iters}: The number of times the likelihood function or its gradient is evaluated.
+#'
 #' \code{message}: message passed from the optimizer function
 #'
 #' \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
@@ -611,6 +615,8 @@ dk.cond.lambda<-function(k,mean.phi.T=NULL,min.phi=NULL,max.phi=NULL,
 #' \code{init}: A vector of the used initial values for optimization
 #'
 #' \code{data}: The data to which the model is fitted to
+#'
+#' \code{param.val.trans}: A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale).
 #'
 #' \code{param.vals}: the default parameter values assumed for the model
 #'
