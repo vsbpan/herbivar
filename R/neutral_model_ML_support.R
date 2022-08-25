@@ -471,7 +471,7 @@ convolve.dist <- function(k, fft.vec, parallel = FALSE){
 #' @param phi.T a vector of cumulative proportion herbivory
 #' @param k a vector of integers indicating the number of convolutions to apply to a Fourier transformed vector
 #' @param fft.vec a Fourier transformed vector on the frequency domain, specifically that of the probability density of phi.
-#' @param phi a numeric vector of the proportion herbivory grid used to generate the \code{fft.vec} with \code{dallo()}. Supplied to find closest matched indices for \code{phi.T} for approximate conditional probabilities of \eqn{P(phi_T | k)}.
+#' @param phi a numeric vector of the proportion herbivory grid used to generate the \code{fft.vec} with \code{dallo()}. Supplied to find closest matched indices for \code{phi.T} for approximate conditional probabilities of \eqn{P(\phi_T | k)}.
 #' @param log if \code{TRUE}, returns probabilities on the log scale.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
