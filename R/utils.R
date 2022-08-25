@@ -98,7 +98,7 @@ optim2 <- function(silent=TRUE,...){
 #' @title Adjust Proportion Data
 #' @description Adjusts proportion data to get rid of 0's and 1's, and optionally transforms the resulting adjusted proportion.
 #' @param x a vector of numeric data bounded between 0 and 1 inclusive.
-#' @param trans a character value indicating the transformation to be applied to the nudged data. Valid options are "identity" (default-- no transformation), "logit", "empirical_logit", "probit", and "log". See details.
+#' @param trans a character value indicating the transformation to be applied to the nudged data. Valid options are "identity" (default-- no transformation), "logit", "empirical_logit", "probit", "log", and "sqarcsin". See details.
 #' @param nudge.method a character value indicating the method of getting rid of 0's and 1's. Valid options are "replace" (default), "smithson", "add", "subtract", and "drop". see details.
 #' @param nudge.size a numeric value of the size of a small nudge (\eqn{epsilon}). Valid character values can also be supplied to choose the method for estimating \eqn{epsilon}. Valid methods are "macmillan" (default), "warton_min", and "warton_max". see details.
 #' @param bounds a character value indicating bounds for which the \code{nudge.method} is applied to. Valid options are "both" (default), "zero", and "one". Only relevant for \code{nudge.method} set as "replace" or "drop".
@@ -106,6 +106,54 @@ optim2 <- function(silent=TRUE,...){
 #'
 #' @return a vector of numeric value with the same length as \code{x}
 #' @details
+#'
+#' **Add commentary**
+#' ## Handling 1's and 0's.
+#' ### Nudge method
+#'
+#' \code{replace}: Replace 0 by \eqn{\epsilon} and 1 by \eqn{1-\epsilon}
+#'
+#' \code{smithson}: the vector is transformed according to the recommendation of Smithson & Verkuilen (2006): \eqn{\frac{x(n-1) + \epsilon}{n}}
+#'
+#' \code{add}: the vector is transformed as \eqn{x + \epsilon}
+#'
+#' \code{subtract}: the vector is transformed as \eqn{x - \epsilon}
+#'
+#' \code{drop}: 0's and/or 1's are dropped from the vector
+#'
+#'
+#' ### Epsilon
+#'
+#' \code{macmillan}: estimated as \eqn{\frac{1}{2n}} per the recommendation of Macmillan & Creelman (2004), where \eqn{n} is the sample size.
+#'
+#' \code{warton_min}: estimated as the smallest non-zero value in the vector x per Warton & Hui (2011).
+#' \code{warton_max}: estimated as one minus the largest non-one value in the vector x, useful when \code{warton_min} is too big (Warton & Hui 2011).
+#'
+#'
+#' ## Transformation
+#'
+#' \code{identity}: no transformation
+#'
+#' \code{logit}: \eqn{\ln{\frac{x}{1-x}}}. Undefined when \eqn{x = 1} or \eqn{x = 0}. Recommended by Warton & Hui (2011) over the square root arcsine transformation when transforming true proportions for analysis that assumes a Gaussian distribution.
+#'
+#' \code{empirical_logit}: \eqn{\ln{\frac{x+\epsilon}{1-x+\epsilon}}}. A modified logit transformation recommend by Warton & Hui (2011) when 0's or 1's are present in the data.
+#'
+#' \code{probit}: \eqn{\int_{-\infty}^{x}\frac{1}{\sqrt{2 \pi}}\exp{-\frac{t^2}{2}}dt}
+#'
+#' \code{log}: \eqn{\ln(x)}
+#'
+#' \code{sqarcsin}: \eqn{\arcsin(\sqrt{x})}
+#'
+#'
+#' ## Missing Value Handling
+#'
+#' \code{ignore}: Function will ignore missing values in the data and return a vector of adjusted values with the original missing values in place.
+#'
+#' \code{remove}: Function will remove missing values in the data and return a shorter vector or adjusted values.
+#'
+#' \code{as.is}: Function will perform the computation with the missing values, possibly returning a vector of \code{NA}s.
+#'
+#' \code{fail}: Function will throw an error if the data contains any missing value.
 #'
 #' @references
 #' Kubinec, R. 2022. Ordered Beta Regression: A Parsimonious, Well-Fitting Model for Continuous Data with Lower and Upper Bounds. Political Analysis:1–18.
@@ -127,7 +175,7 @@ optim2 <- function(silent=TRUE,...){
 adjust_prop <- function(x,
                         nudge.method = c("replace","smithson", "add", "subtract", "drop"),
                         nudge.size = c("macmillan", "warton_min", "warton_max"),
-                        trans = c("identity","logit","empirical_logit","probit","log"),
+                        trans = c("identity","logit","empirical_logit","probit","log","sqarcsin"),
                         bounds = c("both","zero","one"),
                         na.action = c("ignore","remove","as.is","fail")){
 
@@ -252,7 +300,8 @@ adjust_prop <- function(x,
                     "logit" = qlogis(x),
                     "empirical_logit" = log((x + epsilon) / (1 - x + epsilon)),
                     "probit" = qnorm(x),
-                    "log" = log(x))
+                    "log" = log(x),
+                    "sqarcsin" = asin(sqrt(x)))
   x.trans <- structure(x.trans,
                        "adj.method" = list(
                          "epsilon" = epsilon,

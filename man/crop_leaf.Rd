@@ -23,3 +23,13 @@ a cropped 'cimg' object
 \description{
 Crop out non-leaf pixels marked by the color blue as \code{NA}s. Non-leaf pixels need to be cropped out for further analyses.
 }
+\examples{
+file_path <- system.file("extdata/mock_leaf14.png",package="herbivar")
+img <- load.image(file_path) \%>\% add_px_size("dpi:300")
+plot(img)
+cropped_img <- crop_leaf(img)
+plot(cropped_img)
+
+analyze_holes(cropped_img) \%>\% print()
+
+}

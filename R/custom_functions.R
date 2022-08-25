@@ -1,9 +1,8 @@
 #install.packages("C:/R Projects/Package Building/herbivar_0.1.0.tar.gz", repos = NULL, type="source")
 #detach("package:herbivar",unload=T)
-# Version date  "2022-08-07 11:12:31 EDT"
-#Sys.time()
 herbivar.version <- function(x){
-  print("2022-08-07 11:12:31 EDT")
+  utils::packageDate("herbivar")
+  message("Still in development; use with caution!")
 }
 
 .onAttach <- function(...){
@@ -18,11 +17,19 @@ detach.herbivar <- function(x){
   message("goodbye!")
 }
 
+reintall.herbivar <- function(...){
+  detach.herbivar()
+  install.packages("C:/R Projects/Package Building/herbivar_0.1.0.tar.gz", repos = NULL, type="source")
+  library(herbivar)
+}
+
 ### To do:
+## Vignette for neutral model & leaf scan pipeline
+## Documentation & more commentary
 ## Add leaf number support
 ## Add lambda argument in alloT functions
 ## Add in co-limitation theory
-## Add in Jensen's sim and aiterate
+## Add in jiterate and aiterate
 
 
 #### End ####

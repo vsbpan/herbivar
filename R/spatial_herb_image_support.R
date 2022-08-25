@@ -199,6 +199,20 @@ max_scale <- function(object){
 #'
 #' @return A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixset'.
 #' @note The code for the watershed method is adapted from Simon Barthelme's vignette https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html. accessed date 2022-07-25.
+#' @examples
+#' file_path <- system.file("extdata/IMG_20220726_0004.png",package="herbivar")
+#' img <- load.image(file_path) %>%
+#'    crop(empty.rm = "auto", cut_edge = 10) %>%
+#'    add_px_size("dpi:300") %>%
+#'    thin(3)
+#'
+#' plot(img)
+#' img.cleaned <- clean_leaf(img)
+#'
+#' plot(img.cleaned)
+#'
+#'
+#' @export
 clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
                        fg.adjust = 1, blur.size = 2, plot = TRUE,
                        save.plot.path = NA, save.plot.size = "original",
@@ -289,6 +303,15 @@ clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
 #' @param px.size value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.
 #'
 #' @return a cropped 'cimg' object
+#' @examples
+#' file_path <- system.file("extdata/mock_leaf14.png",package="herbivar")
+#' img <- load.image(file_path) %>% add_px_size("dpi:300")
+#' plot(img)
+#' cropped_img <- crop_leaf(img)
+#' plot(cropped_img)
+#'
+#' analyze_holes(cropped_img) %>% print()
+#'
 #' @export
 crop_leaf <- function(object, as.mat = FALSE, invalid = NA, rgb.index = 3L, px.size = NA){
   if(is.na(px.size)){
@@ -429,7 +452,7 @@ leaf_area <- function(object, px.size = NA){
 #' @param mat a matrix
 #' @return a 'ppp' object with pixels as the unit.
 mat2ppp <- function(mat){
-  if(inherits(mat, "matrix")){
+  if(!inherits(mat, "matrix")){
     stop("Object must be a matrix")
   }
   indices<-as.data.frame(which(mat > 0,arr.ind = T))
