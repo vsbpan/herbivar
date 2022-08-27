@@ -666,8 +666,10 @@ plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
     }
     ndraws <- ifelse(spaghetti < nboot, spaghetti, nboot)
 
+    alpha.val <- 1 / (ndraws^0.3)
     for (i in seq_len(ndraws)){
-      graphics::lines(x$boot_array[,"p",i],x$boot_array[,"L",i], col = "grey")
+      graphics::lines(x$boot_array[,"p",i],x$boot_array[,"L",i],
+                      col = scales::alpha(colour = "grey", alpha.val))
     }
     graphics::lines(x = x$lc$p, y = x$lc$L, col = lc.col,lwd = lc.lwd)
   } else {

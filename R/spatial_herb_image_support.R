@@ -304,7 +304,7 @@ clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
 #'
 #' @return a cropped 'cimg' object
 #' @examples
-#' file_path <- system.file("extdata/mock_leaf14.png",package="herbivar")
+#' file_path <- system.file("extdata/mock_leaf8.png",package="herbivar")
 #' img <- load.image(file_path) %>% add_px_size("dpi:300")
 #' plot(img)
 #' cropped_img <- crop_leaf(img)
@@ -497,7 +497,7 @@ thin <- function(object, thin = 3){
 #' @description crop image
 #' @param object a 'cimg', 'pixset', or 'array' object to be cropped.
 #' @param x,y a vector of integers indicating which row or column to keep. If set to \code{NULL}, all rows or clumns will be retained.
-#' @param empty.rm white regions of the image as indicated by the supplied value will be automatically cropped out up to a width (set by \code{pad}) on the image boundaries. Only supported for grayscale images unless set to "auto". Ignored if set to \code{NULL} (default). Images cropped via \code{crop_leaf()} has white space represented by \code{NA}, otherwise white space is usually represented by 1. If set to "auto", the color of the white space will be automatically selected via \code{kmeans}. The function will throw a warning if the object contains \code{NA} but \code{empty.rm} is not set to \code{NULL} or \code{NA} .
+#' @param empty.rm white regions of the image as indicated by the supplied value will be automatically cropped out up to a width (set by \code{pad}) on the image boundaries. Only supported for grayscale images unless set to "auto". Ignored if set to \code{NULL} (default). Images cropped via \code{crop_leaf()} has white space represented by \code{NA}, otherwise white space is usually represented by 1. If set to "auto", the color of the white space will be automatically selected via \code{kmeans}. The function will throw a warning if the object contains \code{NA} but \code{empty.rm} is not set to \code{NULL} or \code{NA}.
 #' @param pad the number of pixels on the image boundaries when using \code{empty.rm}. Ignored if \code{empty.rm} is set to \code{FALSE}.
 #' @param cut_edge the number of pixels to cut off from all image boundaries. No pixels are removed if set to \code{NA} (default). Overwrites \code{pad}.
 #' @return a cropped object of the same supplied object class.

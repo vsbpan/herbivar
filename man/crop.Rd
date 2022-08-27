@@ -11,7 +11,7 @@ crop(object, x = NULL, y = NULL, empty.rm = NULL, pad = 10, cut_edge = NA)
 
 \item{x, y}{a vector of integers indicating which row or column to keep. If set to \code{NULL}, all rows or clumns will be retained.}
 
-\item{empty.rm}{white regions of the image as indicated by the supplied value will be automatically cropped out up to a width (set by \code{pad}) on the image boundaries. Only supported for grayscale images unless set to "auto". Ignored if set to \code{NULL} (default). Images cropped via \code{crop_leaf()} has white space represented by \code{NA}, otherwise white space is usually represented by 1. If set to "auto", the color of the white space will be automatically selected via \code{kmeans}. The function will throw a warning if the object contains \code{NA} but \code{empty.rm} is not set to \code{NULL} or \code{NA} .}
+\item{empty.rm}{white regions of the image as indicated by the supplied value will be automatically cropped out up to a width (set by \code{pad}) on the image boundaries. Only supported for grayscale images unless set to "auto". Ignored if set to \code{NULL} (default). Images cropped via \code{crop_leaf()} has white space represented by \code{NA}, otherwise white space is usually represented by 1. If set to "auto", the color of the white space will be automatically selected via \code{kmeans}. The function will throw a warning if the object contains \code{NA} but \code{empty.rm} is not set to \code{NULL} or \code{NA}.}
 
 \item{pad}{the number of pixels on the image boundaries when using \code{empty.rm}. Ignored if \code{empty.rm} is set to \code{FALSE}.}
 
