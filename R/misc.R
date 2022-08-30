@@ -29,6 +29,8 @@ reinstall.herbivar <- function(...){
 ## Add lambda argument in alloT functions
 ## Add in co-limitation theory
 ## Add in jiterate and aiterate
+## Ad levene test, correlation least squares, Brown-Forsthe test, Bayesian test for heteroskedasticity (Dumitrscu 2019), dglm (?)
+## Padé approximant for JE stuff
 
 
 

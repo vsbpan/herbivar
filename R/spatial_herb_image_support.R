@@ -196,6 +196,17 @@ max_scale <- function(object){
 #' @param ws.thresh a threshold for selecting leaf pixels from a watershed transformed image. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "auto".
 #' @param px.size value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.
 #' @details
+#' Some quick notes:
+#'
+#' \code{fg.thresh} is better left at "auto", unless you know what parameter is best tuned for the set of images you will process.
+#'
+#' \code{fg.adjust} can be increased to pick up more of the foreground, and decreased if too much non-leaf pixels are misidentified.
+#'
+#' \code{bg.thresh} can be lowered occasionally when lighter spots of the leaf is mistaken as background.
+#'
+#' \code{blur.size} can be increased when small white speckles is present in the processed image.
+#'
+#' \code{km} can be toggled to change the number of clusters and the boundary rank selected when "auto" misbehaves.
 #'
 #' @return A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixset'.
 #' @note The code for the watershed method is adapted from Simon Barthelme's vignette https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html. accessed date 2022-07-25.
@@ -210,8 +221,6 @@ max_scale <- function(object){
 #' img.cleaned <- clean_leaf(img)
 #'
 #' plot(img.cleaned)
-#'
-#'
 #' @export
 clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
                        fg.adjust = 1, blur.size = 2, plot = TRUE,

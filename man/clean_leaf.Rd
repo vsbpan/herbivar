@@ -53,6 +53,19 @@ A 'cimg' object if \code{return.cimg} is set to \code{TRUE}, otherwise, a 'pixse
 \description{
 get a binary-ized image of a leaf scan, removing background artifacts and eaten sections of the leaf.
 }
+\details{
+Some quick notes:
+
+\code{fg.thresh} is better left at "auto", unless you know what parameter is best tuned for the set of images you will process.
+
+\code{fg.adjust} can be increased to pick up more of the foreground, and decreased if too much non-leaf pixels are misidentified.
+
+\code{bg.thresh} can be lowered occasionally when lighter spots of the leaf is mistaken as background.
+
+\code{blur.size} can be increased when small white speckles is present in the processed image.
+
+\code{km} can be toggled to change the number of clusters and the boundary rank selected when "auto" misbehaves.
+}
 \note{
 The code for the watershed method is adapted from Simon Barthelme's vignette https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html. accessed date 2022-07-25.
 }
@@ -67,6 +80,4 @@ plot(img)
 img.cleaned <- clean_leaf(img)
 
 plot(img.cleaned)
-
-
 }
