@@ -141,7 +141,7 @@ watershed2 <- function(seed, p, spectrum, thr = "auto", approx.res = 10000, km =
 #' @param fg.thr an internal argument to pass calculated threshold to reduce redundant computation. Must be a numeric value.
 #' @return a pixset with the selected pixels
 #' @export
-fg_threshold <- function(img, fg.thresh = "auto", fg.adjust = 1, approx.res = 10000,
+.fg_threshold <- function(img, fg.thresh = "auto", fg.adjust = 1, approx.res = 10000,
                          km = c(1L, 2L), fg.thr = NULL){
   if(is.null(fg.thr)){
     fg.thr <- threshold2(img,thr = as.character(fg.thresh),adjust = fg.adjust,
@@ -238,7 +238,7 @@ clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
   }
 
   bg <- (!threshold2(object,thr = bg.thresh, approx.res = approx.res, km = km))
-  fg <- fg_threshold(object,fg.thresh = fg.thresh,fg.adjust = fg.adjust,
+  fg <- .fg_threshold(object,fg.thresh = fg.thresh,fg.adjust = fg.adjust,
                      approx.res = approx.res, km = km)
   fg.thr <- attr(fg, "threshold")
 
@@ -264,7 +264,7 @@ clean_leaf <- function(object, fg.thresh = "auto", bg.thresh = "10%",
           break
         }
 
-        fg <- fg_threshold(object, fg.thr = fg.thr)
+        fg <- .fg_threshold(object, fg.thr = fg.thr)
         seed <- bg+2*fg
         p <- 1/(1+enorm(imgradient(object,"xy")))
         ws <- watershed2(seed = seed, p = p, spectrum = spec, thr = ws.thresh,

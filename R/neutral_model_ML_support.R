@@ -100,7 +100,7 @@ qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
 #' @param truncate if \code{TRUE} (default), truncate generated values of \eqn{\phi_T} to \eqn{[0, 1]}.
 #' @return a vector of numeric values
 #' @export
-allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
+.allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
                                    n.sim=1000,truncate=T){
   #Forward approximate simulation (not exact!)
   lambda<-mean.phi.T*(2-a)/(1-a)*((max.phi^(1-a)-min.phi^(1-a))/(max.phi^(2-a)-min.phi^(2-a)))
@@ -140,7 +140,7 @@ allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
 #'
 #' The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
 #'
-#' Because the CDF of the neutral herbivory distribution is too computationally intensive, \code{ralloT()} generates values using random draws from the Poisson and 'bite size' distribution. It is essentially a wrapper for the function \code{allometry.herb.quasi.sim()}. For the same reason, \code{qalloT()} estimates the quantile function by generating \code{n.sim} draws from the neutral herbivory distribution then finding the empirical cumulative density function.
+#' Because the CDF of the neutral herbivory distribution is too computationally intensive, \code{ralloT()} generates values using random draws from the Poisson and 'bite size' distribution. It is essentially a wrapper for the function \code{.allometry.herb.quasi.sim()}. For the same reason, \code{qalloT()} estimates the quantile function by generating \code{n.sim} draws from the neutral herbivory distribution then finding the empirical cumulative density function.
 #'
 #'
 #' @param x,q a vector of values of proportion herbivory
@@ -175,14 +175,14 @@ ralloT<-function(n, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
                                  a = a)
   }
 
-  phi.T<-allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
+  phi.T<-.allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
                                   n.sim = n,
                                   min.phi = min.phi,
                                   max.phi = max.phi,
                                   a = a,
                                   truncate = T)
   # while(any(phi.T>1)){
-  #   phi.T[phi.T>1] <- allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
+  #   phi.T[phi.T>1] <- .allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
   #                                              n.sim = sum(phi.T>1),
   #                                              min.phi = min.phi,
   #                                              max.phi = max.phi,
@@ -248,18 +248,18 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     #Pre-calculate indices
     phi.T.index<-findInterval(x = x, vec = phi)
 
-    #Find lambda outside of dk.cond.lambda() to save computation
+    #Find lambda outside of .dk.cond.lambda() to save computation
     lambda <- get_lambda(mean.phi.T,
                          min.phi = min.phi,
                          max.phi = max.phi,
                          a = a)
 
     #Numeric summation of joint prob from k=0 to k=max_k for each observed x (phi.T)
-    prob<-as.vector(tcrossprod(dk.cond.lambda(k = k.vec,
+    prob<-as.vector(tcrossprod(.dk.cond.lambda(k = k.vec,
                                               k.max.tolerance = k.max.tolerance,
                                               lambda = lambda,
                                               log = FALSE),
-                               dalloT.cond.k.fft.conv(phi.T = x,
+                               .dalloT.cond.k.fft.conv(phi.T = x,
                                                       k = k.vec,
                                                       fft.vec = Ft.p.phi,
                                                       phi = phi,
@@ -400,7 +400,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
                                  a = a)
   }
 
-  phi.T<-allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
+  phi.T<-.allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
                                   n.sim = n.sim,
                                   min.phi = min.phi,
                                   max.phi = max.phi,
@@ -417,7 +417,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 
 
 #' @title Calculate the Conditional Probability Matrix of P(phi.T | k) Via Gaussian Approximation
-#' @description Internal function of \code{dalloT.cond.k.fft.conv()} used to calculate \eqn{P(\phi_T | k)} via Gaussian approximation for very large values of \eqn{k.}
+#' @description Internal function of \code{.dalloT.cond.k.fft.conv()} used to calculate \eqn{P(\phi_T | k)} via Gaussian approximation for very large values of \eqn{k.}
 #' @details
 #' Owing to CLT,
 #' \deqn{P(\phi_T | k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]}),} where
@@ -431,7 +431,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @param log if \code{TRUE} (default is \code{FASLE}), return probabilities on the log scale.
 #' @export
-dalloT.cond.k.gauss.approx<-function(phi.T,k,min.phi=0.005,max.phi=1,a=14/9,log=FALSE){
+.dalloT.cond.k.gauss.approx<-function(phi.T,k,min.phi=0.005,max.phi=1,a=14/9,log=FALSE){
   phi.bar<-(1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a))
   phi.var<-(1-a)/(3-a)*(max.phi^(3-a)-min.phi^(3-a))/(max.phi^(1-a)-min.phi^(1-a))-phi.bar^2
 
@@ -443,7 +443,7 @@ dalloT.cond.k.gauss.approx<-function(phi.T,k,min.phi=0.005,max.phi=1,a=14/9,log=
 
 
 #' @title Perform k Convolutions of Fourier Transformed Vector
-#' @description Internal function of \code{dalloT.cond.k.fft.conv()} used to perform \eqn{k} convolutions of a supplied Fourier transformed vector. Parallel computing is supported and requires an already registered cluster.
+#' @description Internal function of \code{.dalloT.cond.k.fft.conv()} used to perform \eqn{k} convolutions of a supplied Fourier transformed vector. Parallel computing is supported and requires an already registered cluster.
 #' @details
 #' \deqn{P(\phi_T|k) = \overbrace{P(\phi)*P(\phi)...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
 #' @param k a vector of integers indicating the number of convolutions to apply to a Fourier transformed vector
@@ -451,7 +451,7 @@ dalloT.cond.k.gauss.approx<-function(phi.T,k,min.phi=0.005,max.phi=1,a=14/9,log=
 #' @param parallel if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 50000, as no computational efficiency would be gained.
 #' @return A \code{length(fft.vec)} x \code{length(k)} matrix of conditional probabilities
 #' @export
-convolve.dist <- function(k, fft.vec, parallel = FALSE){
+.convolve.dist <- function(k, fft.vec, parallel = FALSE){
   fft.vec.length<-length(fft.vec)
   if(parallel &&
      (50000 < fft.vec.length)){ # Only long fft.vec benefits from parallel
@@ -481,7 +481,7 @@ convolve.dist <- function(k, fft.vec, parallel = FALSE){
 #' @param phi.T.index a vector of integers indicating the location where phi.T most closely match the grid of probabilities. If \code{NULL} (default), the indices are calculated using \code{phi.T}, \code{min.phi}, \code{max.phi}, and \code{a}. Supplying a pre-calculated index vector saves a lot of computation when the function is used repeatedly.
 #' @return a \code{length(phi)} X \code{length(k)} matrix of conditional probabilities.
 #' @export
-dalloT.cond.k.fft.conv<-function(phi.T, k, fft.vec, phi, log = FALSE,
+.dalloT.cond.k.fft.conv<-function(phi.T, k, fft.vec, phi, log = FALSE,
                                  min.phi = 0.005, max.phi = 1,
                                  a = 14/9, k.fft.limit = 100,
                                  parallel = FALSE,phi.T.index = NULL){
@@ -495,7 +495,7 @@ dalloT.cond.k.fft.conv<-function(phi.T, k, fft.vec, phi, log = FALSE,
     # Might be able to save some computation by feeding in observed data directly to
     # get the prob, rather than searching in a big matrix
     # The approximation is not needed for biologically reasonable parameter space (!!)
-    prob.max.gauss.approx<-dalloT.cond.k.gauss.approx(phi.T = phi,
+    prob.max.gauss.approx<-.dalloT.cond.k.gauss.approx(phi.T = phi,
                                                       k = k2,
                                                       min.phi = min.phi,
                                                       max.phi = max.phi,
@@ -503,14 +503,14 @@ dalloT.cond.k.fft.conv<-function(phi.T, k, fft.vec, phi, log = FALSE,
                                                       log = FALSE)
 
 
-    cond.prob.mat<-convolve.dist(k = k1,
+    cond.prob.mat<-.convolve.dist(k = k1,
                                  fft.vec =  fft.vec,
                                  parallel = parallel)[seq_along(phi),]
     # Values over the upper boundary are cut off with the indexing
 
     cond.prob.mat<-cbind(cond.prob.mat,prob.max.gauss.approx)
   } else {
-    cond.prob.mat<-convolve.dist(k = k,
+    cond.prob.mat<-.convolve.dist(k = k,
                                  fft.vec =  fft.vec,
                                  parallel = parallel)[seq_along(phi),]
     # Returns a matrix. Row is phi.T and column is k.
@@ -557,7 +557,7 @@ dalloT.cond.k.fft.conv<-function(phi.T, k, fft.vec, phi, log = FALSE,
 #' @param k.max.tolerance the tolerance threshold of maximum convolution cut off (ideally probabilities above \code{k.max} convolutions is vanishingly small). See details of \code{?dalloT()}
 #' @return a \code{(length(phi.T))} X \code{length(k)} matrix of conditional probabilities.
 #' @export
-dk.cond.lambda<-function(k,mean.phi.T=NULL,min.phi=NULL,max.phi=NULL,
+.dk.cond.lambda<-function(k,mean.phi.T=NULL,min.phi=NULL,max.phi=NULL,
                          a=NULL,k.max.tolerance=1e-5,lambda=NULL,log=FALSE){
   if(is.null(lambda)){
     lambda<-mean.phi.T/((1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a)))
