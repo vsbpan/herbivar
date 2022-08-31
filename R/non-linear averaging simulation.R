@@ -191,9 +191,9 @@ JE2 <- function(model, x, RV.name = NULL, nboot = 1L, summarise = TRUE,
           break
         }
       }
-      graphics::lines(mat[,i]~x.md2, col = scales::alpha(colour = "black", alpha.val))
+      graphics::lines(mat[,i]~x.md2, col = scales::alpha(colour = "blue", alpha.val))
     }
-    graphics::abline(h = 0, col = "blue", lwd = 2)
+    graphics::abline(h = 0, col = "black", lwd = 2)
     graphics::lines(apply(mat,1,function(x){quantile(x,0.025)}) ~ x.md2, col = "red",
                     lwd = 2, l = "dashed")
     graphics::lines(apply(mat,1,function(x){quantile(x,0.975)}) ~ x.md2, col = "red",
