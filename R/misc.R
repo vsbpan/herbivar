@@ -388,7 +388,7 @@ r2_partial.brmsfit<-function(object,var,summary=TRUE,robust=FALSE,probs = c(0.02
   var_ypred <- matrixStats::rowVars(ypred)
   var_ypred.og <- matrixStats::rowVars(ypred.og)
   var_e <- matrixStats::rowVars(e)
-  partial_r2 <- as.matrix((var_ypred.og - var_ypred) / (var_ypred.og + var_e))
+  partial_r2 <- as.matrix(var_ypred.og / (var_ypred.og + var_e) - var_ypred /(var_ypred + var_e) )
 
   if(summary){
     partial_r2 <- brms::posterior_summary(partial_r2, probs = probs, robust = robust)
