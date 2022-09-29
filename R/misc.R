@@ -372,7 +372,10 @@ r2_partial.brmsfit<-function(object,var,summary=TRUE,robust=FALSE,probs = c(0.02
   .is_inst("matrixStats", stop.if.false = TRUE)
   stopifnot(inherits(object, "brmsfit"))
   pred.data <- object$data
-  var.names <- names(object$data)
+  var.names <- names(object$data)[-1]
+  if(!is.null(stats::formula(x)$response)){
+    warning("Multivariate model is untested. Proceed with caution.")
+  }
   if(!any(var%in%var.names)){
     stop(paste0("Cannot find variable in model. Try: ", paste0(var.names, collapse = ", ")))
   }
