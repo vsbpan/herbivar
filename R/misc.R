@@ -373,7 +373,7 @@ r2_partial.brmsfit<-function(object,var,summary=TRUE,robust=FALSE,probs = c(0.02
   stopifnot(inherits(object, "brmsfit"))
   pred.data <- object$data
   var.names <- names(object$data)[-1]
-  if(!is.null(stats::formula(x)$response)){
+  if(!is.null(stats::formula(object)$response)){
     warning("Multivariate model is untested. Proceed with caution.")
   }
   if(!any(var%in%var.names)){
