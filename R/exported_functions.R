@@ -1,13 +1,20 @@
 ### Export functions from other packages
 
 #' @export
-ad.test <- function(...) {kSamples::ad.test(...)}
+ad.test <- function(...) {
+  .is_inst("KSamples",stop.if.false = TRUE)
+  kSamples::ad.test(...)
+}
 
 #' @export
-hessian <- function(...) {numDeriv::hessian(...)}
+hessian <- function(...) {
+  .is_inst("numDeriv",stop.if.false = TRUE)
+  numDeriv::hessian(...)
+}
 
 #' @export
 KL<-function(x, test.na = TRUE, unit = "log", est.prob = NULL) {
+  .is_inst("philentropy",stop.if.false = TRUE)
   philentropy::KL(x, test.na = test.na, unit = unit, est.prob = est.prob)
 }
 

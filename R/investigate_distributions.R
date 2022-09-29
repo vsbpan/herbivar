@@ -398,7 +398,12 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
            color="Data",
            fill="Data")+
       ggplot2::theme_bw(base_size=15)
-    return(ggpubr::ggarrange(g,g2,common.legend = T,legend = "top"))
+    if(.is_inst("ggpubr")){
+      return(ggpubr::ggarrange(g,g2,common.legend = TRUE,legend = "top"))
+    } else {
+      return(list(g,g2))
+    }
+
   }
 }
 
@@ -451,6 +456,7 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
 #' @export
 get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
                             nboot=1,n.sim=NULL,digits=2){
+  .is_inst("purrr", stop.if.false = TRUE)
   test <- match.arg(test)
   out.list<-vector(mode="list",length=nboot)
   obs.out<-lapply(allo.fit.list,function(x){

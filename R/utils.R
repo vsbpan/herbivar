@@ -358,7 +358,9 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        display = c("sites", "species", "biplot", "centroids"),
                        group = NULL){
   display <- match.arg(display,several.ok = TRUE)
-  s <- vegan::scores(x,choices = choices,scaling = scaling)
+  if(.is_inst("vegan",stop.if.false = TRUE)){
+    s <- vegan::scores(x,choices = choices,scaling = scaling)
+  }
   name <- names(s)
   if(is.null(name)){
     name <- "sites"
@@ -404,7 +406,7 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
     s$biplot$yend <-s$biplot[,dim2]
     g <- g + ggplot2::geom_text(data = s$biplot,
                                 ggplot2::aes(label = biplot), color = "black") +
-      gggplot2::eom_segment(data = s$biplot, ggplot2::aes(x = x,
+      ggplot2::geom_segment(data = s$biplot, ggplot2::aes(x = x,
                                         y = y,
                                         xend = xend,
                                         yend = yend),
@@ -441,4 +443,22 @@ hellinger_trans <- function(x){
   rs[rs == 0] <- 1
   sqrt(x/rs)
 }
+
+
+.is_inst <- function(pkg, stop.if.false = FALSE, prompt = TRUE) {
+  out <- nzchar(system.file(package = pkg))
+  if(!out){
+    message(pkg," is not installed. Install ",  pkg, "?")
+    if(prompt && menu(c("Yes","No")) == 1){
+      install.packages(pkg)
+      out <- nzchar(system.file(package = pkg))
+    }
+  }
+  if(stop.if.false && !out){
+    stop("Required package ", pkg, " not found")
+  }
+  return(out)
+}
+
+
 

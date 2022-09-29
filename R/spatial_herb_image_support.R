@@ -634,8 +634,9 @@ threshold2<-function (im, thr = "auto", approx = TRUE, adjust = 1,
           warning("'adjust' ignored when 'thr' not set to 'auto'")
         }
         regexp.num <- "\\d+(\\.\\d*)?|\\.\\d+"
+        .is_inst("stringr", stop.if.false = TRUE)
         qt <- stringr::str_match(thr, regexp.num)[, 1] %>%
-          as.numeric
+          as.numeric()
         thr <- quantile(v, qt/100,na.rm = TRUE)
       }
     }

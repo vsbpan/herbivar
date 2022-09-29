@@ -17,24 +17,16 @@ License: GPL (>= 3)
 Depends:
     imager
 Imports:
-    stringr,
     grDevices,
     spatstat.geom,
     spatstat.core,
     dplyr,
     ggplot2,
-    ggpubr,
     foreach,
     doParallel,
     DescTools,
-    kSamples,
-    numDeriv,
-    philentropy,
-    purrr,
     parallel,
     extraDistr,
-    insight,
-    scales
 Suggests: 
     spatstat,
     ineq

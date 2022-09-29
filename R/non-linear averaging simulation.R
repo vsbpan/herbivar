@@ -74,6 +74,7 @@ JE <- function(model, x, RV.name = NULL, nboot = 1L, summarise = TRUE, plot = FA
     y.xbar <- model(x.bar)
     y.bar <- mean(y)
   } else {
+    .is_inst("insight",stop.if.false = TRUE)
     if(is.null(getS3method("predict", class(model)[1],optional = TRUE))){
       warning(paste0("S3 method for predict() not found for class '", class(m)[1]),"'. Double check model prediction.")
     }
@@ -138,6 +139,7 @@ JE2 <- function(model, x, RV.name = NULL, nboot = 1L, summarise = TRUE,
   if(is.function(model)){
     y <- model(x)
   } else {
+    .is_inst("insight",stop.if.false = TRUE)
     if(is.null(getS3method("predict", class(model)[1],optional = TRUE))){
       warning(paste0("S3 method for predict() not found for class '", class(m)[1]),"'. Double check model prediction.")
     }
