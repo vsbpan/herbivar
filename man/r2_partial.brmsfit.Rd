@@ -2,9 +2,9 @@
 % Please edit documentation in R/misc.R
 \name{r2_partial.brmsfit}
 \alias{r2_partial.brmsfit}
-\title{Get Partial R2 of Fitted Model}
+\title{Partial R2 of Fitted 'brmsfit' Model Predictor}
 \usage{
-r2_partial.brmsfit(
+\method{r2_partial}{brmsfit}(
   object,
   var,
   summary = TRUE,
@@ -27,5 +27,5 @@ r2_partial.brmsfit(
 a matrix of partial r2 draws or a vector of partial r2 summary.
 }
 \description{
-Get Partial R2 of Fitted Model
+Calculate the Bayesian partial R2 of a specified predictor variable by finding the change in r2 when the predictor variable is set to zero.
 }

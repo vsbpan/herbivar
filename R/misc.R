@@ -346,9 +346,21 @@ hellinger_trans <- function(x){
   sqrt(x/rs)
 }
 
+#' @title Partial R2 of Fitted Model Predictor
+#' @description Generic method of finding the partial R2 of a specified predictor variable by finding the change in r2 when the predictor variable is set to zero.
+#' @param object a supported model fit object
+#' @param var the name of the variable for which to assess the partial R2
+#' @param ... additional parameters
+#' @return the partial r2
+r2_partial <- function(object, var, ...){
+  UseMethod("r2_partial")
+}
 
 
-#' @title Get Partial R2 of Fitted Model
+
+
+#' @title Partial R2 of Fitted 'brmsfit' Model Predictor
+#' @description Calculate the Bayesian partial R2 of a specified predictor variable by finding the change in r2 when the predictor variable is set to zero.
 #' @param object A 'brmsfit' object
 #' @param var the name of the variable for which to assess the partial R2
 #' @param summary if \code{TRUE} (default), the posterior draws are summarized
