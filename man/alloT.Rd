@@ -120,5 +120,5 @@ where
 
 The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
 
-Because the CDF of the neutral herbivory distribution is too computationally intensive, \code{ralloT()} generates values using random draws from the Poisson and 'bite size' distribution. It is essentially a wrapper for the function \code{allometry.herb.quasi.sim()}. For the same reason, \code{qalloT()} estimates the quantile function by generating \code{n.sim} draws from the neutral herbivory distribution then finding the empirical cumulative density function.
+Because the CDF of the neutral herbivory distribution is too computationally intensive, \code{ralloT()} generates values using random draws from the Poisson and 'bite size' distribution. It is essentially a wrapper for the function \code{.allometry.herb.quasi.sim()}. For the same reason, \code{qalloT()} estimates the quantile function by generating \code{n.sim} draws from the neutral herbivory distribution then finding the empirical cumulative density function.
 }

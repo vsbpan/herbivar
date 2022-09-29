@@ -317,5 +317,128 @@ adjust_prop <- function(x,
 
 
 
+#' @title Summarise vector
+#' @description Handy function to summaries a vector of numeric values
+#' @param x A vector or matrix of numeric values
+#' @param interval The density interval used to find the upper and lower intervals. Default is 0.95.
+#' @param na.rm If \code{TRUE} (default is \code{FALSE}), missing values will be removed.
+#' @return a vector of numeric values summarising the vector \code{x}.
+summarise_vector <- function(x, interval = 0.95, na.rm = FALSE){
+  x <- c(x)
+  if(na.rm){
+    x <- x[!is.na(x)]
+  }
+  lower.prob <- (1-interval)/2
+  upper.prob <- 1 - lower.prob
+  if(any(is.na(x))){
+    out <- c("mean" = NA_real_,
+             "median" = NA_real_,
+             "sd" = NA_real_,
+             "lower" = NA_real_,
+             "upper" = NA_real_)
+  } else {
+    out <- c("mean" = mean(x),
+             "median" = median(x),
+             "sd" = sd(x),
+             "lower" = unname(quantile(x, prob = lower.prob)),
+             "upper" = unname(quantile(x, prob = upper.prob)))
+  }
+  return(out)
+}
 
+#' @title Get Biplot or Triplot
+#' @description Generate biplot or triplot using ggplot2.
+#' @param x an object that is supported by \code{vegan::scores()}
+#' @param choices a vector of length 2 defining the axes to plot
+#' @param scaling scaling argument passed to \code{vegan::scores()}
+#' @param display a vector of characters defining what to plot
+#' @param group a vector in the same length and order as the sites data used to fit the model that is used to color the site points
+#' @return a ggplot object
+get_biplot <- function(x, choices = c(1,2), scaling = 2,
+                       display = c("sites", "species", "biplot", "centroids"),
+                       group = NULL){
+  display <- match.arg(display,several.ok = TRUE)
+  s <- vegan::scores(x,choices = choices,scaling = scaling)
+  name <- names(s)
+  if(is.null(name)){
+    name <- "sites"
+    s <- list(s)
+  }
+  s <- lapply(seq_along(name), function(i,s,name){
+    x <- as.data.frame(s[[i]])
+    x <- cbind(x, "a" = rownames(x))
+    names(x)[length(x)] <- name[i]
+    x
+  }, s = s, name = name)
+  names(s) <- name
+  dim1 <- names(s$sites)[1]
+  dim2 <- names(s$sites)[2]
+  s$dummy <- data.frame(1,2)
+  names(s$dummy) <- c(dim1, dim2)
+
+  g <- s$dummy %>%
+    ggplot2::ggplot(ggplot2::aes_string(paste0("x = ", dim1),paste0("y = ", dim2))) +
+    ggplot2::geom_vline(ggplot2::aes(xintercept=0),linetype="dashed",color="grey",size=1) +
+    ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype="dashed",color="grey",size=1) +
+    ggplot2::theme_bw() +
+    ggplot2::labs(x = dim1, y= dim2)
+
+  if("sites" %in% display){
+    if(!is.null(group)){
+      s$sites <- cbind(s$sites, "group" = group)
+      g <- g + ggplot2::geom_point(data = s$sites, ggplot2::aes(color = group))
+    } else {
+      g <- g + ggplot2::geom_point(data = s$sites,color = "deepskyblue")
+    }
+  }
+
+  if("species" %in% display && !is.null(s$species)){
+    g <- g + ggplot2::geom_text(data = s$species,
+                                ggplot2::aes(label = species), color = "violetred")
+  }
+
+  if("biplot" %in% display && !is.null(s$biplot)){
+    s$biplot$x <- 0
+    s$biplot$y <- 0
+    s$biplot$xend <- s$biplot[,dim1]
+    s$biplot$yend <-s$biplot[,dim2]
+    g <- g + ggplot2::geom_text(data = s$biplot,
+                                ggplot2::aes(label = biplot), color = "black") +
+      gggplot2::eom_segment(data = s$biplot, ggplot2::aes(x = x,
+                                        y = y,
+                                        xend = xend,
+                                        yend = yend),
+                   arrow = ggplot2::arrow(length = unit(0.2, "cm")),
+                   color = "black",
+                   size = 1)
+  }
+
+  if("centroids" %in% display && !is.null(s$centroids)){
+    g <- g + ggplot2::geom_text(data = s$centroids,
+                                ggplot2::aes(label = centroids), color = "darkolivegreen")
+  }
+  return(g)
+}
+
+
+#' @title Inverse Hyperbolic Sine Transformation
+#' @description The inverse hyperbolic sine transformation that can be used in place of the log transformation when the vector contains zero.
+#' @param x a numeric vector to be transformed
+#' @return a transformed numeric vector
+#' @references
+#' Burbidge JB, Magee L, Robb AL (1988) Alternative Transformations to Handle Extreme Values of the Dependent Variable. Journal of the American Statistical Association 83:123–127.
+inv.hsin <- function(x){
+  log(sqrt(x^2+1) + x)
+}
+
+
+#' @title Hellinger Transformation
+#' @description  The Hellinger transformation for a community matrix where the relative species abundance at each site (row) is square root transformed. If no species is observed at a site, the function returns a zero for the site.
+#' @param x a community matrix where each column is a species and each row is a site
+#' @return a transformed community matrix
+hellinger_trans <- function(x){
+  rs <- rowSums(x)
+  rs[rs == 0] <- 1
+  sqrt(x/rs)
+}
 

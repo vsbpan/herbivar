@@ -28,10 +28,14 @@ Gini<-function(x, ...) {
 
 
 #' @export
-Skew<-function(...) {DescTools::Skew(...)}
+Skew<-function(x, weights = NULL, na.rm = FALSE, method = 1, ...) {
+  DescTools::Skew(x, weights = NULL, na.rm = FALSE, method = 1, ...)
+}
 
 #' @export
-Kurt<-function(...) {DescTools::Kurt(...)}
+Kurt<-function(x, weights = NULL, na.rm = FALSE, method = 1, ...) {
+  DescTools::Kurt(x, weights = NULL, na.rm = FALSE, method = 1, ...) + 3
+}
 
 #' @export
 clarkevans <- function(...){
