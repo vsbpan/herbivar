@@ -778,41 +778,16 @@ fit_allo_herb<-function(data.vec,
     return(nll.out)
   }
 
-  if(method=="nlminb"){
-    ML.fit<-nlminb(start = init,
-                   objective = nll,
-                   lower = lower,
-                   upper = upper,
-                   ...)
-    hessian <- hessian(nll, ML.fit$par)
-    loglik <- -ML.fit$objective
-    iters <- ML.fit$evaluations
-
-  } else if(method=="nlm") {
-    ML.fit<-nlm(p = init,
-                f = nll,
-                hessian = T,
-                ...)
-    hessian <- ML.fit$hessian
-    loglik <- -ML.fit$minimum
-    iters <- ML.fit$iterations
-    ML.fit$par <- ML.fit$estimate
-    ML.fit$convergence <- ifelse(ML.fit$code > 2 , 1 , 0) # rename the convergence code for consistency
-    ML.fit$message <- paste0("code = ", ML.fit$code)
-
-  } else {
-    ML.fit<-optim2(par = init,
+    ML.fit<-optim2(init = init,
                   fn = nll,
-                  hessian = T,
+                  hessian = TRUE,
                   method = method,
-                  lower=lower,
-                  upper=upper,
+                  lower = lower,
+                  upper = upper,
                   ...)
     hessian <- ML.fit$hessian
     loglik <- -ML.fit$value
     iters <- ML.fit$counts
-  }
-
 
   allo.herb.fit.out<-list("theta.names" = optim.vars,
                           "par" = ML.fit$par,

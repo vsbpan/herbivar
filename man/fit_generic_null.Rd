@@ -10,7 +10,7 @@ fit_generic_null(
   init = 0,
   lower = -Inf,
   upper = Inf,
-  method = c("Nelder-Mead", "BFGS", "L-BFGS-B", "nlminb"),
+  method = c("Nelder-Mead", "BFGS", "L-BFGS-B", "nlminb", "nlm"),
   id = NULL,
   ...
 )
@@ -24,7 +24,7 @@ fit_generic_null(
 
 \item{lower, upper}{A numeric vector indicating the bounds of each estimated variable for the "L-BFGS-B" and "Brent" method. Defaults to \code{-Inf} and \code{Inf}.}
 
-\item{method}{The method of maximum likelihood estimation algorithm. Acceptable methods are "Nelder-Mead" (Default), "BFGS", "L-BFGS-B", "Brent", and "nlminb". Defaults to "Brent" for one dimensional optimization. For details see \code{?stats::optim()} and \code{?stats::nlminb()}.}
+\item{method}{The method of maximum likelihood estimation algorithm. Acceptable methods are "Nelder-Mead" (Default), "BFGS", "L-BFGS-B", "Brent", "nlminb", and "nlm". Defaults to "Brent" for one dimensional optimization. For details see \code{?stats::optim()} and \code{?stats::nlminb()}.}
 
 \item{id}{A character string supplied for book keeping purposes. Default is \code{NULL}. Useful for when storing a large number of "generic_null_fit" objects in a list.}
 

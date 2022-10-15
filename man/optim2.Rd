@@ -4,9 +4,17 @@
 \alias{optim2}
 \title{General-Purpose Optimization With Error Handling}
 \usage{
-optim2(silent = TRUE, ...)
+optim2(init, fn, method, lower, upper, silent = TRUE, ...)
 }
 \arguments{
+\item{init}{initial values for the parameters to be optimized over}
+
+\item{fn}{function for which to find the minimum}
+
+\item{method}{method allowed by \code{stats::optim()}, as well as \code{nlm} and \code{nlminb}}
+
+\item{lower, upper}{lower and upper bound}
+
 \item{silent}{if \code{TRUE}, no message is returned. Default to \code{TRUE}.}
 
 \item{...}{extra arguments passed to \code{optim()}}
@@ -15,5 +23,5 @@ optim2(silent = TRUE, ...)
 a list
 }
 \description{
-A wrapper function of \code{stats::optim()} with error handling.
+A wrapper function of \code{stats::optim()}, \code{stats::nlm()}, and \code{stats::nlminb()} with error handling. Intended as an interval function.
 }

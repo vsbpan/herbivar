@@ -4,7 +4,7 @@
 #' @param family The generic null distribution. Valid options are "htlnorm" for hurdle truncated log-normal distribution, and "zoibeta" for zero-one-inflated beta distribution. see \code{?dzoibeta()} and \code{?dhtlnorm()}
 #' @param init Initial value for optimizer to start. Defaults to 0.
 #' @param lower,upper A numeric vector indicating the bounds of each estimated variable for the "L-BFGS-B" and "Brent" method. Defaults to \code{-Inf} and \code{Inf}.
-#' @param method The method of maximum likelihood estimation algorithm. Acceptable methods are "Nelder-Mead" (Default), "BFGS", "L-BFGS-B", "Brent", and "nlminb". Defaults to "Brent" for one dimensional optimization. For details see \code{?stats::optim()} and \code{?stats::nlminb()}.
+#' @param method The method of maximum likelihood estimation algorithm. Acceptable methods are "Nelder-Mead" (Default), "BFGS", "L-BFGS-B", "Brent", "nlminb", and "nlm". Defaults to "Brent" for one dimensional optimization. For details see \code{?stats::optim()} and \code{?stats::nlminb()}.
 #' @param id A character string supplied for book keeping purposes. Default is \code{NULL}. Useful for when storing a large number of "generic_null_fit" objects in a list.
 #' @param ... Additional arguments that are passed to the optimizer functions \code{optim()} or \code{nlminb()}.
 #' @return
@@ -44,7 +44,7 @@ fit_generic_null<- function(data.vec,
                             init = 0,
                             lower = -Inf,
                             upper = Inf,
-                            method=c("Nelder-Mead","BFGS","L-BFGS-B","nlminb"),
+                            method=c("Nelder-Mead","BFGS","L-BFGS-B","nlminb","nlm"),
                             id = NULL,
                             ...){
   method <- match.arg(method)
@@ -95,28 +95,17 @@ fit_generic_null<- function(data.vec,
     init <- rep(init, length(optim.vars))
   }
 
-  if(method == "nlminb"){
-    ML.fit<-nlminb(start = init,
-                   objective = nll,
-                   lower = lower,
-                   upper = upper,
-                   ...)
-    hessian <- hessian(nll, ML.fit$par)
-    loglik <- -ML.fit$objective
-    iters <- ML.fit$evaluations
-
-  } else {
-    ML.fit<-optim2(par = init,
+ ML.fit<-optim2(init = init,
                   fn = nll,
-                  hessian = T,
+                  hessian = TRUE,
                   method = method,
-                  lower=lower,
-                  upper=upper,
+                  lower = lower,
+                  upper = upper,
                   ...)
     hessian <- ML.fit$hessian
     loglik <- -ML.fit$value
     iters <- ML.fit$counts
-  }
+
   generic_null_fit.out<-list("theta.names" = optim.vars,
                           "par" = ML.fit$par,
                           "se" = tryCatch(sqrt(diag(solve(hessian))),

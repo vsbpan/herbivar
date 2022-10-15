@@ -54,24 +54,61 @@ combine.data.lists<-function(data.list,data.list2){
 
 
 #' @title General-Purpose Optimization With Error Handling
-#' @description A wrapper function of \code{stats::optim()} with error handling.
+#' @description A wrapper function of \code{stats::optim()}, \code{stats::nlm()}, and \code{stats::nlminb()} with error handling. Intended as an interval function.
+#' @param init initial values for the parameters to be optimized over
+#' @param fn function for which to find the minimum
+#' @param method method allowed by \code{stats::optim()}, as well as \code{nlm} and \code{nlminb}
+#' @param lower,upper lower and upper bound
 #' @param silent if \code{TRUE}, no message is returned. Default to \code{TRUE}.
 #' @param ... extra arguments passed to \code{optim()}
 #' @return a list
 #' @export
-optim2 <- function(silent=TRUE,...){
+optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
   mcall<-match.call()
+  fun <- function(foo,...){
+    if(method == "nlm"){
+      out <- stats::nlm(p = init,
+                 f = fn,
+                 hessian = T,
+                 ...)
+      out$objective <- out$minimum
+      out$counts <- out$iterations
+      out$par <- out$estimate
+      out$convergence <- ifelse(out$code > 2 , 1 , 0) # rename the convergence code for consistency
+      out$message <- paste0("code = ", out$code)
+    }
+    if(method == "nlminb"){
+      out <- stats::nlminb(start = init,
+                    objective = fn,
+                    lower = lower,
+                    upper = upper,
+                    ...)
+      out$value <- out$objective
+      out$counts <- out$evaluations
+      out$hessian <- hessian(nll, out$par)
+    } else {
+      out <- stats::optim(
+          par = init,
+          fn = fn,
+          method = method,
+          upper = upper,
+          lower = lower,
+          ...)
+    }
+    return(out)
+  }
+
   tryCatch(
     if(silent){
-      suppressWarnings(optim(...))
-    } else{
-      optim(...)
+      suppressWarnings(fun(...))
+    } else {
+      fun(...)
     },
     error = function(e){
       if(!silent){
         message("Optimization failed: \n", deparse(mcall))
       }
-      list("par" = NA,
+      list("par" = rep(NA, length(init)),
            "value" = NA,
            "counts" = c("function" = NA, "gradient" = NA),
            "convergence" = 1,
