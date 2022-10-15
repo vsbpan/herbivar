@@ -382,13 +382,14 @@ r2_partial.brmsfit<-function(object,var,summary=TRUE,robust=FALSE,probs = c(0.02
   pred.data[,match(var,var.names)] <- 0
 
   y <- brms::get_y(object)
-  ypred <- brms::posterior_epred(object, newdata = pred.data,allow_new_levels=TRUE)
+  ypred <- brms::posterior_epred(object, newdata = pred.data,
+                                 allow_new_levels = TRUE)
   ypred.og <- brms::posterior_epred(object)
-  e <- -1 * sweep(ypred, 2, y)
   var_ypred <- matrixStats::rowVars(ypred)
   var_ypred.og <- matrixStats::rowVars(ypred.og)
-  var_e <- matrixStats::rowVars(e)
-  partial_r2 <- as.matrix(var_ypred.og / (var_ypred.og + var_e) - var_ypred /(var_ypred + var_e) )
+  var_e <- matrixStats::rowVars(-1 * sweep(ypred, 2, y))
+  var_e.og <- matrixStats::rowVars(-1 * sweep(ypred.og, 2, y))
+  partial_r2 <- as.matrix(var_ypred.og / (var_ypred.og + var_e.og) - var_ypred /(var_ypred + var_e) )
 
   if(summary){
     partial_r2 <- brms::posterior_summary(partial_r2, probs = probs, robust = robust)
@@ -396,3 +397,4 @@ r2_partial.brmsfit<-function(object,var,summary=TRUE,robust=FALSE,probs = c(0.02
   rownames(partial_r2) <- "partial_R2"
   return(partial_r2)
 }
+
