@@ -509,9 +509,11 @@ thin <- function(object, thin = 3){
 #' @param empty.rm white regions of the image as indicated by the supplied value will be automatically cropped out up to a width (set by \code{pad}) on the image boundaries. Only supported for grayscale images unless set to "auto". Ignored if set to \code{NULL} (default). Images cropped via \code{crop_leaf()} has white space represented by \code{NA}, otherwise white space is usually represented by 1. If set to "auto", the color of the white space will be automatically selected via \code{kmeans}. The function will throw a warning if the object contains \code{NA} but \code{empty.rm} is not set to \code{NULL} or \code{NA}.
 #' @param pad the number of pixels on the image boundaries when using \code{empty.rm}. Ignored if \code{empty.rm} is set to \code{FALSE}.
 #' @param cut_edge the number of pixels to cut off from all image boundaries. No pixels are removed if set to \code{NA} (default). Overwrites \code{pad}.
+#' @param km an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2).
 #' @return a cropped object of the same supplied object class.
 #' @export
-crop <- function(object, x = NULL, y = NULL, empty.rm = NULL, pad = 10, cut_edge = NA){
+crop <- function(object, x = NULL, y = NULL, empty.rm = NULL,
+                 pad = 10, cut_edge = NA, km = c(2,3)){
   if(!(is.cimg(object) || is.pixset(object) || is.array(object))){
     stop("Unsupported object type. Object must be of class 'cimg', 'array', or 'pixset'")
   }
@@ -535,9 +537,13 @@ crop <- function(object, x = NULL, y = NULL, empty.rm = NULL, pad = 10, cut_edge
       empty.rm <- NA
     }
 
+    if(!is.null(x) || !is.null(y)){
+     warning("Ignored x and y settings when removing empty spaces")
+    }
+
     if(!is.na(empty.rm) && tolower(empty.rm) == "auto"){
       gs_obj <- grayscale(object)
-      white_space_thr <- cut_kmeans(c(gs_obj), km = c(2,3))
+      white_space_thr <- cut_kmeans(c(gs_obj), km = km)
       x.range <- range(which(rowSums((gs_obj > white_space_thr)) != n.y))
       y.range <- range(which(colSums((gs_obj > white_space_thr)) != n.x))
     } else {
