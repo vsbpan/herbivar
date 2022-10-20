@@ -4,7 +4,15 @@
 \alias{crop}
 \title{Crop Image}
 \usage{
-crop(object, x = NULL, y = NULL, empty.rm = NULL, pad = 10, cut_edge = NA)
+crop(
+  object,
+  x = NULL,
+  y = NULL,
+  empty.rm = NULL,
+  pad = 10,
+  cut_edge = NA,
+  km = c(2, 3)
+)
 }
 \arguments{
 \item{object}{a 'cimg', 'pixset', or 'array' object to be cropped.}
@@ -16,6 +24,8 @@ crop(object, x = NULL, y = NULL, empty.rm = NULL, pad = 10, cut_edge = NA)
 \item{pad}{the number of pixels on the image boundaries when using \code{empty.rm}. Ignored if \code{empty.rm} is set to \code{FALSE}.}
 
 \item{cut_edge}{the number of pixels to cut off from all image boundaries. No pixels are removed if set to \code{NA} (default). Overwrites \code{pad}.}
+
+\item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2).}
 }
 \value{
 a cropped object of the same supplied object class.
