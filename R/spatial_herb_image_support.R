@@ -915,7 +915,12 @@ plot.cimg <- function(x, frame, xlim = c(1, width(x)),
   invisible(x)
 }
 
-
+#' @title Plot image list
+#' @description plot image list via \code{spatstat.geom::plot.imlist()}
+#' @param x an object of class 'imlist'
+#' @param main a character string for the plot title
+#' @param ... additional arguments passed to \code{spatstat.geom::plot.imlist()}
+#' @return \code{NULL}
 plot.imlist <- function(x,main = "", ...){
   spatstat.geom::plot.imlist(x,plotcommand = "plot", main = main, ...)
 }

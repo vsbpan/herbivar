@@ -1,3 +1,7 @@
+#' @title Convert Array to Class 'Image'
+#' @description Convert array formatted as cimg or pixset to an object of class 'Image' from the package \code{EBImage}.
+#' @param x A four dimensional array (as in the format in the package \code{imager}), a cimg, or pixset object.
+#' @return an 'Image' object
 array2Image <- function(x){
   if(dim(x)[3] > 1){
     warning("More than one depth layer detected. Choosing only the first one. ")
@@ -17,6 +21,11 @@ array2Image <- function(x){
   return(out)
 }
 
+#' @title Convert Array to Class 'Image'
+#' @description Convert an object of class 'Image' from the package \code{EBImage} to an array formatted as cimg or pixset.
+#' @param x An 'Image' object
+#' @param imager_class If \code{TRUE} (default), convert the array into a cimg or pixset depending on whether the array elements are numeric or logical.
+#' @return A four dimensional array (as in the format in the package \code{imager}), a cimg, or pixset object.
 Image2array <- function(x, imager_class = TRUE){
   spec <- dim(x)[3]
   spec <- ifelse(is.na(spec),1,spec)
@@ -38,7 +47,73 @@ Image2array <- function(x, imager_class = TRUE){
   return(out)
 }
 
+immask <- function(object, pixset, background = NA){
+  img.spec <- imager::spectrum(object)
+  mask.spec <- imager::spectrum(pixset)
+  if(is.character(background)){
+    if(img.spec==3){
+      background <- c(grDevices::col2rgb(background))/255
+    } else {
+      message("Background color taken as luminance")
+      background <- crossprod((grDevices::col2rgb(background))/255, c(0.3,0.59,0.11))
+    }
 
+  }
+
+  if(img.spec==3){
+    if(mask.spec == 3){
+      col.index <- c(1,2,3)
+      if(length(background) < 3){
+        background <- rep(background,3)
+      }
+    } else {
+      col.index <- c(1,1,1)
+    }
+    object[,,,1][pixset[,,,col.index[1]]] <- background[1]
+    object[,,,2][pixset[,,,col.index[2]]] <- background[2]
+    object[,,,3][pixset[,,,col.index[3]]] <- background[3]
+  } else {
+    if(mask.spec > 1){
+      warning("Only fist color channel of pixset used to subset from image.")
+    }
+    if(length(background)>1){
+      warning("Only first elemenet of 'background' used. ")
+    }
+    object[,,,1][pixset[,,,1]] <- background[1]
+  }
+
+  return(object)
+}
+
+
+#' @title Evaluate Function For Each Height, Width, And Depth Element
+#' @description Evaluate a function for each height, width, and depth element share among a set of provided objects or color spectrum arrays.
+#' @param ... a set of array, cimg, or pixset
+#' @param FUN a function to be evaluated, supported by \code{match.fun()}.
+#' @return a cimg object
+#' @examples
+#' img <- image_example() %>% thin(3)
+#'
+#' # Find the maximum RGB value
+#' out <- slice_eval(G(img),R(img),B(img),FUN = "max")
+#' out
+#' # same thing
+#' all.equal(
+#'   out,
+#'   slice_eval(img,FUN = "max"))
+#'
+slice_eval <- function(..., FUN){
+  a <- EBImage::abind(...)
+  out <- array(
+    apply(
+      a,
+      MARGIN = c(1,2,3),
+      FUN = FUN
+    ),
+    dim =c(dim(a)[1:3],1)
+  )
+  as.cimg(out)
+}
 
 #' @title Invert colors
 #' @description Invert colors of an image. Works with any object type that is supported by \code{imager::imeval()}.
@@ -419,7 +494,10 @@ cut_kmeans <- function (x, km = c(1L,2L)) {
   return(thr)
 }
 
-
+#' @title Load Example Leaf Image
+#' @description A convenience function for loading example image built in the package.
+#' @param type a character string indicating the example image to be loaded
+#' @return an object of class 'cimg'
 image_example <- function(type = c("raw","processed")){
   type <- match.arg(type)
   file <- switch(type,
