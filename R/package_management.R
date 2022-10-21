@@ -30,13 +30,11 @@ reinstall.herbivar <- function(...){
 }
 
 ### To do:
-## Patch a = 1, a = 2
+## Patch a = 1, a = 2, add documentation
 ## Vignette for neutral model & leaf scan pipeline
 ## Documentation & more commentary
 ## Add leaf number support
-## Add lambda argument in alloT functions
 ## Add in co-limitation theory
-## Add in jiterate and aiterate
 ## Add levene test, correlation least squares, Brown-Forsthe test, Bayesian test for heteroskedasticity (Dumitrscu 2019), dglm (?)
 ## Kaiser–Meyer–Olkin Test
 

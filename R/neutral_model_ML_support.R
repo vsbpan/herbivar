@@ -44,7 +44,7 @@ dallo<-function(x,min.phi=0.005,max.phi=1,a=14/9,log = FALSE){
 rallo<-function(n,min.phi=0.005,max.phi=1,a=14/9){
   cdf.prob<-runif(n,min = 0,max = 1)
   # inverse transform sampling
-  phi <-(cdf.prob*(max.phi^(1-a)-min.phi^(1-a))+min.phi^(1-a))^(1/(1-a))
+  phi <- qallo(cdf.prob, min.phi = min.phi, max.phi = max.phi, a = a)
   return(phi)
 }
 
@@ -52,13 +52,24 @@ rallo<-function(n,min.phi=0.005,max.phi=1,a=14/9){
 #' @export
 pallo <- function(q, min.phi = 0.005, max.phi = 1, a = 14/9,
                  lower.tail = TRUE, log.p = FALSE){
-  p <- ifelse(q > 1,
-              1,
-              ifelse(q < min.phi,
-              0,
-              (q^(1-a) - min.phi^(1-a)) / (max.phi^(1-a) - min.phi^(1-a))
-              )
-              )
+  if(a == 1){
+    p <- ifelse(q > 1,
+                1,
+                ifelse(q < min.phi,
+                       0,
+                       (log(q) - log(min.phi)) / (log(max.phi) - log(min.phi))
+                )
+    )
+  } else {
+    p <- ifelse(q > 1,
+                1,
+                ifelse(q < min.phi,
+                       0,
+                       (q^(1-a) - min.phi^(1-a)) / (max.phi^(1-a) - min.phi^(1-a))
+                )
+    )
+  }
+
   if(!lower.tail){
    p <- 1-p
   }
@@ -71,7 +82,7 @@ pallo <- function(q, min.phi = 0.005, max.phi = 1, a = 14/9,
 
 #' @rdname allo
 #' @export
-qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
+qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
                 lower.tail = TRUE, log.p = FALSE){
   if(log.p){
     p <- exp(p)
@@ -79,9 +90,17 @@ qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
   if(!lower.tail){
     p <- 1 - p
   }
-  q <- ifelse(p > 1 | p < 0,
-              NaN,
-              (p*(max.phi^(1-a)-min.phi^(1-a))+min.phi^(1-a))^(1/(1-a)))
+  if(a == 1){
+    q <- ifelse(p > 1 | p < 0,
+                NaN,
+                exp(p*(log(max.phi)-log(min.phi))+log(min.phi))
+                )
+  } else {
+    q <- ifelse(p > 1 | p < 0,
+                NaN,
+                (p*(max.phi^(1-a)-min.phi^(1-a))+min.phi^(1-a))^(1/(1-a))
+                )
+  }
 
   return(q)
 }
@@ -103,7 +122,7 @@ qallo<-function(p,min.phi=0.005,max.phi=1,a=14/9,
 .allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
                                    n.sim=1000,truncate=T){
   #Forward approximate simulation (not exact!)
-  lambda<-mean.phi.T*(2-a)/(1-a)*((max.phi^(1-a)-min.phi^(1-a))/(max.phi^(2-a)-min.phi^(2-a)))
+  lambda<-get_lambda(mean.phi.T = mean.phi.T,min.phi = min.phi, max.phi = max.phi, a = a)
   k<-rpois(n.sim,lambda)
   phi_T<-vapply(X = k,
                 FUN = function(x) sum(
@@ -432,8 +451,8 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' @param log if \code{TRUE} (default is \code{FASLE}), return probabilities on the log scale.
 #' @export
 .dalloT.cond.k.gauss.approx<-function(phi.T,k,min.phi=0.005,max.phi=1,a=14/9,log=FALSE){
-  phi.bar<-(1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a))
-  phi.var<-(1-a)/(3-a)*(max.phi^(3-a)-min.phi^(3-a))/(max.phi^(1-a)-min.phi^(1-a))-phi.bar^2
+  phi.bar<-get_phi_bar(min.phi = min.phi, max.phi = max.phi, a = a)
+  phi.var<-get_phi_var(min.phi = min.phi, max.phi = max.phi, a = a)
 
   prob.mat<-(outer(phi.T, k, Vectorize(FUN = function(phi.T, k){
     dnorm(x = phi.T,mean = k*phi.bar,sd = sqrt(k*phi.var),log = log)
@@ -560,7 +579,10 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 .dk.cond.lambda<-function(k,mean.phi.T=NULL,min.phi=NULL,max.phi=NULL,
                          a=NULL,k.max.tolerance=1e-5,lambda=NULL,log=FALSE){
   if(is.null(lambda)){
-    lambda<-mean.phi.T/((1-a)/(2-a)*(max.phi^(2-a)-min.phi^(2-a))/(max.phi^(1-a)-min.phi^(1-a)))
+    lambda <- get_lambda(mean.phi.T,
+                                 min.phi = min.phi,
+                                 max.phi = max.phi,
+                                 a = a)
   }
   prob<-dpois(x = k,lambda = lambda)
   if((prob[length(prob)]>k.max.tolerance)||
@@ -1037,8 +1059,7 @@ coef.allo_herb_fit<-function(object, ..., backtransform = TRUE){
 #' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @return a vector of numeric values
 get_lambda <- function(mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9){
-  mean.phi.T * (2 - a)/(1 - a) *
-    ((max.phi^(1 - a) - min.phi^(1 - a))/(max.phi^(2 - a) - min.phi^(2 - a)))
+  mean.phi.T / get_phi_bar(min.phi = min.phi, max.phi = max.phi, a = a)
 }
 
 #' @title Calculate Unlimited Mean Cumulative Proportion Herbivory From Attack Rate
@@ -1052,14 +1073,33 @@ get_lambda <- function(mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9){
 #' @param a the combined allometric scaling coefficient. Defaults to 14/9.
 #' @return a vector of numeric values
 get_mean_phi_T <- function(lambda, min.phi = 0.005, max.phi = 1, a = 14/9){
-  lambda / ((2 - a)/(1 - a) *
-              ((max.phi^(1 - a) - min.phi^(1 - a))/(max.phi^(2 - a) - min.phi^(2 - a))))
+  lambda * get_phi_bar(min.phi = min.phi, max.phi = max.phi, a = a)
 }
 
 
+get_phi_bar <- function(min.phi = 0.005, max.phi = 1, a = 14/9){
+  if(a == 1){
+    phi.bar <- 1 / (2-a) * (max.phi^(2-a) - min.phi^(2-a))/(log(max.phi)-log(min.phi))
+  } else if(a == 2){
+    phi.bar <- (1-a) * (log(max.phi) - log(min.phi))/(max.phi^(1-a) - min.phi^(1-a))
+  } else {
+    phi.bar <- (1-a)/(2-a) * (max.phi^(2-a) - min.phi^(2-a))/(max.phi^(1-a) - min.phi^(1-a))
+  }
+  return(phi.bar)
+}
 
 
-
+get_phi_var <- function(min.phi = 0.005, max.phi = 1, a = 14/9){
+  phi.bar <- get_phi_bar(min.phi = min.phi, max.phi = max.phi, a = a)
+  if(a == 1){
+    phi.var <- 1 / (3-a) * (max.phi^(3-a) - min.phi^(3-a))/(log(max.phi)-log(min.phi)) - phi.bar^2
+  } else if(a == 3){
+    phi.var <- (1-a) * (log(max.phi) - log(min.phi))/(max.phi^(1-a) - min.phi^(1-a)) - phi.bar^2
+  } else {
+    phi.var<-(1-a)/(3-a)*(max.phi^(3-a)-min.phi^(3-a))/(max.phi^(1-a)-min.phi^(1-a))-phi.bar^2
+  }
+  return(phi.var)
+}
 
 
 
