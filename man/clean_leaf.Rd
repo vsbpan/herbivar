@@ -6,7 +6,7 @@
 \usage{
 clean_leaf(
   object,
-  fg.thresh = "auto",
+  fg.thresh = "kmeans",
   bg.thresh = "10\%",
   fg.adjust = 1,
   blur.size = 2,
@@ -16,16 +16,16 @@ clean_leaf(
   return.cimg = TRUE,
   approx.res = 10000,
   km = c(1L, 2L),
-  ws.thresh = "auto",
+  ws.thresh = "kmeans",
   px.size = NA
 )
 }
 \arguments{
 \item{object}{a cimg, pixset, or matrix, or array.}
 
-\item{fg.thresh}{a threshold for selecting the foreground in the watershed transform. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "auto".}
+\item{fg.thresh}{a threshold for selecting the foreground in the watershed transform. Can be either numeric, a string, or "kmeans", or "otsu". When set to "otsu" or "kmeans", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "kmeans".}
 
-\item{bg.thresh}{a threshold for selecting the background in the watershed transform. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "10\%".}
+\item{bg.thresh}{a threshold for selecting the background in the watershed transform. Can be either numeric, a string, "kmeans", or "otsu". When set to "kmeans" or "otsu", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "10\%".}
 
 \item{fg.adjust}{used to adjust the automatic threshold. If the auto-threshold is at k, the effective threshold will be at \code{fg.adjust} * k.}
 
@@ -43,7 +43,7 @@ clean_leaf(
 
 \item{km}{an integer vector of length two. The first value selects the the boundary rank in increasing means identified by kmeans clustering (defaults to 1, selecting the boundary that separates the two clusters with the lowest mean). The second value selects the k number of clusters to form (defaults to 2). Ignored when not auto-thresholding.}
 
-\item{ws.thresh}{a threshold for selecting leaf pixels from a watershed transformed image. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "auto".}
+\item{ws.thresh}{a threshold for selecting leaf pixels from a watershed transformed image. Can be either numeric, a string, "kmeans", or "otsu". When set to "otsu" or "kmeans", the threshold is automatically selected by the internal function \code{threshold2()}. Default is "kmeans".}
 
 \item{px.size}{value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.}
 }
@@ -56,7 +56,7 @@ get a binary-ized image of a leaf scan, removing background artifacts and eaten 
 \details{
 Some quick notes:
 
-\code{fg.thresh} is better left at "auto", unless you know what parameter is best tuned for the set of images you will process.
+\code{fg.thresh} is better left at "kmeans", unless you know what parameter is best tuned for the set of images you will process.
 
 \code{fg.adjust} can be increased to pick up more of the foreground, and decreased if too much non-leaf pixels are misidentified.
 
@@ -64,7 +64,7 @@ Some quick notes:
 
 \code{blur.size} can be increased when small white speckles is present in the processed image.
 
-\code{km} can be toggled to change the number of clusters and the boundary rank selected when "auto" misbehaves.
+\code{km} can be toggled to change the number of clusters and the boundary rank selected when "kmeans" misbehaves.
 }
 \note{
 The code for the watershed method is adapted from Simon Barthelme's vignette https://cran.r-project.org/web/packages/imager/vignettes/pixsets.html. accessed date 2022-07-25.

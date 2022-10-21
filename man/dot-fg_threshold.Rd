@@ -6,7 +6,7 @@
 \usage{
 .fg_threshold(
   img,
-  fg.thresh = "auto",
+  fg.thresh = "kmeans",
   fg.adjust = 1,
   approx.res = 10000,
   km = c(1L, 2L),
@@ -16,7 +16,7 @@
 \arguments{
 \item{img}{a cimg object}
 
-\item{fg.thresh}{a threshold for turning the cimg pixels into a selected pixset. Can be either numeric, a string, or "auto". When set to "auto", the threshold is automatically selected by the internal function \code{threshold2()}.}
+\item{fg.thresh}{a threshold for turning the cimg pixels into a selected pixset. Can be either numeric, a string, "kemans", or "otsu". When set to "kmenas" or "otsu", the threshold is automatically selected by the internal function \code{threshold2()}.}
 
 \item{fg.adjust}{used to adjust the automatic threshold. If the auto-threshold is at k, the effective threshold will be at \code{fg.adjust} * k.}
 

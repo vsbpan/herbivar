@@ -4,7 +4,14 @@
 \alias{watershed2}
 \title{Compute Watershed Transform With Grayscale And Color Image Support}
 \usage{
-watershed2(seed, p, spectrum, thr = "auto", approx.res = 10000, km = c(1L, 2L))
+watershed2(
+  seed,
+  p,
+  spectrum,
+  thr = "kmeans",
+  approx.res = 10000,
+  km = c(1L, 2L)
+)
 }
 \arguments{
 \item{seed}{an image}
@@ -13,7 +20,7 @@ watershed2(seed, p, spectrum, thr = "auto", approx.res = 10000, km = c(1L, 2L))
 
 \item{spectrum}{number of spectrum.}
 
-\item{thr}{a threshold, either numeric, or "auto", or string for quantities.}
+\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantities.}
 
 \item{approx.res}{the number of pixels used in threshold approximation. Default is 10000.}
 
