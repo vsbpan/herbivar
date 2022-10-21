@@ -1275,6 +1275,26 @@ plot.cimg <- function(x, frame, xlim = c(1, width(x)),
   invisible(x)
 }
 
+array2Image <- function(x){
+  .is_inst("EBImage",stop.if.false = TRUE)
+  if(dim(x)[3] > 1){
+    warning("More than one depth layer detected. Choosing only the first one. ")
+  }
+  if(dim(x)[4] > 1){
+    if(dim(x)[4] != 3){
+      warning("Number of color channels should be 1 or 3 only.")
+    }
+    color <- "Color"
+  } else {
+    color <- "Grayscale"
+  }
+  out <- EBImage::Image(data = x[,,1,],
+                 dim = dim(x)[-3],
+                 colormode = color)
+  attr(out,"px.size") <- attr(x,"px.size")
+  return(out)
+}
+
 
 # ss <- function(k, mat.dist, method = "silhouette", nboot = 10){
 #   ss <- seq_len(nboot)
