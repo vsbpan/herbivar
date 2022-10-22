@@ -34,7 +34,6 @@ Internal function of \code{.dalloT.cond.k.fft.conv()} used to calculate \eqn{P(\
 }
 \details{
 Owing to CLT,
-\deqn{P(\phi_T | k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]}),} where
-\deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}},} and
-\deqn{\mathbb{Var}[\phi]=\frac{\phi_M^{3-\alpha}-\phi_m^{3-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{3-\alpha}-(\frac{\phi_M^{2-\alpha}-\phi_m^{2-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{2-\alpha})^2.}
+\deqn{P(\phi_T | k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
+Also see \code{?get_phi_bar()} and \code{?get_phi_var()}
 }

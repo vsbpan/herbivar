@@ -47,6 +47,24 @@ Image2array <- function(x, imager_class = TRUE){
   return(out)
 }
 
+
+
+#' @title Mask Unselected Pixels
+#' @description Set pixels in an image not selected in the pixset as an user defined value
+#' @param object a cimg or array for which the values of unselected pixel are set
+#' @param pixset a pixset object defining the set of pixels to be retained
+#' @param background a numeric vector of equal length as the number of color spectra, a character string to be parsed by \code{col2rgb()}, or \code{NA} (default).
+#' @return a masked object
+#' @examples
+#' img <- image_example()
+#' px <- threshold2(img,thr = 0.3)
+#' plot(px)
+#'
+#' immask(img,px,"hotpink") %>% plot()
+#' immask(img, px) %>% plot()
+#'
+#' immask(grayscale(img),B(px), 0) %>% plot()
+#'
 immask <- function(object, pixset, background = NA){
   img.spec <- imager::spectrum(object)
   mask.spec <- imager::spectrum(pixset)

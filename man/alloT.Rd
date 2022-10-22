@@ -103,7 +103,8 @@ Density, distribution function, quantile function, and random generation for the
 }
 \details{
 The neutral herbivory distribution is a type of compound Poisson distribution taking the form:
-\deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha},} and \deqn{k \sim Pois(\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}})}
+\deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha},} when \eqn{\alpha \neq 1} and
+\deqn{P(\phi) = \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1},} when \eqn{\alpha = 1} and \deqn{k \sim Pois(\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}})}
 \eqn{\overline{\phi_{T}'}} is the mean herbivory of the distribution when herbivores are not plant limited. That is, if \eqn{\overline{\phi_{T}}}, which has support \eqn{[x, \infty]}, is not truncated to \eqn{[0, 1]}. \eqn{\overline{\phi_{T}}} and \eqn{\overline{\phi_{T}'}} are often close to each other. For more details on the 'bite size' distribution see \code{?rallo}.
 
 The PDF of \eqn{P(\phi_T)} does not have a closed form solution and is therefore numerically approximated. We first marginalize out \eqn{k} via
@@ -112,11 +113,8 @@ As \eqn{k} increases, \eqn{P(k|\lambda)} becomes vanishingly small, so the infin
 
 The calculation of the conditional probability distribution \eqn{P(\phi_T | k)} requires repeated convolutions of the bite size distribution, which is computationally expensive. Thankfully, we can use the Fast Fourier Transformation (FFT) to simplify the calculation significantly. Convolution of functions is simply the product of those functions in the frequency domain that is then back transformed into the time domain.
 \deqn{P(\phi_T|k) = \overbrace{P(\phi)*P(\phi)...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
-Argument \code{by} sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} are approximated with a normal distribution, given the central limit theorem:
-\deqn{P(\phi_T | k > 100) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]}), }
-where
-\deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}},} and
-\deqn{\mathbb{Var}[\phi]=\frac{\phi_M^{3-\alpha}-\phi_m^{3-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{3-\alpha}-(\frac{\phi_M^{2-\alpha}-\phi_m^{2-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{2-\alpha})^2.}
+Argument \code{by} sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} are approximated with a normal distribution, given the central limit theorem (see \code{?get_phi_bar()} and \code{?get_phi_var()}):
+\deqn{P(\phi_T | k > 100) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
 
 The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
 

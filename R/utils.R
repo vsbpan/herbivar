@@ -1,5 +1,5 @@
 #' @export
-combine.data.lists<-function(data.list,data.list2){
+combine_data_lists<-function(data.list,data.list2){
   for (i in seq_along(data.list2)){
     data.list2[[i]]<-data.list2[[i]][names(data.list[[1]])]
   }

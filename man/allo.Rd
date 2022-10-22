@@ -53,10 +53,14 @@ a vector of numeric values
 Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometric scaling laws.
 }
 \details{
-The neutral 'bite size' distribution has density function \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometric scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
+The neutral 'bite size' distribution has density function
+\deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} when \eqn{\alpha \neq 1} and
+\deqn{P(\phi) = \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1}} when \eqn{\alpha = 1}
+where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometric scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
 
 The cumulative density function is
-\deqn{P(\phi \leq q) = \frac{q^{1-\alpha} - \phi_m^{1-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}}
+\deqn{P(\phi \leq q) = \frac{q^{1-\alpha} - \phi_m^{1-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}} when \eqn{\alpha \neq 1} and
+\deqn{P(\phi \leq q) = \frac{\ln{q} - \ln{\phi_m}}{\ln{\phi_M} - \ln{\phi_m}}} when \eqn{\alpha = 1}.
 }
 \references{
 Damuth, J. 1981. Population density and body size in mammals. Nature 290:699–700.

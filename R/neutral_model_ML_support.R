@@ -9,10 +9,14 @@
 #' @param log,log.p logical; if \code{TRUE}, probabilities p are given as \eqn{\log(p)}.
 #' @param lower.tail logical; if \code{TRUE} (default), probabilities are \eqn{P(X \leq x)} otherwise, \eqn{P(X > x)}
 #' @details
-#' The neutral 'bite size' distribution has density function \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometric scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
+#' The neutral 'bite size' distribution has density function
+#' \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} when \eqn{\alpha \neq 1} and
+#' \deqn{P(\phi) = \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1}} when \eqn{\alpha = 1}
+#' where \eqn{\phi_m} is the minimum 'bite size' and \eqn{\phi_M} is the maximum 'bite size' in terms of proportion leaf herbivory, and \eqn{\alpha} is the combined allometric scaling coefficient defined as \deqn{\alpha = - \frac{\alpha_N + \alpha_S + 1 - \alpha_I}{\alpha_I}.} \eqn{\alpha_N} is the allometric scaling exponent between population density \eqn{N} and body mass \eqn{W} such that \eqn{N \propto W^{\alpha_N}}. A priori value is \eqn{-\frac{3}{4}} according to Damuth’s rule (Damuth 1981). \eqn{\alpha_S} is the allometric scaling exponent of species richness \eqn{S_j} among a body mass class \eqn{W_j} such that \eqn{S_j \propto W_{j}^{\alpha_S}}. A priori value is \eqn{-\frac{2}{3}} according to Hutchinson & MacArthur (1959) and May (1978).\eqn{\alpha_I} is the allometric scaling exponent of whole body metabolic rate \eqn{I_j} among a body mass class \eqn{W_j} such that \eqn{I_j \propto W_{j}^{\alpha_I}}. A priori value is \eqn{\frac{3}{4}} according to Kleiber's law (1932).
 #'
 #' The cumulative density function is
-#' \deqn{P(\phi \leq q) = \frac{q^{1-\alpha} - \phi_m^{1-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}}
+#' \deqn{P(\phi \leq q) = \frac{q^{1-\alpha} - \phi_m^{1-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}} when \eqn{\alpha \neq 1} and
+#' \deqn{P(\phi \leq q) = \frac{\ln{q} - \ln{\phi_m}}{\ln{\phi_M} - \ln{\phi_m}}} when \eqn{\alpha = 1}.
 #'
 #' @return a vector of numeric values
 #' @references
@@ -109,7 +113,9 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
 #' @description This is the workhorse of \code{ralloT()} that generate draws from the neutral herbivory distribution using simulation. The CDF of the neutral herbivory model is too computationally intensive to calculate, so inverse transform sampling is not implemented.
 #' @details
 #' \eqn{\lambda} of a Poisson distribution is calculated from parameters \eqn{\phi_m}, \eqn{\phi_M}, \eqn{a}, and \eqn{\overline{\phi_{T}'}} and used to draw random number of feeding events on a leaf \eqn{k_i}. \deqn{\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}}}
-#' \eqn{\phi_{Ti}} is then obtained via \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha}}
+#' \eqn{\phi_{Ti}} is then obtained via \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where
+#' \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} when \eqn{\alpha \neq 1} and
+#' \deqn{P(\phi) = \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1}} when \eqn{\alpha = 1}
 #' \eqn{\overline{\phi_{T}'}} is the mean herbivory of the distribution when herbivores are not plant limited. That is, if \eqn{\overline{\phi_{T}}}, which has support \eqn{[x, \infty]}, is not truncated to \eqn{[0, 1]}. \eqn{\overline{\phi_{T}}} and \eqn{\overline{\phi_{T}'}} are often close to each other. For more details on the 'bite size' distribution see \code{?rallo()}.
 #' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited. See details.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
@@ -142,7 +148,8 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
 #' @description Density, distribution function, quantile function, and random generation for the neutral herbivory distribution based on allometric scaling laws.
 #' @details
 #' The neutral herbivory distribution is a type of compound Poisson distribution taking the form:
-#' \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha},} and \deqn{k \sim Pois(\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}})}
+#' \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha},} when \eqn{\alpha \neq 1} and
+#' \deqn{P(\phi) = \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1},} when \eqn{\alpha = 1} and \deqn{k \sim Pois(\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}})}
 #' \eqn{\overline{\phi_{T}'}} is the mean herbivory of the distribution when herbivores are not plant limited. That is, if \eqn{\overline{\phi_{T}}}, which has support \eqn{[x, \infty]}, is not truncated to \eqn{[0, 1]}. \eqn{\overline{\phi_{T}}} and \eqn{\overline{\phi_{T}'}} are often close to each other. For more details on the 'bite size' distribution see \code{?rallo}.
 #'
 #' The PDF of \eqn{P(\phi_T)} does not have a closed form solution and is therefore numerically approximated. We first marginalize out \eqn{k} via
@@ -151,11 +158,8 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
 #'
 #' The calculation of the conditional probability distribution \eqn{P(\phi_T | k)} requires repeated convolutions of the bite size distribution, which is computationally expensive. Thankfully, we can use the Fast Fourier Transformation (FFT) to simplify the calculation significantly. Convolution of functions is simply the product of those functions in the frequency domain that is then back transformed into the time domain.
 #' \deqn{P(\phi_T|k) = \overbrace{P(\phi)*P(\phi)...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
-#' Argument \code{by} sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} are approximated with a normal distribution, given the central limit theorem:
-#' \deqn{P(\phi_T | k > 100) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]}), }
-#' where
-#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}},} and
-#' \deqn{\mathbb{Var}[\phi]=\frac{\phi_M^{3-\alpha}-\phi_m^{3-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{3-\alpha}-(\frac{\phi_M^{2-\alpha}-\phi_m^{2-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{2-\alpha})^2.}
+#' Argument \code{by} sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} are approximated with a normal distribution, given the central limit theorem (see \code{?get_phi_bar()} and \code{?get_phi_var()}):
+#' \deqn{P(\phi_T | k > 100) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
 #'
 #' The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
 #'
@@ -439,9 +443,8 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' @description Internal function of \code{.dalloT.cond.k.fft.conv()} used to calculate \eqn{P(\phi_T | k)} via Gaussian approximation for very large values of \eqn{k.}
 #' @details
 #' Owing to CLT,
-#' \deqn{P(\phi_T | k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]}),} where
-#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}},} and
-#' \deqn{\mathbb{Var}[\phi]=\frac{\phi_M^{3-\alpha}-\phi_m^{3-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{3-\alpha}-(\frac{\phi_M^{2-\alpha}-\phi_m^{2-\alpha}}{\phi_M^{1-\alpha}-\phi_m^{1-\alpha}}\frac{1-\alpha}{2-\alpha})^2.}
+#' \deqn{P(\phi_T | k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
+#' Also see \code{?get_phi_bar()} and \code{?get_phi_var()}
 #' @return a length(phi.T) X length(k) matrix of probabilities.
 #' @param phi.T a vector of cumulative proportion herbivory
 #' @param k a vector of integer values indicating the number of convolutions to perform
@@ -1051,8 +1054,7 @@ coef.allo_herb_fit<-function(object, ..., backtransform = TRUE){
 #' @title Calculate Attack Rate From Unlimited Mean Cumulative Proportion Herbivory
 #' @description Convenience function that reparameterizes unlimited mean cumulative proportion herbivory \eqn{\overline{\phi_T'}} as attack rate \eqn{\lambda}.
 #' @details
-#' \deqn{\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}},} where
-#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}.}
+#' \deqn{\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}}}
 #' @param mean.phi.T The mean herbivory of the distribution when herbivores are not plant limited.
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
@@ -1065,8 +1067,7 @@ get_lambda <- function(mean.phi.T, min.phi = 0.005, max.phi = 1, a = 14/9){
 #' @title Calculate Unlimited Mean Cumulative Proportion Herbivory From Attack Rate
 #' @description Convenience function that reparameterizes attack rate \eqn{\lambda} as unlimited mean cumulative proportion herbivory \eqn{\overline{\phi_T'}}.
 #' @details
-#' \deqn{\overline{\phi_T'} = \overline{\phi}\lambda,} where
-#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}.}
+#' \deqn{\overline{\phi_T'} = \overline{\phi}\lambda}
 #' @param lambda the attack rate on the plant or leaf
 #' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
 #' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
@@ -1076,7 +1077,26 @@ get_mean_phi_T <- function(lambda, min.phi = 0.005, max.phi = 1, a = 14/9){
   lambda * get_phi_bar(min.phi = min.phi, max.phi = max.phi, a = a)
 }
 
-
+#' @title Calculate Mean Proportion Bite Size
+#' @description Calculate the theoretical mean of the proportion bite size distribution
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
+#' @details
+#'
+#' The mean of the bite size distribution can be found via:
+#'
+#' When \eqn{\phi \neq 1,2}
+#' \deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}}
+#'
+#' when \eqn{\phi = 1}
+#' \deqn{\overline{\phi} = \frac{1}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\ln{\phi_M} - \ln{\phi_m}}}
+#'
+#' when \eqn{\phi = 2}
+#' \deqn{\overline{\phi} = (1-\alpha) \frac{\ln{\phi_M} - \ln{\phi_m}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}}
+#'
+#' @return a numeric value of the mean
+#'
 get_phi_bar <- function(min.phi = 0.005, max.phi = 1, a = 14/9){
   if(a == 1){
     phi.bar <- 1 / (2-a) * (max.phi^(2-a) - min.phi^(2-a))/(log(max.phi)-log(min.phi))
@@ -1088,7 +1108,26 @@ get_phi_bar <- function(min.phi = 0.005, max.phi = 1, a = 14/9){
   return(phi.bar)
 }
 
-
+#' @title Calculate Variation of Proportion Bite Size
+#' @description Calculate the theoretical variance of the proportion bite size distribution
+#' @param min.phi the minimum bite size in terms of proportion leaf herbivory. Defaults to 0.005 (0.5%).
+#' @param max.phi the maximum bite size in terms of proportion leaf herbivory Defaults to 1 (100%).
+#' @param a the combined allometric scaling coefficient. Defaults to 14/9.
+#' @details
+#'
+#' The variance of the bite size distribution can be found via:
+#'
+#' When \eqn{\phi \neq 1,3}
+#' \deqn{\mathbb{V}ar[\phi] = \frac{1-\alpha}{3-\alpha} \frac{\phi_M^{3-\alpha} - \phi_m^{3-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} - \overline{\phi}^2}
+#'
+#' when \eqn{\phi = 1}
+#' \deqn{\mathbb{V}ar[\phi] = \frac{1}{3-\alpha} \frac{\phi_M^{3-\alpha} - \phi_m^{3-\alpha}}{\ln{\phi_M} - \ln{\phi_m}} - \overline{\phi}^2}
+#'
+#' when \eqn{\phi = 3}
+#' \deqn{\mathbb{V}ar[\phi] = (1-\alpha) \frac{\ln{\phi_M} - \ln{\phi_m}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} - \overline{\phi}^2}
+#'
+#' @return a numeric value of the variance
+#'
 get_phi_var <- function(min.phi = 0.005, max.phi = 1, a = 14/9){
   phi.bar <- get_phi_bar(min.phi = min.phi, max.phi = max.phi, a = a)
   if(a == 1){

@@ -34,6 +34,8 @@ This is the workhorse of \code{ralloT()} that generate draws from the neutral he
 }
 \details{
 \eqn{\lambda} of a Poisson distribution is calculated from parameters \eqn{\phi_m}, \eqn{\phi_M}, \eqn{a}, and \eqn{\overline{\phi_{T}'}} and used to draw random number of feeding events on a leaf \eqn{k_i}. \deqn{\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}}}
-\eqn{\phi_{Ti}} is then obtained via \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{1-\alpha}}
+\eqn{\phi_{Ti}} is then obtained via \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where
+\deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}} when \eqn{\alpha \neq 1} and
+\deqn{P(\phi) = \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1}} when \eqn{\alpha = 1}
 \eqn{\overline{\phi_{T}'}} is the mean herbivory of the distribution when herbivores are not plant limited. That is, if \eqn{\overline{\phi_{T}}}, which has support \eqn{[x, \infty]}, is not truncated to \eqn{[0, 1]}. \eqn{\overline{\phi_{T}}} and \eqn{\overline{\phi_{T}'}} are often close to each other. For more details on the 'bite size' distribution see \code{?rallo()}.
 }

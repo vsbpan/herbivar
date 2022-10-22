@@ -22,6 +22,5 @@ a vector of numeric values
 Convenience function that reparameterizes attack rate \eqn{\lambda} as unlimited mean cumulative proportion herbivory \eqn{\overline{\phi_T'}}.
 }
 \details{
-\deqn{\overline{\phi_T'} = \overline{\phi}\lambda,} where
-\deqn{\overline{\phi} = \frac{1-\alpha}{2-\alpha} \frac{\phi_M^{2-\alpha} - \phi_m^{2-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}.}
+\deqn{\overline{\phi_T'} = \overline{\phi}\lambda}
 }
