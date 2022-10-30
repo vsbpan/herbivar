@@ -2,7 +2,7 @@
 % Please edit documentation in R/herb_image_helpers.R
 \name{color_index}
 \alias{color_index}
-\title{Image Color Index From Pliman}
+\title{Image Color Index From pliman}
 \usage{
 color_index(img, index = "all", plot = TRUE)
 }

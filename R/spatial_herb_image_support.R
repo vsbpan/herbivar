@@ -187,7 +187,7 @@ clean_leaf <- function(object, fg.thresh = "kmeans", bg.thresh = "10%",
 #' @title Crop Out Non-Leaf Pixels
 #' @description Crop out non-leaf pixels marked by the color blue as \code{NA}s. Non-leaf pixels need to be cropped out for further analyses.
 #' @param object a cimg, pixset, or matrix, or array to be cropped.
-#' @param thr a threshold, either numeric, "kmeans", or "otsu", or string for quantiles. If \code{FALSE} (default is "kmeans"), no thesholding will be performed prior to cropping. Useful for when the colors are slightly impure.
+#' @param thr a threshold, either numeric, "kmeans", or "otsu", or string for quantiles. If \code{FALSE} (default is "otsu"), no thesholding will be performed prior to cropping. Useful for when the colors are slightly impure.
 #' @param invalid the value to replace non-leaf pixels as. Default is \code{NA}.
 #' @param rgb.index an integer value \code{1L}, \code{2L}, or \code{3L}, indicating red, green, or blue colors respectively to be identified as non-leaf pixels.
 #' @param px.size value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.
@@ -203,7 +203,7 @@ clean_leaf <- function(object, fg.thresh = "kmeans", bg.thresh = "10%",
 #' analyze_holes(cropped_img) %>% print()
 #'
 #' @export
-crop_leaf <- function(object, thr = "kmeans", invalid = NA, rgb.index = 3L, px.size = NA){
+crop_leaf <- function(object, thr = "otsu", invalid = NA, rgb.index = 3L, px.size = NA){
   if(is.na(px.size)){
     px.size <- attr(object,"px.size")
   }
