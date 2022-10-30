@@ -48,7 +48,6 @@ Image2array <- function(x, imager_class = TRUE){
 }
 
 
-
 #' @title Mask Unselected Pixels
 #' @description Set pixels in an image not selected in the pixset as an user defined value
 #' @param object a cimg or array for which the values of unselected pixel are set
@@ -524,5 +523,46 @@ image_example <- function(type = c("raw","processed")){
   file_path <- system.file(file,package = "herbivar")
   img <- imager::load.image(file_path)
   return(img)
+}
+
+
+
+#' @title Image Color Index From pliman
+#' @description Return and display different transformed colored image, useful for thresholding. Indices are imported from the pliman package. Custom color index can be calculated using \code{imager::imeval()}.
+#' @details This is an experimental function for internal use at the moment. Credit is due to the package Pliman.
+#' @param img a cimg object with three color spectra
+#' @param index a character string indicating the indices to use. If "all", all indices will be chosen
+#' @param plot if \code{TRUE} (default), plot the transformed images
+#' @return an imlist object
+color_index <- function(img, index = "all",plot = TRUE){
+  .is_inst("pliman",stop.if.false = TRUE,prompt = TRUE)
+  stopifnot(imager::spectrum(img)==3)
+  ind <- read.csv(file = system.file("indexes.csv", package = "pliman",
+                                     mustWork = TRUE), header = T, sep = ";")
+  ind$Equation <- gsub("B","B(.)",gsub("G","G(.)",gsub("R","R(.)",ind$Equation)))
+  max2 <- function(...){
+    slice_eval(...,FUN = "max")
+  }
+  min2 <- function(...){
+    slice_eval(...,FUN = "min")
+  }
+  ind$Equation <- gsub("min","min2",gsub("max","max2",ind$Equation))
+  if(index == "all"){
+    index <- ind$Index
+  } else {
+    if(!any(index %in% ind$Index)){
+      stop("No valid index selected. Try: ", paste0(ind$Index, collapse = ", "))
+    }
+  }
+  iml<-lapply(seq_along(index), function(i,index){
+    form <- ind[ind$Index == index[i],"Equation"]
+    imeval(img,~eval(parse(text=form)))
+  }, index = index)
+  names(iml) <- index
+  iml <- as.imlist(iml)
+  if(plot){
+    herbivar::plot.imlist(iml)
+  }
+  return(iml)
 }
 

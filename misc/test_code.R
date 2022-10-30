@@ -78,7 +78,7 @@ color_index <- function(img, index = "all",plot = TRUE){
   names(iml) <- index
   iml <- as.imlist(iml)
   if(plot){
-    plot(iml)
+    herbivar::plot.imlist(iml)
   }
   return(iml)
 }
@@ -107,6 +107,43 @@ immask2(grayscale(img),threshold2(grayscale(img),thr=0.3),background = 1) %>% pl
 
 plot(img)
 img[]
+
+
+
+
+
+
+
+get_lambda_p<-function(p){
+  -log(1-p)
+}
+
+plot(get_lambda_p(seq(0,1,0.001)))
+
+
+library(herbivar)
+img <- load.image("C:/R Projects/misc analysis/sylvie_images/IMG_20220809_12r.png")
+plot(img)
+
+
+img <- thin(img,3) %>% crop(empty.rm = "auto",cut_edge = 10)
+plot(img)
+color_index(img)
+
+
+
+immask(img,
+       threshold2(
+         color_index(img,index = "GR",plot = FALSE)[[1]],
+         thr = "otsu"
+         ) |
+         !threshold2(
+           color_index(img,index = "SCI",plot = FALSE)[[1]],
+           thr = "99.5"
+         )
+       ) %>% plot()
+
+
 
 
 

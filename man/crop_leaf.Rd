@@ -4,12 +4,12 @@
 \alias{crop_leaf}
 \title{Crop Out Non-Leaf Pixels}
 \usage{
-crop_leaf(object, as.mat = FALSE, invalid = NA, rgb.index = 3L, px.size = NA)
+crop_leaf(object, thr = "kmeans", invalid = NA, rgb.index = 3L, px.size = NA)
 }
 \arguments{
 \item{object}{a cimg, pixset, or matrix, or array to be cropped.}
 
-\item{as.mat}{if \code{TRUE}, the function returns a matrix of the pixel values of the \code{rgb.index} spectrum. If \code{FALSE} (default), the function returns a grayscale 'cimg' object.}
+\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantiles. If \code{FALSE} (default is "kmeans"), no thesholding will be performed prior to cropping. Useful for when the colors are slightly impure.}
 
 \item{invalid}{the value to replace non-leaf pixels as. Default is \code{NA}.}
 
@@ -18,7 +18,7 @@ crop_leaf(object, as.mat = FALSE, invalid = NA, rgb.index = 3L, px.size = NA)
 \item{px.size}{value passed to \code{px_size_calc()}. When set to \code{NA} (default), the 'px.size' attribute is extracted from the supplied \code{object}.}
 }
 \value{
-a cropped 'cimg' object
+a cropped 'cimg' object with only one color spectrum
 }
 \description{
 Crop out non-leaf pixels marked by the color blue as \code{NA}s. Non-leaf pixels need to be cropped out for further analyses.

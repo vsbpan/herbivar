@@ -18,7 +18,7 @@ threshold2(
 \arguments{
 \item{im}{the image}
 
-\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantities. If \code{thr.exact} is \code{TRUE}, the value must be numeric.}
+\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantiles. If \code{thr.exact} is \code{TRUE}, the value must be numeric.}
 
 \item{approx}{skip pixels when computing quantiles in large images (defaults to \code{TRUE})}
 

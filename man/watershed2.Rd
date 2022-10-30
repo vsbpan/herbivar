@@ -20,7 +20,7 @@ watershed2(
 
 \item{spectrum}{number of spectrum.}
 
-\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantities.}
+\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantiles.}
 
 \item{approx.res}{the number of pixels used in threshold approximation. Default is 10000.}
 

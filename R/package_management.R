@@ -25,10 +25,10 @@ detach.herbivar <- function(x){
   }
 }
 
-reinstall.herbivar <- function(...){
+reinstall.herbivar <- function(package_path = "C:/R Projects/Package Building/herbivar_0.1.0.tar.gz"){
   load.herbivar <- "herbivar" %in% (.packages())
   detach.herbivar()
-  install.packages("C:/R Projects/Package Building/herbivar_0.1.0.tar.gz", repos = NULL, type="source")
+  install.packages(package_path, repos = NULL, type="source")
   .rs.restartR()
   if(load.herbivar){
     library(herbivar)
