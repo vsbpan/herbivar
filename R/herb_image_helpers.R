@@ -400,7 +400,7 @@ thin <- function(object, thin = 3){
   } else if(is.cimg(object) || is.pixset(object)){
     out<-object[x,y,,,drop=FALSE]
   }
-  px.size$size <- px.size$size * thin^2
+  px.size$size <- px.size$size * thin
 
   if(length(px.size$size)==0){
     px.size <- NULL
