@@ -223,7 +223,7 @@ crop_leaf <- function(object, thr = "otsu", invalid = NA, rgb.index = 3L, px.siz
     other.col.check <- TRUE
   } else {
     other.colors <- seq_len(3)[-rgb.index]
-    other.col.check <- object[,,,other.colors[1]] < 0.2  & object[,,,other.colors[2]] < 0.2
+    other.col.check <- object[,,,other.colors[1]] < 0.3  & object[,,,other.colors[2]] < 0.3
   }
   object[object[,,,rgb.index] > 0.6 & other.col.check] <- invalid
   object[object[,,,rgb.index] < 0.95] <- 0
@@ -234,6 +234,10 @@ crop_leaf <- function(object, thr = "otsu", invalid = NA, rgb.index = 3L, px.siz
       out <- object
     }
   attr(out,"px.size") <- px_size_calc(out, px.size)
+
+  if((is.na(invalid) && !any(is.na(out))) || isTRUE(!any(out == invalid))){
+    warning("No ", invalid, " detected in cropped image. Try to toggle the 'thr' argument or check if 'rgb.index' is set to the correct channel. ")
+  }
   return(out)
 }
 
@@ -766,6 +770,34 @@ hole_perimeter <- function(mat, non_leaf_border = FALSE, px.size = NA){
     perim_out <- perim_total
   }
   return(c("px" = perim_out, "mm2" = perim_out * px.size_mm$size))
+}
+
+
+#' @title Find Major Axis Length of Leaf
+#' @description Takes a cropped image and find the maximum euclidean distance between leaf borders. Some caveats apply. For instance, if the leaf is not straight, or if there are speckles in the background, then the distance would be off.
+#' @param object an object of type 'split_herb', 'matrix', 'array ', 'cimg', or 'pixset'.
+#' @param px.size	value passed to px_size_calc(). When set to NA (default), the 'px.size' attribute is extracted from the supplied object
+#' @return a vector of the number of pixels and milometer maximum distance between leaf border pixels. he object must have a "px.size" attribute or the px.size argument must be defined to return values for mm2 distance.
+#'
+leaf_length <- function(object, px.size = NA){
+  if (is.na(px.size)) {
+    px.size <- attr(object, "px.size")
+  }
+  if (inherits(object, "split_herb")) {
+    object <- object$px
+  }
+  px.len <-imager::imeval(as.cimg(object), ~ !is.na(.)) %>%
+    imager::boundary() %>%
+    .[,,1,1] %>%
+    which(arr.ind = TRUE) %>%
+    dist() %>%
+    max()
+  if(is.null(px.size)){
+    real.len <- NULL
+  } else {
+    real.len <- px.len * px.size$size
+  }
+  return(c(px = px.len, mm2 = real.len))
 }
 
 
