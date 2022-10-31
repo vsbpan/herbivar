@@ -2,7 +2,7 @@
 % Please edit documentation in R/neutral_model_ML_support.R
 \name{.dalloT.cond.k.gauss.approx}
 \alias{.dalloT.cond.k.gauss.approx}
-\title{Calculate the Conditional Probability Matrix of P(phi.T | k) Via Gaussian Approximation}
+\title{Calculate the kth Convolution Probability Matrix of P(phi) Via Gaussian Approximation}
 \usage{
 .dalloT.cond.k.gauss.approx(
   phi.T,
@@ -30,10 +30,10 @@
 a length(phi.T) X length(k) matrix of probabilities.
 }
 \description{
-Internal function of \code{.dalloT.cond.k.fft.conv()} used to calculate \eqn{P(\phi_T | k)} via Gaussian approximation for very large values of \eqn{k.}
+Internal function of \code{.dalloT.cond.k.fft.conv()} used to calculate \eqn{P(\phi^k)} via Gaussian approximation for very large values of \eqn{k}.
 }
 \details{
 Owing to CLT,
-\deqn{P(\phi_T | k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
+\deqn{P(\phi_T^k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
 Also see \code{?get_phi_bar()} and \code{?get_phi_var()}
 }

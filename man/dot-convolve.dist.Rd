@@ -20,5 +20,5 @@ A \code{length(fft.vec)} x \code{length(k)} matrix of conditional probabilities
 Internal function of \code{.dalloT.cond.k.fft.conv()} used to perform \eqn{k} convolutions of a supplied Fourier transformed vector. Parallel computing is supported and requires an already registered cluster.
 }
 \details{
-\deqn{P(\phi_T|k) = \overbrace{P(\phi)*P(\phi)...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
+\deqn{P(\phi_T^k) = \overbrace{P(\phi)*P(\phi)*...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
 }

@@ -111,10 +111,12 @@ The PDF of \eqn{P(\phi_T)} does not have a closed form solution and is therefore
 \deqn{P(\phi_T)=\sum_{k=0}^\infty P(\phi_T|k) P(k|\lambda ).}
 As \eqn{k} increases, \eqn{P(k|\lambda)} becomes vanishingly small, so the infinite sum can be cut off at a rather low \code{k.max} value without loosing much accuracy. \code{k.max.tolerance} sets the tolerance threshold for the cut off in the calculation. More precisely, the function checks to see whether \eqn{P(k.max | \lambda)} is less than the threshold of triviality. If exceeded, the function would throw a warning.
 
-The calculation of the conditional probability distribution \eqn{P(\phi_T | k)} requires repeated convolutions of the bite size distribution, which is computationally expensive. Thankfully, we can use the Fast Fourier Transformation (FFT) to simplify the calculation significantly. Convolution of functions is simply the product of those functions in the frequency domain that is then back transformed into the time domain.
-\deqn{P(\phi_T|k) = \overbrace{P(\phi)*P(\phi)...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
+The calculation of the conditional probability distribution \eqn{P(\phi_T | k)} is given by
+\deqn{P(\phi_T | k) = P(\phi_T^k)}
+when \eqn{\phi_T < 1}. The truncated probabilities \eqn{P(\phi_T > 1 | k)} is added back to \eqn{P(\phi_T = 1 | k)} such that \eqn{P(\phi_T \leq 1 | k)} sums up to 1. Here, \eqn{P(\phi_T^k)} is the kth convolution of \eqn{P(\phi)}. \eqn{P(\phi_T^k)} is computationally expensive. Thankfully, we can use the Fast Fourier Transformation (FFT) to simplify the calculation significantly. Convolution of functions is simply the product of those functions in the frequency domain that is then back transformed into the time domain.
+\deqn{P(\phi_T^k) = \overbrace{P(\phi)*P(\phi)*...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
 Argument \code{by} sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} are approximated with a normal distribution, given the central limit theorem (see \code{?get_phi_bar()} and \code{?get_phi_var()}):
-\deqn{P(\phi_T | k > 100) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
+\deqn{P(\phi_T^k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
 
 The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
 
