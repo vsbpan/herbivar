@@ -144,7 +144,63 @@ immask(img,
        ) %>% plot()
 
 
+library(herbivar)
+
+img <- load.image("misc/test1.png")
+plot(img2)
+img2 <- load.image("misc/test2.png")
+
+crop_leaf(img2) %>%
+  imager::boundary() %>%
+  crop(y=2500:2636) %>%
+  plot()
+
+crop_leaf(img2) %>%
+  imager::boundary() %>%
+  crop(y=0:636) %>%
+  plot()
+
+
+d<-imager::imeval(crop_leaf(img2), ~ !is.na(.)) %>%
+  imager::boundary() %>%
+  .[,,1,1] %>%
+  which(arr.ind = TRUE) %>%
+  dist(upper = FALSE,diag = FALSE)
+
+head(d)
 
 
 
+hist(d)
 
+
+analyze_holes
+
+img3 <-crop_leaf(img2)
+
+img4 <- rbind(
+  rep(NA,ncol(img3)+2),
+  cbind(rep(NA,nrow(img3)),img3[,,1,1],rep(NA,nrow(img3))),
+  rep(NA,ncol(img3)+2)
+) %>% as.cimg()
+
+px <-imager::imeval(img4, ~ !is.na(.)) %>%
+  as.cimg()
+
+
+
+plot(px)
+
+iml <- imager::split_connected(px,high_connectivity = TRUE)
+iml[[lapply(iml, function(x){
+  sum(x)
+}) %>% simplify2array() %>%
+  which.max()]] %>%
+  imager::boundary() %>%
+  .[,,1,1] %>%
+  which(arr.ind = TRUE) %>%
+  dist() %>%
+  c() %>%
+  max()
+
+crop_leaf(img2) %>% leaf_length()

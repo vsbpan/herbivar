@@ -776,22 +776,54 @@ hole_perimeter <- function(mat, non_leaf_border = FALSE, px.size = NA){
 #' @title Find Major Axis Length of Leaf
 #' @description Takes a cropped image and find the maximum euclidean distance between leaf borders. Some caveats apply. For instance, if the leaf is not straight, or if there are speckles in the background, then the distance would be off.
 #' @param object an object of type 'split_herb', 'matrix', 'array ', 'cimg', or 'pixset'.
+#' @param filer_speckles If \code{TRUE} (default), the largest connected patch is treated as the leaf and all other segmented patches are ignored.
 #' @param px.size	value passed to px_size_calc(). When set to NA (default), the 'px.size' attribute is extracted from the supplied object
 #' @return a vector of the number of pixels and milometer maximum distance between leaf border pixels. he object must have a "px.size" attribute or the px.size argument must be defined to return values for mm2 distance.
 #'
-leaf_length <- function(object, px.size = NA){
+leaf_length <- function(object, filer_speckles = TRUE, px.size = NA){
   if (is.na(px.size)) {
     px.size <- attr(object, "px.size")
   }
   if (inherits(object, "split_herb")) {
     object <- object$px
   }
-  px.len <-imager::imeval(as.cimg(object), ~ !is.na(.)) %>%
-    imager::boundary() %>%
-    .[,,1,1] %>%
-    which(arr.ind = TRUE) %>%
-    dist() %>%
-    max()
+  object <-as.cimg(object)
+
+  object <- rbind(
+    rep(NA,ncol(object)+2),
+    cbind(rep(NA,nrow(object)),object[,,1,1],rep(NA,nrow(object))),
+    rep(NA,ncol(object)+2)
+  ) %>% as.cimg()
+
+  if(filer_speckles){
+    iml <- imager::split_connected(
+      imager::imeval(object, ~ !is.na(.)),
+      high_connectivity = TRUE)
+
+    px.len <- iml[[
+      lapply(iml,
+             function(x){
+               sum(x)
+             }) %>%
+        simplify2array() %>%
+        which.max()
+    ]] %>%
+      imager::boundary() %>%
+      .[,,1,1] %>%
+      which(arr.ind = TRUE) %>%
+      dist() %>%
+      c() %>%
+      max()
+  } else {
+    px.len <- imager::imeval(object, ~ !is.na(.)) %>%
+      imager::boundary() %>%
+      .[,,1,1] %>%
+      which(arr.ind = TRUE) %>%
+      dist() %>%
+      c() %>%
+      max()
+  }
+
   if(is.null(px.size)){
     real.len <- NULL
   } else {

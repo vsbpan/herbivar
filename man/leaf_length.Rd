@@ -4,10 +4,12 @@
 \alias{leaf_length}
 \title{Find Major Axis Length of Leaf}
 \usage{
-leaf_length(object, px.size = NA)
+leaf_length(object, filer_speckles = TRUE, px.size = NA)
 }
 \arguments{
 \item{object}{an object of type 'split_herb', 'matrix', 'array ', 'cimg', or 'pixset'.}
+
+\item{filer_speckles}{If \code{TRUE} (default), the largest connected patch is treated as the leaf and all other segmented patches are ignored.}
 
 \item{px.size}{value passed to px_size_calc(). When set to NA (default), the 'px.size' attribute is extracted from the supplied object}
 }
@@ -15,5 +17,5 @@ leaf_length(object, px.size = NA)
 a vector of the number of pixels and milometer maximum distance between leaf border pixels. he object must have a "px.size" attribute or the px.size argument must be defined to return values for mm2 distance.
 }
 \description{
-Takes a cropped image and find the maximum euclidean distance between leaf borders. Some caveats apply. For instance, if the leaf is not straight, then the distance would be off.
+Takes a cropped image and find the maximum euclidean distance between leaf borders. Some caveats apply. For instance, if the leaf is not straight, or if there are speckles in the background, then the distance would be off.
 }
