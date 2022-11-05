@@ -1,6 +1,6 @@
 #' @title Fit Non-Neutral Generic Null Models Using Maximum Likelihood Estimation
 #' @description Estimate unknown parameters in non-neutral generic null herbivory models from a vector of observed herbivory data using Maximum Likelihood Estimation (MLE).
-#' @param data.vec A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error.
+#' @param data.vec A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error. Values less than "min.phi" are coerced to zero by default.
 #' @param family The generic null distribution. Valid options are "htlnorm" for hurdle truncated log-normal distribution, and "zoibeta" for zero-one-inflated beta distribution. see \code{?dzoibeta()} and \code{?dhtlnorm()}
 #' @param init Initial value for optimizer to start. Defaults to 0.
 #' @param lower,upper A numeric vector indicating the bounds of each estimated variable for the "L-BFGS-B" and "Brent" method. Defaults to \code{-Inf} and \code{Inf}.
@@ -51,7 +51,7 @@ fit_generic_null<- function(data.vec,
   method <- match.arg(method)
   family <- match.arg(family)
 
-  data.vec <- .herb_data_check(data.vec, min.phi = 0, allow.zero = TRUE)
+  data.vec <- .herb_data_check(data.vec, min.phi = 0, allow.zero = TRUE, coerce.to.zero = TRUE)
 
   if(family == "htlnorm"){
     optim.vars <- c("theta","meanlog","sdlog")

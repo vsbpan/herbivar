@@ -582,7 +582,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' \deqn{\mathcal{L}(\phi_{T1},\phi_{T2},...,\phi_{Tn}|\overline{\phi_T},\phi_M,\phi_m,\alpha)=\prod_i^n P(\phi_{Ti}|\overline{\phi_T},\phi_M,\phi_m,\alpha).}
 #' @details
 #' The order of \code{optim.var}, \code{upper}, \code{lower}, and \code{init} must match exactly. The initial value and bounds must be on the scale of the transformed variable.
-#' @param data.vec A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error.
+#' @param data.vec A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error. Values less than "min.phi" are coerced to zero by default.
 #' @param optim.vars A vector of character string indicating the name of the variables to be estimated. Acceptable values are "mean.phi.T" (default), "min.phi", "max.phi", and "a".
 #' @param init A numeric vector of initial values in the order of optim.vars for the optimizer to start searching. Defaults to 0.
 #' @param method The method of maximum likelihood estimation algorithm. Acceptable methods are "Nelder-Mead" (Default), "BFGS", "L-BFGS-B", "Brent", "nlminb", and "nlm". Defaults to "Brent" for one dimensional optimization. For details see \code{?stats::optim()}, \code{?stats::nlminb()}, and \code{?stats::nlm()}
@@ -712,7 +712,8 @@ fit_allo_herb<-function(data.vec,
                                min.phi = ifelse(is.na(min.phi),
                                                 lower.min.phi,
                                                 min.phi),
-                               allow.zero = TRUE)
+                               allow.zero = TRUE,
+                               coerce.to.zero = TRUE)
 
   if(method == "L-BFGS-B" || method == "Brent"){
     if(("max.phi"%in%optim.vars) &&

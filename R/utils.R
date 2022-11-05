@@ -8,7 +8,7 @@ combine_data_lists<-function(data.list,data.list2){
 }
 
 
-.herb_data_check <- function(x, min.phi, allow.zero, allow.one = TRUE){
+.herb_data_check <- function(x, min.phi, allow.zero, allow.one = TRUE, coerce.to.zero = FALSE){
   x <- as.numeric(x)
   if(any(is.na(x))){
     message(sum(is.na(x))," NA detected and removed from data")
@@ -26,15 +26,28 @@ combine_data_lists<-function(data.list,data.list2){
   if(allow.zero){
     z <- (x < min.phi) & (x != 0)
     if(any(z)){
-      message(sum(z)," non-zero values less than min.phi detected and removed from data")
+      if(coerce.to.zero){
+        x[z] <- 0
+        message(sum(z)," non-zero values less than min.phi detected and coerced to zero")
+      } else {
+        x <- x[!z]
+        message(sum(z)," non-zero values less than min.phi detected and removed from data")
+      }
     }
   } else {
     z <- x < min.phi
     if(any(z)){
-      message(sum(z)," values less than min.phi detected and removed from data")
+      if(coerce.to.zero){
+        x[z] <- 0
+        message(sum(z)," values less than min.phi detected and coerced to zero")
+      } else {
+        x <- x[!z]
+        message(sum(z)," values less than min.phi detected and removed from data")
+      }
     }
   }
-  x <- x[!z]
+
+
 
   if(!allow.one){
     o <- x == 1

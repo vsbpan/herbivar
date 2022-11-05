@@ -32,7 +32,7 @@ fit_allo_herb(
 )
 }
 \arguments{
-\item{data.vec}{A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error.}
+\item{data.vec}{A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error. Values less than "min.phi" are coerced to zero by default.}
 
 \item{optim.vars}{A vector of character string indicating the name of the variables to be estimated. Acceptable values are "mean.phi.T" (default), "min.phi", "max.phi", and "a".}
 

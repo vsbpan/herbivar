@@ -16,7 +16,7 @@ fit_generic_null(
 )
 }
 \arguments{
-\item{data.vec}{A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error.}
+\item{data.vec}{A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error. Values less than "min.phi" are coerced to zero by default.}
 
 \item{family}{The generic null distribution. Valid options are "htlnorm" for hurdle truncated log-normal distribution, and "zoibeta" for zero-one-inflated beta distribution. see \code{?dzoibeta()} and \code{?dhtlnorm()}}
 
