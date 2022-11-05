@@ -257,7 +257,7 @@ BIC.generic_null_fit <- function(object,...){
 #' @param ... additional arguments
 #' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is \code{TRUE}.
 #' @return A named vector
-coef.generic_null_fit<-function(object, ..., backtransform = T){
+coef.generic_null_fit<-function(object, ..., backtransform = TRUE){
   if(backtransform){
     out<-vapply(seq_along(object$par), function(i){
       vapply(object$par[i],object$param.val.trans[[object$theta.names[i]]],numeric(1))
@@ -273,9 +273,9 @@ coef.generic_null_fit<-function(object, ..., backtransform = T){
 #' @title Fit A 'Bite Size' Distribution To Data
 #' @description Fit multiple distributions to a vector of data using maximum likelihood.
 #' @param object A vector of proportion 'bite sizes' between zero and one, not inclusive. If an object of class 'split_herb' is supplied, the \code{hole_prop} vector will be extracted.
-#' @param family A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", and "cb". See details.
+#' @param family A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", and "cb". See details. If "all", all available families will be selected.
 #' @param min.phi The minimum proportion 'bite size'. If \code{NA} (default), the minimum non-zero value in the data is used. If \code{NA} and \code{object} supplied is of class 'split_herb', the \code{min_prop} is extracted from the \code{object}.
-#' @param method Optimizer used to find the maximum likelihood estimates. Valid options are "Nelder-Mead" (default) and "BFGS".
+#' @param method Optimizer used to find the maximum likelihood estimates. Valid options are "Nelder-Mead", "BFGS" (default), and "nlminb".
 #' @param IC An information criteria used to rank the fitted distributions. Default is "AICc".
 #'
 #' @details
@@ -349,11 +349,14 @@ fit_bite_size<-function(object,
                         family = c("allo","allo_a","allo_M",
                                    "tlnorm","beta","kumar", "tpareto", "cb"),
                         min.phi = NA,
-                        method = c("Nelder-Mead","BFGS"),
+                        method = c("BFGS","nlminb", "Nelder-Mead"),
                         IC = "AICc"){
 
   supported.families <- c("allo","allo_a","allo_M",
                           "tlnorm","beta","kumar", "tpareto", "cb")
+  if(any("all" %in% family)){
+    family <- supported.families
+  }
 
   if(inherits(object,"split_herb")){
     data.vec <- object$hole_prop
@@ -376,7 +379,7 @@ fit_bite_size<-function(object,
     stop("min.phi must be between zero and one, not inclusive.")
   }
 
-  data.vec <- .herb_data_check(data.vec, min.phi = min.phi, allow.zero = FALSE)
+  data.vec <- .herb_data_check(data.vec, min.phi = min.phi, allow.zero = FALSE, allow.one = FALSE)
 
   n <- length(data.vec)
   if(n < 3){
@@ -388,7 +391,7 @@ fit_bite_size<-function(object,
                                       min.phi = min.phi,
                                       max.phi = 1,
                                       a = 14/9,
-                                      log = T)),
+                                      log = TRUE)),
                             class= "logLik",
                             nall = n,
                             nobs= n,
@@ -405,17 +408,17 @@ fit_bite_size<-function(object,
 
   if("allo_a" %in% family){
 
-    allo_a.fit<-optim2(par = 1.5,
+    allo_a.fit<-optim2(init = 1.5,
                       fn = function(theta){
                         -sum(dallo(x = data.vec,
                                    min.phi = min.phi,
                                    max.phi = 1,
                                    a = theta,
-                                   log = T))
+                                   log = TRUE))
                       }, method = "Brent",
                       lower = 0,
                       upper = 10,
-                      hessian = T)
+                      hessian = TRUE)
 
     allo_a.loglik<- structure(-allo_a.fit$value,
                               class= "logLik",
@@ -441,23 +444,23 @@ fit_bite_size<-function(object,
   }
 
   if("allo_M" %in% family){
-    # allo_M.fit<-optim2(par = 1,
+    # allo_M.fit<-optim2(init = 1,
     #                   fn = function(theta){
     #                     -sum(dallo(x = data.vec,
     #                                min.phi = min.phi,
     #                                max.phi = theta,
     #                                a = 14/9,
-    #                                log = T))
+    #                                log = TRUE))
     #                   }, method = "Brent",
     #                   lower = max(data.vec)+0.01,
     #                   upper = 10,
-    #                   hessian = T)
+    #                   hessian = TRUE)
 
     allo_M.loglik<- structure(sum(dallo(x = data.vec,
                                         min.phi = min.phi,
                                         max.phi = max(data.vec),
                                         a = 14/9,
-                                        log = T)),
+                                        log = TRUE)),
                               class= "logLik",
                               nall = n,
                               nobs= n,
@@ -472,16 +475,18 @@ fit_bite_size<-function(object,
   }
 
   if("tlnorm" %in% family){
-    tlnorm.fit<-optim2(par = c(1,0),
+    tlnorm.fit<-optim2(init = c(1,0),
                       fn = function(theta){
                         -sum(dhtlnorm(x = data.vec,
                                       theta = 0,
                                       meanlog = theta[1],
                                       sdlog = exp(theta[2]),
                                       endpoint = 1,
-                                      log = T))
+                                      log = TRUE))
                       }, method = method,
-                      hessian = T)
+                      upper = c(Inf, Inf),
+                      lower = c(-Inf, -Inf),
+                      hessian = TRUE)
 
     tlnorm.loglik<- structure(-tlnorm.fit$value,
                               class= "logLik",
@@ -508,14 +513,16 @@ fit_bite_size<-function(object,
   }
 
   if("beta" %in% family){
-    beta.fit<-optim2(par = c(0,0),
+    beta.fit<-optim2(init = c(0,0),
                     fn = function(theta){
                       -sum(dbeta(x = data.vec,
                                  shape1 = exp(theta[1]),
                                  shape2 = exp(theta[2]),
-                                 log = T))
+                                 log = TRUE))
                     }, method = method,
-                    hessian = T)
+                    upper = c(Inf, Inf),
+                    lower = c(-Inf, -Inf),
+                    hessian = TRUE)
 
     beta.loglik<- structure(-beta.fit$value,
                             class= "logLik",
@@ -542,14 +549,16 @@ fit_bite_size<-function(object,
   }
 
   if("kumar" %in% family){
-    kumar.fit<-optim2(par = c(0,0),
+    kumar.fit<-optim2(init = c(0,0),
                     fn = function(theta){
                       -sum(extraDistr::dkumar(x = data.vec,
                                  a = exp(theta[1]),
                                  b = exp(theta[2]),
-                                 log = T))
+                                 log = TRUE))
                     }, method = method,
-                    hessian = T)
+                    upper = c(Inf, Inf),
+                    lower = c(-Inf, -Inf),
+                    hessian = TRUE)
 
     kumar.loglik<- structure(-kumar.fit$value,
                             class= "logLik",
@@ -576,16 +585,16 @@ fit_bite_size<-function(object,
   }
 
   if("tpareto" %in% family){
-    tpareto.fit<-optim2(par = 1,
+    tpareto.fit<-optim2(init = 1,
                      fn = function(theta){
                        -sum(dtpareto(x = data.vec,
                                                a = exp(theta),
                                                b = min.phi,
-                                               log = T))
-                     }, method = "Brent",
+                                               log = TRUE))
+                     }, method = method,
                      lower = -10,
                      upper = 4,
-                     hessian = T)
+                     hessian = TRUE)
 
     tpareto.loglik<- structure(-tpareto.fit$value,
                              class= "logLik",
@@ -611,13 +620,15 @@ fit_bite_size<-function(object,
   }
 
   if("cb" %in% family){
-    cb.fit<-optim2(par = ,
+    cb.fit<-optim2(init = 0,
                       fn = function(theta){
                         -sum(dcb(x = data.vec,
                                 lambda = plogis(theta[1]),
-                                log = T))
+                                log = TRUE))
                       }, method = method,
-                      hessian = T)
+                   upper = c(Inf),
+                   lower = c(-Inf),
+                      hessian = TRUE)
 
     cb.loglik<- structure(-cb.fit$value,
                              class= "logLik",

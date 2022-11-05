@@ -4,7 +4,7 @@
 \alias{coef.generic_null_fit}
 \title{Extract Model Coefficients}
 \usage{
-\method{coef}{generic_null_fit}(object, ..., backtransform = T)
+\method{coef}{generic_null_fit}(object, ..., backtransform = TRUE)
 }
 \arguments{
 \item{object}{A 'generic_null_fit' object}

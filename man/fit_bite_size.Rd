@@ -8,18 +8,18 @@ fit_bite_size(
   object,
   family = c("allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", "cb"),
   min.phi = NA,
-  method = c("Nelder-Mead", "BFGS"),
+  method = c("BFGS", "nlminb", "Nelder-Mead"),
   IC = "AICc"
 )
 }
 \arguments{
 \item{object}{A vector of proportion 'bite sizes' between zero and one, not inclusive. If an object of class 'split_herb' is supplied, the \code{hole_prop} vector will be extracted.}
 
-\item{family}{A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", and "cb". See details.}
+\item{family}{A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", and "cb". See details. If "all", all available families will be selected.}
 
 \item{min.phi}{The minimum proportion 'bite size'. If \code{NA} (default), the minimum non-zero value in the data is used. If \code{NA} and \code{object} supplied is of class 'split_herb', the \code{min_prop} is extracted from the \code{object}.}
 
-\item{method}{Optimizer used to find the maximum likelihood estimates. Valid options are "Nelder-Mead" (default) and "BFGS".}
+\item{method}{Optimizer used to find the maximum likelihood estimates. Valid options are "Nelder-Mead", "BFGS" (default), and "nlminb".}
 
 \item{IC}{An information criteria used to rank the fitted distributions. Default is "AICc".}
 }

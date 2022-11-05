@@ -276,3 +276,38 @@ debug(herbivar:::.dalloT.cond.k.fft.conv)
 dalloT(c(0,0.5,1),lambda = 1)
 
 #1-sum(dpois(0:50,1)%*%t(cond.prob.mat[-nrow(cond.prob.mat),]))
+
+
+
+
+nll <- function(theta){
+  -sum(dcb(
+    data.vec,
+    lambda = plogis(theta[1]),
+    log = TRUE
+  ))
+}
+
+nll(c(1,4))
+
+debug(optim2)
+
+optim(c(0.1), fn = nll, lower = c(-Inf), upper = c(Inf), method = "BFGS")
+
+data.vec <- rbeta(100, 1,1)
+data.vec <- rcb(100, 0.1)
+
+fit_bite_size(rallo(1000),family = "all",min.phi = 0.005, method = "BFGS")
+
+
+optim2(init = c(1,1),
+       fn = function(theta){
+         -sum(dbeta(x = data.vec,
+                    shape1 = exp(theta[1]),
+                    shape2 = exp(theta[2]),
+                    log = T))
+       }, method = method,
+       hessian = T)
+
+
+

@@ -8,7 +8,7 @@ combine_data_lists<-function(data.list,data.list2){
 }
 
 
-.herb_data_check <- function(x, min.phi, allow.zero){
+.herb_data_check <- function(x, min.phi, allow.zero, allow.one = TRUE){
   x <- as.numeric(x)
   if(any(is.na(x))){
     message(sum(is.na(x))," NA detected and removed from data")
@@ -36,6 +36,13 @@ combine_data_lists<-function(data.list,data.list2){
   }
   x <- x[!z]
 
+  if(!allow.one){
+    o <- x == 1
+    if(any(o)){
+      message(sum(o), " ones detected and removed from data")
+    }
+    x <- x[!o]
+  }
   return(x)
 }
 
@@ -65,6 +72,10 @@ combine_data_lists<-function(data.list,data.list2){
 #' @export
 optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
   mcall<-match.call()
+  stopifnot(!missing(method))
+  stopifnot(!missing(lower))
+  stopifnot(!missing(upper))
+
   fun <- function(foo,...){
     if(method == "nlm"){
       out <- stats::nlm(p = init,
