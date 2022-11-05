@@ -37,13 +37,8 @@ combine_data_lists<-function(data.list,data.list2){
   } else {
     z <- x < min.phi
     if(any(z)){
-      if(coerce.to.zero){
-        x[z] <- 0
-        message(sum(z)," values less than min.phi detected and coerced to zero")
-      } else {
         x <- x[!z]
         message(sum(z)," values less than min.phi detected and removed from data")
-      }
     }
   }
 
