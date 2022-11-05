@@ -163,7 +163,8 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
 #' Argument \code{by} sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} are approximated with a normal distribution, given the central limit theorem (see \code{?get_phi_bar()} and \code{?get_phi_var()}):
 #' \deqn{P(\phi_T^k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
 #'
-#' The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
+#' The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}}
+#'  and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T,} and when \eqn{q = 1}, \deqn{P(\phi_T \leq q) = 1.}
 #'
 #' Because the CDF of the neutral herbivory distribution is too computationally intensive, \code{ralloT()} generates values using random draws from the Poisson and 'bite size' distribution. It is essentially a wrapper for the function \code{.allometry.herb.quasi.sim()}. For the same reason, \code{qalloT()} estimates the quantile function by generating \code{n.sim} draws from the neutral herbivory distribution then finding the empirical cumulative density function.
 #'
@@ -253,7 +254,7 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     # }
     # mean.phi.T is the mean before cutting off at 1 (!!).
     # mean.phi.T is an overestimation of the true mean, especially at higher values
-    k.vec <- seq_len(k.max) # Set the vector of k that is calculated.
+    k.vec <- seq(0,k.max,by = 1) # Set the vector of k that is calculated.
     # 50 usually does a good approximation
 
     phi <- seq(from=0,to = 1,by = by) # Generate some x
@@ -299,8 +300,8 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
   } # Parallel computing only possible with registered cluster
 
   #Fix scaling issue
-  prob <- ifelse(x == 0,
-                 dpois(0,lambda,log = FALSE),
+  prob <- ifelse(x == 0 | x == 1,
+                 prob,
                  prob/by)
 
   if(log){
@@ -321,7 +322,9 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' @rdname alloT
 #' @export
 palloT<-function(q, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, lambda = NULL,
-                 by = 0.01, cores = 1, lower.tail = TRUE, log.p = FALSE, ...){
+                 by = 0.001, k.max = 50, k.max.tolerance = 1e-5,
+                 k.fft.limit = 100, parallel = FALSE, cores = 1,
+                 lower.tail = TRUE, log.p = FALSE, ...){
   if(is.null(mean.phi.T)){
     if(is.null(lambda)){
       stop("Either 'lambda' or 'mean.phi.T must be specified'.")
@@ -336,71 +339,41 @@ palloT<-function(q, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
                            max.phi = max.phi,
                            a = a)
 
-  p0 <- dpois(0,lambda = lambda)
-
-  if((by > min.phi & q < min.phi) || by > q){
+  if(any((q > 0) & ((by > min.phi & q < min.phi) | (by > q)))){
     warning("Numeric resolution not high enough, result is unreliable. Lower the 'by' setting.")
   }
-  if(by < 0.01 && q > 0.1){
-    message("Slow! Be prepared to wait. Go make coffee :) ")
-  }
-  if(cores>1){
-    parallel <- TRUE
-    cluster <- makeCluster(cores)
-    doParallel::registerDoParallel(cluster)
 
-    p <- foreach::foreach(i = q, .combine = "c", .packages = c("herbivar")) %dopar% {
-      upper <- i
-      upper<-ifelse(upper<0,0,upper)
-      foo<-integrate(
-        f = function(x) {dalloT(x = x,
-                                mean.phi.T = mean.phi.T,
-                                min.phi = min.phi,
-                                max.phi = max.phi,
-                                a = a,
-                                by = by,
-                                ...)},
-        lower = 0,
-        upper = upper,
-        subdivisions = 500
-      )
-      return(foo$value)
-    }
-    on.exit(
-      try({
-        doParallel::stopImplicitCluster()
-        stopCluster(cluster)
-      })
-    )
-  } else {
-    p<-vapply(X = q, FUN = function(q) {
-      q<-ifelse(q<0,0,q)
-      foo<-integrate(
-        f = function(x) {dalloT(x = x,
-                                mean.phi.T = mean.phi.T,
-                                min.phi = min.phi,
-                                max.phi = max.phi,
-                                a = a,
-                                by = by,
-                                ...)},
-        lower = 0,
-        upper = q,
-        subdivisions = 500
-      )
-      return(foo$value)
-    }, FUN.VALUE = numeric(1))
-  }
-  p.true <- p + ifelse(q<0,0,p0)
+  x <- seq(0,1, by = by) # Set up a grid to numerically integrate at 'by' resolution
+
+  x.prob <- dalloT(x = x, # Generate probability
+         lambda = lambda,
+         min.phi = min.phi,
+         max.phi = max.phi,
+         a = a,
+         k.max = k.max,
+         by = by,
+         k.max.tolerance = k.max.tolerance,
+         k.fft.limit = k.fft.limit,
+         log = FALSE,
+         parallel = parallel,
+         cores = cores)
+  x.prob[-c(1,length(x.prob))] <- x.prob[-c(1,length(x.prob))] * by # Fix scaling issue for the continuous interval
+  x.prob <- c(0, x.prob) # Append prob = 0 to any q less than 0
+  x.cdf <- cumsum(x.prob) # Find cdf grid
+  indices <- findInterval(q, x)+1
+
+  p <- x.cdf[indices] # Index q from the cdf grid
+  p <- ifelse(indices == length(x.prob), 1, p) # Fix precision issue
 
   if(!lower.tail){
-   p.true <-  1 - p.true
+   p <-  1 - p
   }
 
   if(log.p){
-    p.true <- log(p.true)
+    p <- log(p)
   }
 
-  return(p.true)
+  return(p)
 }
 
 #' @rdname alloT
@@ -540,9 +513,12 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     # Returns a matrix. Row is phi.T and column is k.
     # Values over the upper boundary are cut off with the indexing
   }
+  cond.prob.mat[1,] <- 0 # P(phi_T = 0 | k > 0) = 0 Discrete probability
+  cond.prob.mat[1,1] <- 1 # P(phi_T = 0 | k = 0) = 1 Discrete probability
+
 
   # Cut off probabilities added back to phi=1
-   cond.prob.mat[nrow(cond.prob.mat),]<-cond.prob.mat[nrow(cond.prob.mat),]+1-colSums(cond.prob.mat)
+  cond.prob.mat[nrow(cond.prob.mat),]<-cond.prob.mat[nrow(cond.prob.mat),]+1-colSums(cond.prob.mat)
   #cond.prob.mat <- cond.prob.mat/ colSums(cond.prob.mat)
 
   if(is.null(phi.T.index)){
@@ -556,9 +532,9 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
                     FUN = function(phi.T.index, k){
                       cond.prob.mat[
                         phi.T.index,
-                        (k)]
+                        (k+1)]
                     })) # slow
-  prob.mat[(phi.T>1)|(phi.T<0),]<-0 # Set values outside of bounds to zero
+  prob.mat[(phi.T>1)|(phi.T<0)|(phi.T > 0 & phi.T < min.phi),]<-0 # Set values outside of bounds to zero
 
   prob.mat[prob.mat<0]<-0 # Fix some numeric errors
   if(log){
@@ -654,6 +630,8 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' \code{n}: the sample size
 #'
 #' \code{df}: the degrees of freedom of the model
+#'
+#' \code{herbivar.version}: version of herbivar used to fit the model
 #'
 #' \code{num.approx.param}: a named vector of values indicating the parameters used in the numerical approximation of the density function of the neutral herbivory distribution.
 #' @export
@@ -835,6 +813,7 @@ fit_allo_herb<-function(data.vec,
                           "id" = id,
                           "n" = length(data.vec),
                           "df" = length(optim.vars),
+                          "herbivar.version" = herbivar.version(silent = TRUE),
                           "num.approx.param" = c("k.max" = k.max,
                                                  "resolution" = by,
                                                  "k.max.tolerance" = k.max.tolerance,

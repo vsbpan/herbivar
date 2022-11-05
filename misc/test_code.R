@@ -204,3 +204,75 @@ iml[[lapply(iml, function(x){
   max()
 
 crop_leaf(img2) %>% leaf_length()
+
+img<-herbivar::image_example(type = "p")
+library(herbivar)
+
+object <- img
+
+grow_edge(img,1) %>% plot()
+
+
+
+
+
+
+
+
+library(herbivar)
+
+x <- seq(0.00001,1.5,by=0.00001)
+
+rallo(10000,0.00001,2,a = 0.5) %>% hist()
+
+
+rallo(10000, 0.0000001,2)
+herbivar:::.allometry.herb.quasi.sim
+
+
+
+for (i in c(1, 3, 10, 30, 100, 300,1000, 3000)){
+
+}
+
+hist(ralloT(10000,0.3))
+
+ralloT(10000,min.phi = 0.2,max.phi = 0.24,lambda = 1) %>%
+  hist(nclass=200)
+
+f(50)
+
+
+x<-rallo(10000,max.phi = 10)
+
+x[x>1] <- 1
+hist(x)
+
+f(10,max.phi = 40,min.phi = 0.001,a = 1.55)
+
+
+f <- function(i, min.phi = 0.00001, max.phi = 100,a=14/9){
+  n.sim <- 10000
+  lambda <- i
+  k <- rpois(n.sim, lambda)
+  phi_T <- vapply(X = k,
+                  FUN = function(x) sum(
+                    rallo(n = x,min.phi = min.phi, max.phi = max.phi,a=a)),
+                  FUN.VALUE = numeric(1))
+  phi_T[phi_T > 1] <- 1
+  phi_T[phi_T < 0.005] <- 0
+  phi_T %>% hist(main = i,nclass= 100)
+  mean(phi_T)
+  invisible(phi_T)
+}
+
+?hist
+
+library(herbivar)
+
+debug(herbivar:::dalloT)
+debug(herbivar:::.dalloT.cond.k.fft.conv)
+
+dalloT(c(0,0.5,1),lambda = 1)
+
+#1-sum(dpois(0:50,1)%*%t(cond.prob.mat[-nrow(cond.prob.mat),]))

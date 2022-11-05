@@ -30,7 +30,7 @@ A object of class 'bite_size_fit' and 'list'
 A named list of model fit details, including MLE values, SE, log likelihood, and convergence code.
 
 \code{settings}:
-A named list of function inputs, including the original vector of data, \code{min.phi}, \code{method}, and \code{family}.
+A named list of function inputs, including the original vector of data, \code{min.phi}, \code{method}, \code{family}, and \code{herbivar.version}.
 
 \code{summary}:
 A matrix array of ordered IC values of fitted models.

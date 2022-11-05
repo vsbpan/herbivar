@@ -60,6 +60,7 @@ An 'generic_null_fit' object with the following slots:
 \code{n}: the sample size
 
 \code{df}: the degrees of freedom of the model
+\code{herbivar.version}: version of herbivar used to fit the model
 }
 \description{
 Estimate unknown parameters in non-neutral generic null herbivory models from a vector of observed herbivory data using Maximum Likelihood Estimation (MLE).

@@ -37,6 +37,7 @@
 #' \code{n}: the sample size
 #'
 #' \code{df}: the degrees of freedom of the model
+#' \code{herbivar.version}: version of herbivar used to fit the model
 
 #' @export
 fit_generic_null<- function(data.vec,
@@ -123,7 +124,8 @@ fit_generic_null<- function(data.vec,
                           "param.val.trans" = param.val.trans,
                           "id" = id,
                           "n" = length(data.vec),
-                          "df" = length(optim.vars)
+                          "df" = length(optim.vars),
+                          "herbivar.version" = herbivar.version(silent = TRUE)
 
   )
   if(any(is.na(generic_null_fit.out$se))){
@@ -337,7 +339,7 @@ coef.generic_null_fit<-function(object, ..., backtransform = T){
 #' A named list of model fit details, including MLE values, SE, log likelihood, and convergence code.
 #'
 #' \code{settings}:
-#' A named list of function inputs, including the original vector of data, \code{min.phi}, \code{method}, and \code{family}.
+#' A named list of function inputs, including the original vector of data, \code{min.phi}, \code{method}, \code{family}, and \code{herbivar.version}.
 #'
 #' \code{summary}:
 #' A matrix array of ordered IC values of fitted models.
@@ -660,7 +662,8 @@ fit_bite_size<-function(object,
                   "settings" = list("data" = data.vec,
                          "min.phi" = min.phi,
                          "method" = method,
-                         "family" = family),
+                         "family" = family,
+                         "herbivar.version" = herbivar.version(silent = TRUE)),
                   "summary" = t(out.tab))
   if(any(out.tab[4,] == 1)){
     warning("Model did not converge (1).")

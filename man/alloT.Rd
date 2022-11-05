@@ -39,7 +39,11 @@ palloT(
   max.phi = 1,
   a = 14/9,
   lambda = NULL,
-  by = 0.01,
+  by = 0.001,
+  k.max = 50,
+  k.max.tolerance = 1e-05,
+  k.fft.limit = 100,
+  parallel = FALSE,
   cores = 1,
   lower.tail = TRUE,
   log.p = FALSE,
@@ -118,7 +122,8 @@ when \eqn{\phi_T < 1}. The truncated probabilities \eqn{P(\phi_T > 1 | k)} is ad
 Argument \code{by} sets the grid resolution of the discrete Fourier transform. Usually, a value below 0.001 is required to achieve reasonable accuracy. Eights times as many zeros are added to the end of the PDF to improve the accuracy and efficiency of the FFT (i.e. zero padding). To avoid overflow and improve computational efficiency, convolutions with \eqn{k > 100} are approximated with a normal distribution, given the central limit theorem (see \code{?get_phi_bar()} and \code{?get_phi_var()}):
 \deqn{P(\phi_T^k) \approx \mathcal{N}(\mu = k\overline\phi,\sigma=\sqrt{k\mathbb{Var}[\phi]})}
 
-The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}} and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T.}
+The CDF of the neutral herbivory distribution is calculated numerically by adding up the density. Because the neutral herbivory distribution is a mix of discrete and continuous, the CDF is the sum of the discrete portion \deqn{P(\phi_T = 0, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) = e^{-\lambda}}
+and the integral of the continuous portion \deqn{\int_0^q P(\phi_T = q, \overline{\phi_T'}, \phi_m, \phi_M, \alpha) d \phi_T,} and when \eqn{q = 1}, \deqn{P(\phi_T \leq q) = 1.}
 
 Because the CDF of the neutral herbivory distribution is too computationally intensive, \code{ralloT()} generates values using random draws from the Poisson and 'bite size' distribution. It is essentially a wrapper for the function \code{.allometry.herb.quasi.sim()}. For the same reason, \code{qalloT()} estimates the quantile function by generating \code{n.sim} draws from the neutral herbivory distribution then finding the empirical cumulative density function.
 }

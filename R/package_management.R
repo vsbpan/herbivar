@@ -1,6 +1,10 @@
-herbivar.version <- function(x){
-  print(utils::packageDate("herbivar"))
-  message("Still in development; use with caution!")
+herbivar.version <- function(silent = FALSE){
+  out <- utils::packageDate("herbivar")
+  if(!silent){
+    print(out)
+    message("Still in development; use with caution!")
+  }
+  invisible(out)
 }
 
 .onAttach <- function(...){

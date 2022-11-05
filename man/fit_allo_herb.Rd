@@ -95,6 +95,8 @@ An 'allo_herb_fit' object with the following slots:
 
 \code{df}: the degrees of freedom of the model
 
+\code{herbivar.version}: version of herbivar used to fit the model
+
 \code{num.approx.param}: a named vector of values indicating the parameters used in the numerical approximation of the density function of the neutral herbivory distribution.
 }
 \description{

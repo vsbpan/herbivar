@@ -566,3 +566,30 @@ color_index <- function(img, index = "all",plot = TRUE){
   return(iml)
 }
 
+
+#' @title Add One Row of Pixel to Edge
+#' @description Add one row of pixel with value 'background' (default is \code{NA}) to the edge of the image. Useful for image processing when the leaf is touching the edge of the image, which prevents the leaf boarder from being recognized properly.
+#' @param object a 'cimg' object
+#' @param background the value appended to the edge of the image. Default is \code{NA}. Only a single value is supported at the moment. So for colored images, all color channels will be set the same value.
+#' @return A 'cimg' object
+grow_edge <- function(object, background = NA){
+  stopifnot(imager::is.cimg(object))
+  x <- ncol(object)
+  y <- nrow(object)
+  z <- dim(object)[3]
+  spec <- dim(object)[4]
+
+
+
+  object <- EBImage::abind(
+    array(rep(NA,z*spec*(x+2)),dim = c(1,x+2,z,spec)),
+    EBImage::abind(array(rep(NA,z*spec*y),dim = c(y,1,z,spec)),
+                   object[],
+                   array(rep(NA,z*spec*y),dim = c(y,1,z,spec)),
+                   along = 2),
+    array(rep(NA,z*spec*(x+2)),dim = c(1,x+2,z,spec)),
+    along = 1
+  ) %>% as.cimg()
+
+  return(object)
+}

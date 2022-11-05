@@ -4,12 +4,12 @@
 \alias{crop_leaf}
 \title{Crop Out Non-Leaf Pixels}
 \usage{
-crop_leaf(object, thr = "otsu", invalid = NA, rgb.index = 3L, px.size = NA)
+crop_leaf(object, thr = "99", invalid = NA, rgb.index = 3L, px.size = NA)
 }
 \arguments{
 \item{object}{a cimg, pixset, or matrix, or array to be cropped.}
 
-\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantiles. If \code{FALSE} (default is "otsu"), no thesholding will be performed prior to cropping. Useful for when the colors are slightly impure.}
+\item{thr}{a threshold, either numeric, "kmeans", or "otsu", or string for quantiles. If \code{FALSE} (default is "99"), no thesholding will be performed prior to cropping. Useful for when the colors are slightly impure.}
 
 \item{invalid}{the value to replace non-leaf pixels as. Default is \code{NA}.}
 

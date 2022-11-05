@@ -171,9 +171,9 @@ rtpareto<-function(n, a, b, endpoint = 1){
 
 
 #' @title Truncated Log-Normal Hurdle Distribution
-#' @description Density function and random number generation of a three parameter truncated log-normal hurdle distribution. The log-normal distribution does not normally have support at zero and has an upper bound at positive infinity. Setting up the distribution as a hurdle model takes care of zeros in data. The truncation sets the upper bound to 1 or any arbitrary user defined value.
+#' @description Density function and random number generation of a three parameter truncated log-normal hurdle distribution. The log-normal distribution does not normally have support at zero and has an upper bound at positive infinity. Setting up the distribution as a hurdle model takes care of zeros in data. The truncation sets the upper bound to 1 or any arbitrary user defined value. The truncated probabilities are added to the end point as a Dirac delta function.
 #' @param x A vector of numeric values
-#' @param n integer value indicating the number of observations to generate
+#' @param n integer value indicating the number of observations to generat
 #' @param theta A numeric value between zero and one (inclusive) that defines the probability of non-zero values
 #' @param meanlog,sdlog Mean and standard deviation of the distribution on the log scale.
 #' @param endpoint A numeric value indicating the upper bound of the distribution
@@ -183,8 +183,10 @@ rtpareto<-function(n, a, b, endpoint = 1){
 #'
 #' If \eqn{x = 0}
 #' \deqn{f(x) = \theta}
-#' If \eqn{x > 0}
-#' \deqn{f(x) = (1 - \theta) \frac{g(x, \mu, \sigma)}{G(x = b; \mu ,\sigma)} }
+#' if \eqn{x = 1}
+#' \deqn{f(x) = (1 - \theta) (1-G(x = b; \mu ,\sigma))}
+#' if \eqn{1 > x > 0}
+#' \deqn{f(x) = (1 - \theta) g(x, \mu, \sigma)}
 #' where the log-normal PDF is defined as
 #' \deqn{ g(x; \mu , \sigma) = \frac{1}{x \sigma \sqrt{2 \pi}} \exp{(-\frac{(\ln{x}-\mu)^2}{2\sigma^2})} }
 #' and the log-normal CDF is \eqn{G(x = b; \mu ,\sigma)}.\eqn{b} is the upper bound (endpoint), \eqn{\mu} is the mean, \eqn{\sigma} is the standard deviation, and \eqn{\theta} is the proportion of zeros.
@@ -195,10 +197,13 @@ dhtlnorm<-function(x,theta,meanlog,sdlog,endpoint =1,log=FALSE){
     x == 0,
     theta,
     (1-theta) * ifelse(
-      x <= endpoint,
-      dlnorm(x, meanlog = meanlog, sdlog = sdlog) /
-        plnorm(endpoint,meanlog = meanlog,sdlog = sdlog),
-      0)
+      x < endpoint,
+      dlnorm(x, meanlog = meanlog, sdlog = sdlog),
+      ifelse(
+        x == endpoint,
+        1 - plnorm(endpoint,meanlog = meanlog,sdlog = sdlog),
+        0
+      ))
   )
 
   if(log){
@@ -211,18 +216,24 @@ dhtlnorm<-function(x,theta,meanlog,sdlog,endpoint =1,log=FALSE){
 #' @rdname htlnorm
 #' @export
 rhtlnorm<-function(n,theta,meanlog,sdlog,endpoint=1){
+  p.max <- plnorm(q = endpoint,
+         meanlog = meanlog,
+         sdlog = sdlog)
+
   out <- ifelse(
     rbinom(n, size = 1, prob = theta) == 1,
     0,
-    qlnorm(
-      p =
-        runif(n = n, #Inverse sampling but shrink original support to location of truncation
-              min = 0,
-              max = plnorm(q = endpoint,
-                           meanlog = meanlog,
-                           sdlog = sdlog)),
-      meanlog = meanlog,
-      sdlog = sdlog
+    ifelse(
+      rbinom(n, size = 1, prob = 1-p.max) == 1,
+      1,
+      qlnorm(
+        p =
+          runif(n = n, #Inverse sampling but shrink original support to location of truncation
+                min = 0,
+                max = p.max),
+        meanlog = meanlog,
+        sdlog = sdlog
+      )
     )
   )
   return(out)
