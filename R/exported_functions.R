@@ -2,7 +2,7 @@
 
 #' @export
 ad.test <- function(...) {
-  .is_inst("KSamples",stop.if.false = TRUE)
+  .is_inst("kSamples",stop.if.false = TRUE)
   kSamples::ad.test(...)
 }
 

@@ -6,7 +6,7 @@
 \usage{
 adjust_prop(
   x,
-  nudge.method = c("replace", "smithson", "add", "subtract", "drop"),
+  nudge.method = c("replace", "none", "smithson", "add", "subtract", "drop"),
   nudge.size = c("macmillan", "warton_min", "warton_max"),
   trans = c("identity", "logit", "empirical_logit", "probit", "log", "sqarcsin"),
   bounds = c("both", "zero", "one"),
@@ -16,9 +16,9 @@ adjust_prop(
 \arguments{
 \item{x}{a vector of numeric data bounded between 0 and 1 inclusive.}
 
-\item{nudge.method}{a character value indicating the method of getting rid of 0's and 1's. Valid options are "replace" (default), "smithson", "add", "subtract", and "drop". see details.}
+\item{nudge.method}{a character value indicating the method of getting rid of 0's and 1's. Valid options are "replace" (default), "none", "smithson", "add", "subtract", and "drop". see details.}
 
-\item{nudge.size}{a numeric value of the size of a small nudge (\eqn{epsilon}). Valid character values can also be supplied to choose the method for estimating \eqn{epsilon}. Valid methods are "macmillan" (default), "warton_min", and "warton_max". see details.}
+\item{nudge.size}{a numeric value of the size of a small nudge (\eqn{\epsilon}). Valid character values can also be supplied to choose the method for estimating \eqn{\epsilon}. Valid methods are "macmillan" (default), "warton_min", and "warton_max". see details.}
 
 \item{trans}{a character value indicating the transformation to be applied to the nudged data. Valid options are "identity" (default-- no transformation), "logit", "empirical_logit", "probit", "log", and "sqarcsin". See details.}
 
@@ -38,6 +38,8 @@ Adjusts proportion data to get rid of 0's and 1's, and optionally transforms the
 \subsection{Nudge method}{
 
 \code{replace}: Replace 0 by \eqn{\epsilon} and 1 by \eqn{1-\epsilon}
+
+\code{none}: No method applied. Can be used along with the empirical logit transformation.
 
 \code{smithson}: the vector is transformed according to the recommendation of Smithson & Verkuilen (2006): \eqn{\frac{x(n-1) + \epsilon}{n}}
 

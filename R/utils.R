@@ -152,6 +152,33 @@ optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
   return(out)
 }
 
+#' @title Bind a list of vector into data.frame
+#' @description Bind a list of vector into a data.frame and keep track of list names and vector names.
+#' @param x a list of vectors
+#' @param margin the direction for which the vectors will be bound. 1 indicates rows (default) and 2 indicates columns.
+#' @param keep_row_names if \code{TRUE} (default), the row names will be kept. Otherwise, they will be set to \code{NULL}.
+#' @param row_names_as_col if a character string is provided, the row name will be added to the data.frame as the first column with that name. If \code{TRUE}, "rownames" will be used as the column name. Otherwise, the no column is added (default is \code{FALSE}).
+#' @return a data.frame
+bind_vec <- function(x,margin = 1L, keep_row_names = TRUE, row_names_as_col = FALSE){
+  out <- as.data.frame(do.call("cbind",x))
+  names(out) <- names(x)
+  if(as.numeric(margin) == 1){
+    out <- as.data.frame(t(out))
+  }
+  if(isTRUE(row_names_as_col)){
+    row_names_as_col <- "rownames"
+  }
 
+  if(is.character(row_names_as_col)){
+    out <- cbind("v" = rownames(out), out)
+    names(out)[1] <- row_names_as_col
+  }
+
+  if(!keep_row_names){
+    rownames(out) <- NULL
+  }
+
+  return(out)
+}
 
 

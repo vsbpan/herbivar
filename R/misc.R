@@ -12,8 +12,8 @@ slide_show<-function(data.list,expression,sleep.time=1,length=1){
 #' @description Adjusts proportion data to get rid of 0's and 1's, and optionally transforms the resulting adjusted proportion.
 #' @param x a vector of numeric data bounded between 0 and 1 inclusive.
 #' @param trans a character value indicating the transformation to be applied to the nudged data. Valid options are "identity" (default-- no transformation), "logit", "empirical_logit", "probit", "log", and "sqarcsin". See details.
-#' @param nudge.method a character value indicating the method of getting rid of 0's and 1's. Valid options are "replace" (default), "smithson", "add", "subtract", and "drop". see details.
-#' @param nudge.size a numeric value of the size of a small nudge (\eqn{epsilon}). Valid character values can also be supplied to choose the method for estimating \eqn{epsilon}. Valid methods are "macmillan" (default), "warton_min", and "warton_max". see details.
+#' @param nudge.method a character value indicating the method of getting rid of 0's and 1's. Valid options are "replace" (default), "none", "smithson", "add", "subtract", and "drop". see details.
+#' @param nudge.size a numeric value of the size of a small nudge (\eqn{\epsilon}). Valid character values can also be supplied to choose the method for estimating \eqn{\epsilon}. Valid methods are "macmillan" (default), "warton_min", and "warton_max". see details.
 #' @param bounds a character value indicating bounds for which the \code{nudge.method} is applied to. Valid options are "both" (default), "zero", and "one". Only relevant for \code{nudge.method} set as "replace" or "drop".
 #' @param na.action a character value indicating how to handle missing values. Valid options are "ignore", "remove", "as.is", and "fail". See details.
 #'
@@ -25,6 +25,8 @@ slide_show<-function(data.list,expression,sleep.time=1,length=1){
 #' ### Nudge method
 #'
 #' \code{replace}: Replace 0 by \eqn{\epsilon} and 1 by \eqn{1-\epsilon}
+#'
+#' \code{none}: No method applied. Can be used along with the empirical logit transformation.
 #'
 #' \code{smithson}: the vector is transformed according to the recommendation of Smithson & Verkuilen (2006): \eqn{\frac{x(n-1) + \epsilon}{n}}
 #'
@@ -86,7 +88,7 @@ slide_show<-function(data.list,expression,sleep.time=1,length=1){
 #'
 #'
 adjust_prop <- function(x,
-                        nudge.method = c("replace","smithson", "add", "subtract", "drop"),
+                        nudge.method = c("replace","none","smithson", "add", "subtract", "drop"),
                         nudge.size = c("macmillan", "warton_min", "warton_max"),
                         trans = c("identity","logit","empirical_logit","probit","log","sqarcsin"),
                         bounds = c("both","zero","one"),
@@ -236,7 +238,7 @@ adjust_prop <- function(x,
 #' @param interval The density interval used to find the upper and lower intervals. Default is 0.95.
 #' @param na.rm If \code{TRUE} (default is \code{FALSE}), missing values will be removed.
 #' @return a vector of numeric values summarising the vector \code{x}.
-summarise_vector <- function(x, interval = 0.95, na.rm = FALSE){
+summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
   x <- c(x)
   if(na.rm){
     x <- x[!is.na(x)]

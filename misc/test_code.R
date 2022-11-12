@@ -237,8 +237,16 @@ for (i in c(1, 3, 10, 30, 100, 300,1000, 3000)){
 
 hist(ralloT(10000,0.3))
 
-ralloT(10000,min.phi = 0.2,max.phi = 0.24,lambda = 1) %>%
-  hist(nclass=200)
+library(herbivar)
+library(tidyverse)
+
+a<-ralloT(100000,min.phi = 0.2,max.phi = 0.23,lambda = 2) %>% hist(nclass = 200)
+data.frame("x" = a$mids, "y" = a$counts/sum(a$counts)) %>%
+  ggplot(aes(x=x,y=y)) +
+  geom_col(color = "navy", fill = "steelblue") +
+  theme_bw(base_size = 15) +
+  labs(x = expression("Proportion herbivory"~phi[T]), y = expression(P(Binned~phi[T])),
+       subtitle = expression(lambda~"="~2~","~phi[m]~"="~0.2~","~phi[M]~"="~0.23))
 
 f(50)
 
@@ -310,4 +318,8 @@ optim2(init = c(1,1),
        hessian = T)
 
 
+
+
+
+herbivar::adjust_prop
 
