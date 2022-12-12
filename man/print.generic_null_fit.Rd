@@ -4,14 +4,14 @@
 \alias{print.generic_null_fit}
 \title{Print Values}
 \usage{
-\method{print}{generic_null_fit}(x, ..., trans = NULL, digits = 3)
+\method{print}{generic_null_fit}(x, ..., trans = "backtransform", digits = 3)
 }
 \arguments{
 \item{x}{a 'generic_null_fit' object}
 
 \item{...}{additional arguments}
 
-\item{trans}{a function that is used to transform the estimated model coefficients. No transformation is applied when set to \code{NULL} (default).}
+\item{trans}{a function that is used to transform the estimated model coefficients. No transformation is applied when set to \code{FALSE}. If set to "backtransform" (default), then the values are back transformed to the original scale.}
 
 \item{digits}{number of digits to display. Default is 3.}
 }

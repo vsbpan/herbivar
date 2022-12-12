@@ -695,3 +695,34 @@ plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
   }
 }
 
+
+#' @title Survival Plot
+#' @description Generate a log-log survival plot of positive only sample. Can be useful for visualizing the tail of the distribution.
+#' @param x a vector of numeric values greater than 0
+#' @param add a logical value indicating whether to overlay points upon an existing plot
+#' @param ... additional arguments passed to \code{points()} or \code{plot()}
+#' @return a plot
+#' @examples
+#' x <- rlnorm(10000,1,1)
+#' survival_plot(x)
+#'
+#' x2 <- rlnorm(10000,1,1.1)
+#' survival_plot(x2, add = TRUE, col = "green", pch = 19)
+#'
+#' @references Aban, I. B., M. M. Meerschaert, and A. K. Panorska. 2006. Parameter Estimation for the Truncated Pareto Distribution. Journal of the American Statistical Association 101:270–277.
+survival_plot <- function(x, add = FALSE, ...){
+  stopifnot(all(x > 0))
+  x2 <- sort(x)
+  vals <- unique(x2)
+  rval <- cumsum(tabulate(match(x2,vals)))/length(x2)
+
+  if(add){
+    graphics::points(log(1-rval)~log(vals), ...)
+  } else {
+    plot(log(1-rval)~log(vals),
+         xlab = expression(ln(x)),
+         ylab = expression(ln(P(X>x))),
+         ...)
+  }
+}
+

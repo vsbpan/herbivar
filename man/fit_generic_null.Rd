@@ -37,7 +37,7 @@ An 'generic_null_fit' object with the following slots:
 
 \code{par}: the value of fitted parameters on the transformed scale in the order of theta.names
 
-\code{se}: standard error of fitted parameters on the transformed scale. Quadratic approximation of the standard error will be implemented in the future.
+\code{se}: standard error of fitted parameters on the transformed scale.
 
 \code{loglik}: log likelihood of the data given the parameter combinations
 
@@ -47,9 +47,7 @@ An 'generic_null_fit' object with the following slots:
 
 \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
 
-\code{method}: Method of optimization
-
-\code{init}: A vector of the used initial values for optimization
+\code{optim.param}: A list of parameters passed to \code{optim2()}, including the method of optimization, a vector of the used initial values for optimization, the lower and upper bounds.
 
 \code{data}: The data to which the model is fitted to
 
@@ -60,6 +58,7 @@ An 'generic_null_fit' object with the following slots:
 \code{n}: the sample size
 
 \code{df}: the degrees of freedom of the model
+
 \code{herbivar.version}: version of herbivar used to fit the model
 }
 \description{

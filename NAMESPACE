@@ -7,10 +7,13 @@ importFrom(stats, "density", "dnorm", "dpois", "ecdf", "fft",
                 "filter", "integrate", "ks.test", "median", "nlm", "nlminb",
                 "optim", "plogis", "quantile", "rpois", "runif", "sd",
                 "var", "BIC", "AIC", "logLik","dbeta","dlnorm","plnorm","qlnorm",
-                "rbeta","rbinom","pnorm","dist","kmeans","qlogis","qnorm")
+                "rbeta","rbinom","pnorm","dist","kmeans","qlogis","qnorm", "biplot")
 importFrom(dplyr,"%>%","group_by","select","ungroup","summarise","mutate_if",
            "mutate","left_join","right_join","summarise_all","bind_rows","bind_cols")
 importFrom(foreach,"%dopar%")
+importFrom("utils", "getS3method", "install.packages", "menu",
+               "read.csv")
+
 
 S3method("print", "allo_herb_fit")
 S3method("logLik", "allo_herb_fit")

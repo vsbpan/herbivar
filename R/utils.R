@@ -68,14 +68,14 @@ combine_data_lists<-function(data.list,data.list2){
 }
 
 
-#' @title General-Purpose Optimization With Error Handling
+#' @title Maximum Likelihood Optimization With Error Handling
 #' @description A wrapper function of \code{stats::optim()}, \code{stats::nlm()}, and \code{stats::nlminb()} with error handling. Intended as an interval function.
 #' @param init initial values for the parameters to be optimized over
 #' @param fn function for which to find the minimum
 #' @param method method allowed by \code{stats::optim()}, as well as \code{nlm} and \code{nlminb}
-#' @param lower,upper lower and upper bound
+#' @param lower,upper lower and upper bounds
 #' @param silent if \code{TRUE}, no message is returned. Default to \code{TRUE}.
-#' @param ... extra arguments passed to \code{optim()}
+#' @param ... extra arguments passed to \code{optim()}, \code{nlm()}, or \code{nlminb()}
 #' @return a list
 #' @export
 optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
@@ -88,7 +88,7 @@ optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
     if(method == "nlm"){
       out <- stats::nlm(p = init,
                  f = fn,
-                 hessian = T,
+                 hessian = TRUE,
                  ...)
       out$objective <- out$minimum
       out$counts <- out$iterations
@@ -112,8 +112,22 @@ optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
           method = method,
           upper = upper,
           lower = lower,
+          hessian = TRUE,
           ...)
     }
+
+    out$se <- tryCatch(sqrt(diag(solve(out$hessian))),
+                       error = function(e) {
+                         rep(NA, length(init))
+                       })
+
+    if(any(is.na(out$se))){
+      out$convergence <- 2
+    }
+    if(is.na(out$value) || !is.finite(out$value)){
+      out$convergence <- 1
+    }
+
     return(out)
   }
 
@@ -129,6 +143,7 @@ optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
       }
       list("par" = rep(NA, length(init)),
            "value" = NA,
+           "se" = rep(NA, length(init)),
            "counts" = c("function" = NA, "gradient" = NA),
            "convergence" = 1,
            "message" = "Model did not converge",
@@ -182,3 +197,21 @@ bind_vec <- function(x,margin = 1L, keep_row_names = TRUE, row_names_as_col = FA
 }
 
 
+FOSM <- function(x,var,trans){
+  # First order taylor's approximation
+  # Var[f(X)] \approx f'(E[X])^2  var[X]
+  stopifnot(is.function(trans))
+  fun.string <- deparse1(trans)
+  variable_name <- gsub(".*function \\(|\\).*","",fun.string)
+  fun.string <- gsub(variable_name,"x",fun.string)
+  fun.string <-gsub(".*\\{| |\\}.*| ","",fun.string)
+  fun.string <- gsub("function\\(x\\)","",fun.string)
+  if(fun.string == "plogis(x)"){
+    deriv.expression <- expression(1/x + 1/(1-x))
+  } else {
+    deriv.expression <- D(parse(text = fun.string), "x")
+  }
+
+  var.trans <- eval(deriv.expression)^2 * var
+  return(var.trans)
+}

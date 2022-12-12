@@ -323,3 +323,121 @@ optim2(init = c(1,1),
 
 herbivar::adjust_prop
 
+
+
+
+
+
+
+
+
+
+x<-ralloT(100,mean.phi.T = 0.1)
+a$optim.param$method
+a<-fit_allo_herb(x)
+fit_generic_null(x)
+a
+
+debug(fit_bite_size)
+
+
+
+
+fit_bite_size(rallo(1000,max.phi = 0.5),min.phi = 0.005)
+
+
+x <- rallo(100,max.phi = 0.90)
+
+exp(seq(0.001,5,by = 0.1)) %>%
+  vapply(nll,numeric(1)) %>% plot()
+
+
+
+optim2(init = exp(11),
+       fn = nll,
+       method = "L-BFGS-B",
+       lower = exp(0.005),
+       upper = exp(10))
+
+
+
+nll<-function(theta){
+  -sum(dallo(x,max.phi = exp(theta), log = TRUE))
+}
+
+.herb_data_check <- herbivar:::.herb_data_check
+
+debug(fit_bite_size)
+
+
+
+?quadprog::solve.QP()
+
+
+x
+
+log(x)
+
+x <- rallo(1000,min.phi = 1,max.phi = 10,a = 14/9)
+o<-order(x)
+x2 <- x[o]
+vals <- unique(x2)
+rval <- cumsum(tabulate(match(x2,vals)))/length(x2)
+plot(log(1-rval)~log(vals))
+lines(log(pallo(vals, min.phi = 1, max.phi = 10, a = 14/9,lower.tail = FALSE)) ~ log(vals))
+
+pallo(4,min.phi = 1, max.phi = 10, a = 14/9,lower.tail = FALSE)
+palloT(10,mean.phi.T = 0.4,max.phi = 6)
+
+pallo
+
+
+
+
+
+D(quote(x/100),"x")
+
+X <- c(1,2,3)
+
+vcv <- matrix(c(rbeta(9,1,1)),ncol = 3)
+vcv
+
+trans <-  c(
+  "theta" = function(x) {plogis(x)},
+  "meanlog" = function(x) {x},
+  "sdlog" = function(x) {exp(z)})
+
+x <- c(1,2,3)
+var <- c()
+
+trans$sdlog
+
+parse(text = match.fun(trans$sdlog))
+
+
+
+
+
+
+
+x <- ralloT(100,lambda = 3)
+
+fit <- fit_allo_herb(x)
+fit2 <- fit_generic_null(x)
+fit
+fit2
+debug(coef.generic_null_fit)
+
+coef(fit2,se = TRUE)
+
+coef(fit,se = TRUE)
+
+
+
+survival_plot(rgamma(1000,1,1))
+survival_plot(rbeta(1000,1,1))
+survival_plot(rlnorm(1000,1,1))
+survival_plot(rallo(1000,max.phi = 5))
+survival_plot()
+
+

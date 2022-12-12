@@ -4,7 +4,7 @@
 \alias{coef.allo_herb_fit}
 \title{Extract Model Coefficients}
 \usage{
-\method{coef}{allo_herb_fit}(object, ..., backtransform = TRUE)
+\method{coef}{allo_herb_fit}(object, ..., backtransform = TRUE, se = FALSE)
 }
 \arguments{
 \item{object}{An 'allo_herb_fit' object}
@@ -14,7 +14,7 @@
 \item{backtransform}{A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is TRUE.}
 }
 \value{
-A named vector
+A named vector of estimates. If \code{se = TRUE}, a named list of vectors will be returned instead.
 }
 \description{
 extract model coefficients from allo_herb_fit objects

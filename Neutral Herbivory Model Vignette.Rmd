@@ -1,0 +1,71 @@
+---
+title: "Neutral Herbivory Model Vignette"
+author: "Vincent Pan"
+date: "`r format(Sys.time(), '%B %d, %Y')`"
+output: 
+  html_document:
+    toc_float: true
+    toc: true 
+    toc_depth: 2 
+    number_sections: true 
+    code_folding: show
+---
+
+
+## Introduction
+
+
+## Prerequisets 
+
+```{r}
+
+
+
+
+
+
+```
+
+## Neutral model
+
+## Formulation
+
+## Supporting functions
+
+### Fitting the neutral model
+```{r}
+a<-fit_bite_size(rallo(100,max.phi = 0.4),min.phi = 0.005)
+
+```
+
+
+## Generic null models
+### Formulation
+
+### Supporting functions
+
+### Fitting the generic null models
+
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils.R
 \name{optim2}
 \alias{optim2}
-\title{General-Purpose Optimization With Error Handling}
+\title{Maximum Likelihood Optimization With Error Handling}
 \usage{
 optim2(init, fn, method, lower, upper, silent = TRUE, ...)
 }
@@ -13,11 +13,11 @@ optim2(init, fn, method, lower, upper, silent = TRUE, ...)
 
 \item{method}{method allowed by \code{stats::optim()}, as well as \code{nlm} and \code{nlminb}}
 
-\item{lower, upper}{lower and upper bound}
+\item{lower, upper}{lower and upper bounds}
 
 \item{silent}{if \code{TRUE}, no message is returned. Default to \code{TRUE}.}
 
-\item{...}{extra arguments passed to \code{optim()}}
+\item{...}{extra arguments passed to \code{optim()}, \code{nlm()}, or \code{nlminb()}}
 }
 \value{
 a list

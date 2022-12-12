@@ -4,7 +4,7 @@
 \alias{coef.generic_null_fit}
 \title{Extract Model Coefficients}
 \usage{
-\method{coef}{generic_null_fit}(object, ..., backtransform = TRUE)
+\method{coef}{generic_null_fit}(object, ..., backtransform = TRUE, se = FALSE)
 }
 \arguments{
 \item{object}{A 'generic_null_fit' object}
@@ -14,7 +14,7 @@
 \item{backtransform}{A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is \code{TRUE}.}
 }
 \value{
-A named vector
+A named vector of estimates. If \code{se = TRUE}, a named list of vectors will be returned instead.
 }
 \description{
 extract model coefficient from 'generic_null_fit' objects

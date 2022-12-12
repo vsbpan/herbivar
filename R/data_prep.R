@@ -22,67 +22,73 @@ rep_data.frame<-function(x,n){
 
 
 #' @export
-id.screener<-function(data,variable,cond=T,min.leaves=2,min.plants=2,
-                      min.herb=0.00000001){
-  variable<-ifelse(variable=="l","percLf",
-                   ifelse(variable=="p1","percHerbPlant",
-                          ifelse(variable=="p2","percHerbPlant2",
-                                 variable)))
-  if(!any(
-    c("percLf","percHerbPlant","percHerbPlant2")%in%variable
-  )){
-    stop("Variable not supported")
-  }
+id.screener<-function(data,variable = c("percHerbPlant",
+                                        "percLf",
+                                        "leaf",
+                                        "plant"),cond=TRUE,min.leaves = 1,min.plants = 15,
+                      min.herb = 0.005){
+  variable <- match.arg(variable)
+  variable <- switch(variable,
+                     "leaf" = "leaf",
+                     "plant" = "plant",
+                     "percLf" = "leaf",
+                     "percHerbPlant" = "plant")
+
   if(is.list(data)){
-    if(variable=="percLf"){
+    if(variable=="leaf"){
       data<-data[["long"]]
     } else {
       data<-data[["short"]]
     }
   }
 
-  if(variable=="percLf"){
+  if(variable=="leaf"){
     ids<-data %>%
       dplyr::filter(eval(parse(text = cond))) %>%
       dplyr::filter(!is.na(percLf)) %>%
-      group_by(plantID3.long) %>%
-      mutate(n.leaves.on.plant= length(unique(leafID))) %>%
-      ungroup() %>%
-      group_by(surveyID) %>%
-      mutate(n.plants.in.survey = length(unique(plantID3.long))) %>%
-      ungroup() %>%
+      dplyr::group_by(plantID3.long) %>%
+      dplyr::mutate(n.leaves.on.plant= length(unique(leafID))) %>%
+      dplyr::ungroup() %>%
+      dplyr::group_by(surveyID) %>%
+      dplyr::mutate(n.plants.in.survey = length(unique(plantID3.long))) %>%
+      dplyr::ungroup() %>%
       dplyr::filter(n.leaves.on.plant>=min.leaves) %>%
       dplyr::filter(n.plants.in.survey>=min.plants) %>%
-      group_by(plantID3.long) %>%
-      mutate(avgHerb=mean(percLf)) %>%
-      dplyr::filter(avgHerb>min.herb) %>%
-      ungroup() %>%
+      dplyr::mutate(percLf = ifelse(percLf < min.herb,
+                    0,
+                    percLf)) %>%
+      dplyr::group_by(plantID3.long) %>%
+      dplyr::mutate(all_zero_check = all(percLf < min.herb)) %>%
+      dplyr::ungroup() %>%
+      dplyr::filter(!all_zero_check) %>%
       dplyr::select(plantID3.long) %>%
       unique() %>%
       unlist()
   } else {
-    if(variable=="percHerbPlant"){
-      data<-data %>%
-        dplyr::filter(!is.na(percHerbPlant)) %>%
-        mutate(percHerbPlant2=percHerbPlant)
+    if(variable=="plant"){
+      ids<-data %>%
+        dplyr::filter(!is.na(percHerbPlant2)) %>%
+        dplyr::filter(eval(parse(text = cond))) %>%
+        dplyr::filter(n.avg >= min.leaves) %>%
+        dplyr::group_by(surveyID) %>%
+        dplyr::mutate(n.plants.in.survey = length(unique(plantID3.long)),
+                      n.avg.med = median(n.avg)) %>%
+        dplyr::ungroup() %>%
+        dplyr::filter(n.plants.in.survey >=
+                        min.plants) %>%
+        dplyr::mutate(percHerbPlant2 = ifelse(percHerbPlant2 < min.herb * 1/n.avg.med,
+                                              0,
+                                              percHerbPlant2)) %>%
+        dplyr::group_by(surveyID) %>%
+        dplyr::mutate(all_zero_check = all(percHerbPlant2 == 0)) %>%
+        dplyr::filter(!all_zero_check) %>%
+        dplyr::select(surveyID) %>%
+        unique() %>%
+        unlist()
     }
-    ids<-data %>%
-      dplyr::filter(eval(parse(text = cond))) %>%
-      dplyr::filter(n.avg>=min.leaves) %>%
-      group_by(surveyID) %>%
-      mutate(n.plants.in.survey = length(unique(plantID3.long))) %>%
-      ungroup() %>%
-      dplyr::filter(n.plants.in.survey>=min.plants) %>%
-      group_by(surveyID) %>%
-      mutate(avgHerb=mean(percHerbPlant2)) %>%
-      dplyr::filter(avgHerb>=min.herb) %>%
-      ungroup() %>%
-      dplyr::select(surveyID) %>%
-      unique() %>%
-      unlist()
   }
-  ids<-ids %>% as.vector()
-  return(ids)
+
+  return(unname(ids))
 }
 
 

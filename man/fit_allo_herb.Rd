@@ -67,7 +67,7 @@ An 'allo_herb_fit' object with the following slots:
 
 \code{par}: the value of fitted parameters on the transformed scale in the order of theta.names
 
-\code{se}: standard error of fitted parameters on the transformed scale. Quadratic approximation of the standard error will be implemented in the future.
+\code{se}: standard error of fitted parameters on the transformed scale.
 
 \code{loglik}: log likelihood of the data given the parameter combinations
 
@@ -79,9 +79,7 @@ An 'allo_herb_fit' object with the following slots:
 
 \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
 
-\code{method}: Method of optimization
-
-\code{init}: A vector of the used initial values for optimization
+\code{optim.param}: A list of parameters passed to \code{optim2()}, including the method of optimization, a vector of the used initial values for optimization, the lower and upper bounds.
 
 \code{data}: The data to which the model is fitted to
 
@@ -101,7 +99,7 @@ An 'allo_herb_fit' object with the following slots:
 }
 \description{
 Estimate unknown parameter(s) in the neutral herbivory model from a vector of observed herbivory data using Maximum Likelihood Estimation (MLE). The likelihood function is of the form
-\deqn{\mathcal{L}(\phi_{T1},\phi_{T2},...,\phi_{Tn}|\overline{\phi_T},\phi_M,\phi_m,\alpha)=\prod_i^n P(\phi_{Ti}|\overline{\phi_T},\phi_M,\phi_m,\alpha).}
+\deqn{\mathcal{L}(\phi_{T1},\phi_{T2},...,\phi_{Tn}|\overline{\phi_T'},\phi_M,\phi_m,\alpha)=\prod_i^n P(\phi_{Ti}|\overline{\phi_T'},\phi_M,\phi_m,\alpha).}
 }
 \details{
 The order of \code{optim.var}, \code{upper}, \code{lower}, and \code{init} must match exactly. The initial value and bounds must be on the scale of the transformed variable.

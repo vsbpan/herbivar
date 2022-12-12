@@ -57,7 +57,7 @@ rallo<-function(n,min.phi=0.005,max.phi=1,a=14/9){
 pallo <- function(q, min.phi = 0.005, max.phi = 1, a = 14/9,
                  lower.tail = TRUE, log.p = FALSE){
   if(a == 1){
-    p <- ifelse(q > 1,
+    p <- ifelse(q > max.phi,
                 1,
                 ifelse(q < min.phi,
                        0,
@@ -65,7 +65,7 @@ pallo <- function(q, min.phi = 0.005, max.phi = 1, a = 14/9,
                 )
     )
   } else {
-    p <- ifelse(q > 1,
+    p <- ifelse(q > max.phi,
                 1,
                 ifelse(q < min.phi,
                        0,
@@ -343,7 +343,7 @@ palloT<-function(q, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     warning("Numeric resolution not high enough, result is unreliable. Lower the 'by' setting.")
   }
 
-  x <- seq(0,1, by = by) # Set up a grid to numerically integrate at 'by' resolution
+  x <- seq(0,max.phi, by = by) # Set up a grid to numerically integrate at 'by' resolution
 
   x.prob <- dalloT(x = x, # Generate probability
          lambda = lambda,
@@ -579,7 +579,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 
 #' @title Fit Neutral Herbivory Distribution Using Maximum Likelihood Estimation
 #' @description Estimate unknown parameter(s) in the neutral herbivory model from a vector of observed herbivory data using Maximum Likelihood Estimation (MLE). The likelihood function is of the form
-#' \deqn{\mathcal{L}(\phi_{T1},\phi_{T2},...,\phi_{Tn}|\overline{\phi_T},\phi_M,\phi_m,\alpha)=\prod_i^n P(\phi_{Ti}|\overline{\phi_T},\phi_M,\phi_m,\alpha).}
+#' \deqn{\mathcal{L}(\phi_{T1},\phi_{T2},...,\phi_{Tn}|\overline{\phi_T'},\phi_M,\phi_m,\alpha)=\prod_i^n P(\phi_{Ti}|\overline{\phi_T'},\phi_M,\phi_m,\alpha).}
 #' @details
 #' The order of \code{optim.var}, \code{upper}, \code{lower}, and \code{init} must match exactly. The initial value and bounds must be on the scale of the transformed variable.
 #' @param data.vec A vector of numeric data. \code{NA}s are ignored. If the whole vector does not contain any non-zero values or contains values outside of \eqn{[0,1]}, the function would throw an error. Values less than "min.phi" are coerced to zero by default.
@@ -603,7 +603,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #'
 #' \code{par}: the value of fitted parameters on the transformed scale in the order of theta.names
 #'
-#' \code{se}: standard error of fitted parameters on the transformed scale. Quadratic approximation of the standard error will be implemented in the future.
+#' \code{se}: standard error of fitted parameters on the transformed scale.
 #'
 #' \code{loglik}: log likelihood of the data given the parameter combinations
 #'
@@ -615,9 +615,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #'
 #' \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
 #'
-#' \code{method}: Method of optimization
-#'
-#' \code{init}: A vector of the used initial values for optimization
+#' \code{optim.param}: A list of parameters passed to \code{optim2()}, including the method of optimization, a vector of the used initial values for optimization, the lower and upper bounds.
 #'
 #' \code{data}: The data to which the model is fitted to
 #'
@@ -786,28 +784,23 @@ fit_allo_herb<-function(data.vec,
 
     ML.fit<-optim2(init = init,
                   fn = nll,
-                  hessian = TRUE,
                   method = method,
                   lower = lower,
                   upper = upper,
                   ...)
-    hessian <- ML.fit$hessian
-    loglik <- -ML.fit$value
-    iters <- ML.fit$counts
 
   allo.herb.fit.out<-list("theta.names" = optim.vars,
                           "par" = ML.fit$par,
-                          "se" = tryCatch(sqrt(diag(solve(hessian))),
-                                          error = function(e) {
-                                            rep(NA,length(diag(hessian)))
-                                          }),
-                          "loglik" = loglik,
-                          "hessian" = hessian,
+                          "se" = ML.fit$se,
+                          "loglik" = -ML.fit$value,
+                          "hessian" = ML.fit$hessian,
                           "message" = ML.fit$message,
-                          "iters" = iters,
+                          "iters" = ML.fit$counts,
                           "convergence" = ML.fit$convergence, # > 0 indicates issues
-                          "method" = method,
-                          "init" = init,
+                          "optim.param" = list("init" = init,
+                                               "method" = method,
+                                               "lower" = lower,
+                                               "upper" = upper),
                           "data" = data.vec,
                           "param.vals" = param.vals,
                           "param.val.trans" = param.val.trans,
@@ -821,10 +814,9 @@ fit_allo_herb<-function(data.vec,
                                                  "k.fft.limit" = k.fft.limit)
 
   )
-  if(any(is.na(allo.herb.fit.out$se))){
+  if(allo.herb.fit.out$convergence == 2){
     warning("Non-positive definite hessian matrix")
     #Usually increasing 'by' resolution fixes this issue. But SLOW!
-    allo.herb.fit.out$convergence <- 2
   } else if(allo.herb.fit.out$convergence!=0){
     warning("Model did not converge","  ",allo.herb.fit.out$convergence)
   }
@@ -848,40 +840,54 @@ fit_allo_herb<-function(data.vec,
 #' @description Prints fitted object and returns an invisible matrix array of the fitted model coefficients
 #' @param x An object of class 'allo_herb_fit'
 #' @param ... additional arguments
-#' @param trans A string or function of transformation applied on the model coefficients
+#' @param trans a function that is used to transform the estimated model coefficients. No transformation is applied when set to \code{FALSE}. If set to "backtransform" (default), then the values are back transformed to the original scale.
 #' @param digits A numeric value indicating the number of digits to be displayed in the model coefficients. Default is 3.
 #' @return A matrix array
 #' @export
-print.allo_herb_fit <- function(x, ..., trans = NULL, digits = 3){
+print.allo_herb_fit <- function(x, ..., trans = "backtransform", digits = 3){
   if(!inherits(x,"allo_herb_fit")){
     stop("Needs to by of object type 'allo_herb_fit'")
   }
-  if(is.null(trans)){
-    FUN <- function(x) x
-  } else {
-    FUN <- match.fun(trans)
-  }
 
   cat("Fitted result on", x$id,"\n")
-  cat("method =",x$method,"\n")
+  cat("method =",x$optim.param$method,"\n")
   cat("n =",length(x$data),"\n")
   cat("\n")
   print(c("loglik" = x$loglik, "AIC" = AIC(x), "AICc" = AICc(logLik(x)), "BIC" = BIC(x)))
   cat("\n")
   print(c(x$iters,"convergence"=x$convergence))
   cat("\n")
-  print(noquote(vapply(
-    x$param.val.trans[x$theta.names],
-    function(z){
-      gsub(".*\\{| |\\}","",paste0(deparse(z),collapse = ""))
-    },
-    character(1)
-  )))
-  cat("\n")
-  x$param.vals<-round(x$param.vals,digits = 3)
+  if(trans != "backtransform"){
+    cat("Estimate needs backtransformation")
+    print(noquote(vapply(
+      x$param.val.trans[x$theta.names],
+      function(z){
+        gsub(".*\\{| |\\}","",paste0(deparse(z),collapse = ""))
+      },
+      character(1)
+    )))
+    cat("\n")
+  }
+  x$param.vals<-round(x$param.vals,digits = digits)
   x$param.vals[is.na(x$param.vals)]<-"fitted"
   print(noquote(x$param.vals))
   cat("\n")
+
+  if(!is.null(trans) && trans == "backtransform"){
+    back.trans.coef <-coef(object = x, backtransform = TRUE, se = TRUE)
+    x$par <- back.trans.coef$Estimate
+    x$se <- back.trans.coef$Std.
+
+    FUN <- function(x) x
+  } else {
+    if(is.null(trans) || isFALSE(trans)){
+      FUN <- function(x) x
+    } else {
+      FUN <- match.fun(trans)
+    }
+
+  }
+
   out<-round(
     apply(as.matrix(
       data.frame(row.names = x$theta.names,
@@ -891,6 +897,7 @@ print.allo_herb_fit <- function(x, ..., trans = NULL, digits = 3){
                  "upper" = x$par+x$se*1.96)
     ), 2, FUN = FUN),
     digits = digits)
+
   if(is.vector(out)){
     out<-t(as.matrix(out))
     rownames(out)<-x$theta.names
@@ -1017,19 +1024,37 @@ BIC.allo_herb_fit <- function(object,...){
 #' @param object An 'allo_herb_fit' object
 #' @param ... additional arguments
 #' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is TRUE.
-#' @return A named vector
-coef.allo_herb_fit<-function(object, ..., backtransform = TRUE){
+#' @return A named vector of estimates. If \code{se = TRUE}, a named list of vectors will be returned instead.
+coef.allo_herb_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
   if(backtransform){
     out<-vapply(seq_along(object$par), function(i){
-      vapply(object$par[i],object$param.val.trans[[object$theta.names[i]]],numeric(1))
+      object$param.val.trans[[object$theta.names[i]]](object$par[i])
     }, numeric(1))
+
+    if(se){
+      se.out <- vapply(seq_along(object$par), function(i){
+        sqrt(FOSM(object$par[i],
+                  object$se[i]^2,
+                  object$param.val.trans[[object$theta.names[i]]]))
+      }, numeric(1))
+      names(se.out) <- object$theta.name
+    }
   } else {
     out <- object$par
+    if(se){
+      se.out <- object$se
+      names(se.out) <- object$theta.name
+    }
   }
   names(out) <- object$theta.name
-  return(out)
-}
 
+  if(se){
+    return(list("Estimate" = out,
+                "Std." = se.out))
+  } else {
+    return(out)
+  }
+}
 
 
 

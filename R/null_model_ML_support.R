@@ -14,7 +14,7 @@
 #'
 #' \code{par}: the value of fitted parameters on the transformed scale in the order of theta.names
 #'
-#' \code{se}: standard error of fitted parameters on the transformed scale. Quadratic approximation of the standard error will be implemented in the future.
+#' \code{se}: standard error of fitted parameters on the transformed scale.
 #'
 #' \code{loglik}: log likelihood of the data given the parameter combinations
 #'
@@ -24,9 +24,7 @@
 #'
 #' \code{convergence}: 0 indicates successful convergence. Error codes are passed from the optimizer function. 1 indicate that the iteration limit has been reached and convergence has failed. 2 indicate that the Hessian matrix is non-positive definite.
 #'
-#' \code{method}: Method of optimization
-#'
-#' \code{init}: A vector of the used initial values for optimization
+#' \code{optim.param}: A list of parameters passed to \code{optim2()}, including the method of optimization, a vector of the used initial values for optimization, the lower and upper bounds.
 #'
 #' \code{data}: The data to which the model is fitted to
 #'
@@ -37,6 +35,7 @@
 #' \code{n}: the sample size
 #'
 #' \code{df}: the degrees of freedom of the model
+#'
 #' \code{herbivar.version}: version of herbivar used to fit the model
 
 #' @export
@@ -98,28 +97,23 @@ fit_generic_null<- function(data.vec,
 
  ML.fit<-optim2(init = init,
                   fn = nll,
-                  hessian = TRUE,
                   method = method,
                   lower = lower,
                   upper = upper,
                   ...)
-    hessian <- ML.fit$hessian
-    loglik <- -ML.fit$value
-    iters <- ML.fit$counts
 
   generic_null_fit.out<-list("theta.names" = optim.vars,
                           "par" = ML.fit$par,
-                          "se" = tryCatch(sqrt(diag(solve(hessian))),
-                                          error = function(e) {
-                                            rep(NA,length(diag(hessian)))
-                                          }),
+                          "se" = ML.fit$se,
                           "family" = family,
-                          "loglik" = loglik,
-                          "hessian" = hessian,
-                          "iters" = iters,
+                          "loglik" = -ML.fit$value,
+                          "hessian" = ML.fit$hessian,
+                          "iters" = ML.fit$counts,
                           "convergence" = ML.fit$convergence, # > 0 indicates issues
-                          "method" = method,
-                          "init" = init,
+                          "optim.param" = list("init" = init,
+                                               "method" = method,
+                                               "lower" = lower,
+                                               "upper" = upper),
                           "data" = data.vec,
                           "param.val.trans" = param.val.trans,
                           "id" = id,
@@ -128,9 +122,8 @@ fit_generic_null<- function(data.vec,
                           "herbivar.version" = herbivar.version(silent = TRUE)
 
   )
-  if(any(is.na(generic_null_fit.out$se))){
+  if(generic_null_fit.out$convergence == 2){
     warning("Non-positive definite hessian matrix")
-    generic_null_fit.out$convergence <- 2
   } else if(generic_null_fit.out$convergence!=0){
     warning("Model did not converge","  ",generic_null_fit.out$convergence)
   }
@@ -144,22 +137,17 @@ fit_generic_null<- function(data.vec,
 #' @description Print 'generic_null_fit' objects
 #' @param x a 'generic_null_fit' object
 #' @param ... additional arguments
-#' @param trans a function that is used to transform the estimated model coefficients. No transformation is applied when set to \code{NULL} (default).
+#' @param trans a function that is used to transform the estimated model coefficients. No transformation is applied when set to \code{FALSE}. If set to "backtransform" (default), then the values are back transformed to the original scale.
 #' @param digits number of digits to display. Default is 3.
 #' @return a matrix
 #' @export
-print.generic_null_fit<-function(x, ..., trans = NULL, digits = 3){
+print.generic_null_fit<-function(x, ..., trans = "backtransform", digits = 3){
   if(!inherits(x,"generic_null_fit")){
     stop("Needs to by of object type 'generic_null_fit'")
   }
-  if(is.null(trans)){
-    FUN <- function(x) x
-  } else {
-    FUN <- match.fun(trans)
-  }
 
   cat("Fitted result on", x$id,"\n")
-  cat("method =",x$method,"\n")
+  cat("method =",x$optim.param$method,"\n")
   cat("family =",x$family,"\n")
   cat("n =",x$n,"\n")
   cat("\n")
@@ -167,14 +155,33 @@ print.generic_null_fit<-function(x, ..., trans = NULL, digits = 3){
   cat("\n")
   print(c(x$iters,"convergence"=x$convergence))
   cat("\n")
-  print(noquote(vapply(
-    x$param.val.trans[x$theta.names],
-    function(z){
-      gsub(".*\\{| |\\}","",paste0(deparse(z),collapse = ""))
-    },
-    character(1)
-  )))
-  cat("\n")
+  if(trans != "backtransform"){
+    cat("Estimate needs backtransformation")
+    print(noquote(vapply(
+      x$param.val.trans[x$theta.names],
+      function(z){
+        gsub(".*\\{| |\\}","",paste0(deparse(z),collapse = ""))
+      },
+      character(1)
+    )))
+    cat("\n")
+  }
+
+  if(!is.null(trans) && trans == "backtransform"){
+    back.trans.coef <-coef(object = x, backtransform = TRUE, se = TRUE)
+    x$par <- back.trans.coef$Estimate
+    x$se <- back.trans.coef$Std.
+
+    FUN <- function(x) x
+  } else {
+    if(is.null(trans) || isFALSE(trans)){
+      FUN <- function(x) x
+    } else {
+      FUN <- match.fun(trans)
+    }
+
+  }
+
   out<-round(
     apply(as.matrix(
       data.frame(row.names = x$theta.names,
@@ -256,17 +263,36 @@ BIC.generic_null_fit <- function(object,...){
 #' @param object A 'generic_null_fit' object
 #' @param ... additional arguments
 #' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is \code{TRUE}.
-#' @return A named vector
-coef.generic_null_fit<-function(object, ..., backtransform = TRUE){
+#' @return A named vector of estimates. If \code{se = TRUE}, a named list of vectors will be returned instead.
+coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
   if(backtransform){
     out<-vapply(seq_along(object$par), function(i){
-      vapply(object$par[i],object$param.val.trans[[object$theta.names[i]]],numeric(1))
+      object$param.val.trans[[object$theta.names[i]]](object$par[i])
     }, numeric(1))
+
+    if(se){
+      se.out <- vapply(seq_along(object$par), function(i){
+        sqrt(FOSM(object$par[i],
+                  object$se[i]^2,
+                  object$param.val.trans[[object$theta.names[i]]]))
+      }, numeric(1))
+      names(se.out) <- object$theta.name
+    }
   } else {
     out <- object$par
+    if(se){
+      se.out <- object$se
+      names(se.out) <- object$theta.name
+    }
   }
   names(out) <- object$theta.name
-  return(out)
+
+  if(se){
+    return(list("Estimate" = out,
+                "Std." = se.out))
+  } else {
+    return(out)
+  }
 }
 
 
@@ -408,7 +434,7 @@ fit_bite_size<-function(object,
 
   if("allo_a" %in% family){
 
-    allo_a.fit<-optim2(init = 1.5,
+    allo_a.fit<-optim2(init = 0.01,
                       fn = function(theta){
                         -sum(dallo(x = data.vec,
                                    min.phi = min.phi,
@@ -417,8 +443,7 @@ fit_bite_size<-function(object,
                                    log = TRUE))
                       }, method = "Brent",
                       lower = 0,
-                      upper = 10,
-                      hessian = TRUE)
+                      upper = 1)
 
     allo_a.loglik<- structure(-allo_a.fit$value,
                               class= "logLik",
@@ -427,49 +452,46 @@ fit_bite_size<-function(object,
                               df = 1)
 
     allo_a_out<-list("param" = c("a"=allo_a.fit$par),
-                     "se" = tryCatch(sqrt(diag(solve(allo_a.fit$hessian))),
-                                     error = function(e) {
-                                       rep(NA,length(diag(allo_a.fit$hessian)))
-                                     }),
-                     "logLik" = allo_a.loglik)
-    allo_a_out$convergence <- ifelse(
-      is.na((allo_a_out$se)) ||
-        allo_a.fit$convergence > 0 ||
-        !is.finite(allo_a.fit$value),
-      1,
-      0
-    )
+                     "se" = allo_a.fit$se,
+                     "logLik" = allo_a.loglik,
+                     "convergence" = allo_a.fit$convergence)
   } else {
     allo_a_out <- NULL
   }
 
   if("allo_M" %in% family){
-    # allo_M.fit<-optim2(init = 1,
+    # allo_M.fit<-optim2(init = 0.9,
     #                   fn = function(theta){
     #                     -sum(dallo(x = data.vec,
     #                                min.phi = min.phi,
-    #                                max.phi = theta,
+    #                                max.phi = exp(theta),
     #                                a = 14/9,
     #                                log = TRUE))
     #                   }, method = "Brent",
-    #                   lower = max(data.vec)+0.01,
-    #                   upper = 10,
-    #                   hessian = TRUE)
+    #                   lower = exp(min.phi+0.0001),
+    #                   upper = exp(30))
+    allo_M.fit <- list("par" = max(data.vec),
+                       "se" = NA,
+                       "value" = -sum(dallo(x = data.vec,
+                                            min.phi = min.phi,
+                                            max.phi = max(data.vec),
+                                            a = 14/9,
+                                            log = TRUE)),
+                       "convergence" = 2)
 
-    allo_M.loglik<- structure(sum(dallo(x = data.vec,
-                                        min.phi = min.phi,
-                                        max.phi = max(data.vec),
-                                        a = 14/9,
-                                        log = TRUE)),
+    allo_M.loglik<- structure(-allo_M.fit$value,
                               class= "logLik",
                               nall = n,
                               nobs= n,
                               df = 1)
 
-    allo_M_out<-list("param" = c("max.phi"=max(data.vec)),
-                     "se" = NA,
-                     "logLik" = allo_M.loglik)
-    allo_M_out$convergence <- ifelse(is.finite(allo_M.loglik),2,1)
+    # Calculation of the variance of the MLE of the truncation point is nonregular -- cannot be found from the fisher infromation matrix
+
+    allo_M_out<-list("param" = c("max.phi_log" = allo_M.fit$par),
+                     "se" = allo_M.fit$se,
+                     "logLik" = allo_M.loglik,
+                     "convergence" = allo_M.fit$convergence)
+
   } else {
     allo_M_out <- NULL
   }
@@ -485,8 +507,7 @@ fit_bite_size<-function(object,
                                       log = TRUE))
                       }, method = method,
                       upper = c(Inf, Inf),
-                      lower = c(-Inf, -Inf),
-                      hessian = TRUE)
+                      lower = c(-Inf, -Inf))
 
     tlnorm.loglik<- structure(-tlnorm.fit$value,
                               class= "logLik",
@@ -496,18 +517,9 @@ fit_bite_size<-function(object,
 
     tlnorm_out<-list("param" = c("meanlog"=tlnorm.fit$par[1],
                                  "sdlog_log"=tlnorm.fit$par[2]),
-                     "se" = tryCatch(sqrt(diag(solve(tlnorm.fit$hessian))),
-                                     error = function(e) {
-                                       rep(NA,length(diag(tlnorm.fit$hessian)))
-                                     }) ,
-                     "logLik" = tlnorm.loglik)
-    tlnorm_out$convergence <- ifelse(
-      any(is.na((tlnorm_out$se))) ||
-        tlnorm.fit$convergence > 0 ||
-        any(!is.finite(tlnorm.fit$value)),
-      1,
-      0
-    )
+                     "se" = tlnorm.fit$se,
+                     "logLik" = tlnorm.loglik,
+                     "convergence" = tlnorm.fit$convergence)
   } else {
     tlnorm_out <- NULL
   }
@@ -521,8 +533,7 @@ fit_bite_size<-function(object,
                                  log = TRUE))
                     }, method = method,
                     upper = c(Inf, Inf),
-                    lower = c(-Inf, -Inf),
-                    hessian = TRUE)
+                    lower = c(-Inf, -Inf))
 
     beta.loglik<- structure(-beta.fit$value,
                             class= "logLik",
@@ -532,18 +543,9 @@ fit_bite_size<-function(object,
 
     beta_out<-list("param" = c("shape1_log"=beta.fit$par[1],
                                "shape2_log"=beta.fit$par[2]),
-                   "se" = tryCatch(sqrt(diag(solve(beta.fit$hessian))),
-                                   error = function(e) {
-                                     rep(NA,length(diag(beta.fit$hessian)))
-                                   }) ,
-                   "logLik" = beta.loglik)
-    beta_out$convergence <- ifelse(
-      any(is.na((beta_out$se))) ||
-        beta.fit$convergence > 0 ||
-        any(!is.finite(beta.fit$value)),
-      1,
-      0
-    )
+                   "se" = beta.fit$se,
+                   "logLik" = beta.loglik,
+                   "convergence" = beta.fit$convergence)
   } else {
     beta_out <- NULL
   }
@@ -557,8 +559,7 @@ fit_bite_size<-function(object,
                                  log = TRUE))
                     }, method = method,
                     upper = c(Inf, Inf),
-                    lower = c(-Inf, -Inf),
-                    hessian = TRUE)
+                    lower = c(-Inf, -Inf))
 
     kumar.loglik<- structure(-kumar.fit$value,
                             class= "logLik",
@@ -568,18 +569,9 @@ fit_bite_size<-function(object,
 
     kumar_out<-list("param" = c("a_log"=kumar.fit$par[1],
                                "b_log"=kumar.fit$par[2]),
-                   "se" = tryCatch(sqrt(diag(solve(kumar.fit$hessian))),
-                                   error = function(e) {
-                                     rep(NA,length(diag(kumar.fit$hessian)))
-                                   }) ,
-                   "logLik" = kumar.loglik)
-    kumar_out$convergence <- ifelse(
-      any(is.na((kumar_out$se))) ||
-        kumar.fit$convergence > 0 ||
-        any(!is.finite(kumar.fit$value)),
-      1,
-      0
-    )
+                   "se" = kumar.fit$se,
+                   "logLik" = kumar.loglik,
+                   "convergence" = kumar.fit$convergence)
   } else {
     kumar_out <- NULL
   }
@@ -593,8 +585,7 @@ fit_bite_size<-function(object,
                                                log = TRUE))
                      }, method = method,
                      lower = -10,
-                     upper = 4,
-                     hessian = TRUE)
+                     upper = 4)
 
     tpareto.loglik<- structure(-tpareto.fit$value,
                              class= "logLik",
@@ -603,18 +594,9 @@ fit_bite_size<-function(object,
                              df = 1)
 
     tpareto_out<-list("param" = c("a_log"=tpareto.fit$par),
-                    "se" = tryCatch(sqrt(diag(solve(tpareto.fit$hessian))),
-                                    error = function(e) {
-                                      rep(NA,length(diag(tpareto.fit$hessian)))
-                                    }) ,
-                    "logLik" = tpareto.loglik)
-    tpareto_out$convergence <- ifelse(
-      is.na((tpareto_out$se)) ||
-        tpareto.fit$convergence > 0 ||
-        !is.finite(tpareto.fit$value),
-      1,
-      0
-    )
+                    "se" = tpareto.fit$se,
+                    "logLik" = tpareto.loglik,
+                    "convergence" = tpareto.fit$convergence)
   } else {
     tpareto_out <- NULL
   }
@@ -627,8 +609,7 @@ fit_bite_size<-function(object,
                                 log = TRUE))
                       }, method = method,
                    upper = c(Inf),
-                   lower = c(-Inf),
-                      hessian = TRUE)
+                   lower = c(-Inf))
 
     cb.loglik<- structure(-cb.fit$value,
                              class= "logLik",
@@ -637,18 +618,9 @@ fit_bite_size<-function(object,
                              df = 2)
 
     cb_out<-list("param" = c("lambda_logit"=cb.fit$par[1]),
-                    "se" = tryCatch(sqrt(diag(solve(cb.fit$hessian))),
-                                    error = function(e) {
-                                      rep(NA,length(diag(cb.fit$hessian)))
-                                    }) ,
-                    "logLik" = cb.loglik)
-    cb_out$convergence <- ifelse(
-      any(is.na((cb_out$se))) ||
-        cb.fit$convergence > 0 ||
-        any(!is.finite(cb.fit$value)),
-      1,
-      0
-    )
+                    "se" = cb.fit$se,
+                    "logLik" = cb.loglik,
+                 "convergence" = cb.fit$convergence)
   } else {
     cb_out <- NULL
   }

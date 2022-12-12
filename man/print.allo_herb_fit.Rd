@@ -4,14 +4,14 @@
 \alias{print.allo_herb_fit}
 \title{Print Values}
 \usage{
-\method{print}{allo_herb_fit}(x, ..., trans = NULL, digits = 3)
+\method{print}{allo_herb_fit}(x, ..., trans = "backtransform", digits = 3)
 }
 \arguments{
 \item{x}{An object of class 'allo_herb_fit'}
 
 \item{...}{additional arguments}
 
-\item{trans}{A string or function of transformation applied on the model coefficients}
+\item{trans}{a function that is used to transform the estimated model coefficients. No transformation is applied when set to \code{FALSE}. If set to "backtransform" (default), then the values are back transformed to the original scale.}
 
 \item{digits}{A numeric value indicating the number of digits to be displayed in the model coefficients. Default is 3.}
 }
