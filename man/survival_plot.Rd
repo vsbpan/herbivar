@@ -4,17 +4,19 @@
 \alias{survival_plot}
 \title{Survival Plot}
 \usage{
-survival_plot(x, add = FALSE, ...)
+survival_plot(x, add = FALSE, plot = TRUE, ...)
 }
 \arguments{
 \item{x}{a vector of numeric values greater than 0}
 
 \item{add}{a logical value indicating whether to overlay points upon an existing plot}
 
+\item{plot}{a logical value indicating whether to plot the results. Set to \code{FALSE} to just getting the empirical cumulative density function data.frame.}
+
 \item{...}{additional arguments passed to \code{points()} or \code{plot()}}
 }
 \value{
-a plot
+a data.frame of the empirical cumulative density function
 }
 \description{
 Generate a log-log survival plot of positive only sample. Can be useful for visualizing the tail of the distribution.

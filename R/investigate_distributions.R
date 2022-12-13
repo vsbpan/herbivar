@@ -190,6 +190,24 @@ q75 <- function(x, na.rm = FALSE){
   return(as.numeric(quantile(x,probs = 0.75)))
 }
 
+
+#' @title Hoover Index
+#' @description Calculate the Hoover index of a vector of numeric data
+#' @param x a vector of numeric data
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @details
+#' The Hoover index can be thought of the percentage of the total x that would have to be reallocated to make all individuals within a population have equal values of x. It is calculated as such:
+#' \deqn{H(X) = \frac{\sum_i^n |x_i - E[X]|}{2 \sum_i^n x_i}}
+#'
+#' @return A numeric value
+#' @export
+Hoover <- function(x, na.rm = FALSE){
+  if(na.rm){
+    x <- x[!is.na(x)]
+  }
+ sum(abs(x - mean(x))) / (2 * sum(x))
+}
+
 #' @title Lorenz Asymmetry Coefficient
 #' @description Calculate Lorenz Asymmetry Coefficient (also known as \eqn{S}) for a vector of data. The statistic identifies which quantile of \code{x} contribute most to the total inequality.
 #' @param x a vector of non-negative numeric values
@@ -235,7 +253,6 @@ q75 <- function(x, na.rm = FALSE){
 #' plot(lorenz_curve(x2))
 #' abline(a=1,b=-1) # Line of symmetry
 #' lac(x2) # S = 1.24
-
 #'
 #' @export
 lac <- function(x, n = NULL, interval = FALSE, na.rm = FALSE) {
@@ -700,8 +717,9 @@ plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
 #' @description Generate a log-log survival plot of positive only sample. Can be useful for visualizing the tail of the distribution.
 #' @param x a vector of numeric values greater than 0
 #' @param add a logical value indicating whether to overlay points upon an existing plot
+#' @param plot a logical value indicating whether to plot the results. Set to \code{FALSE} to just getting the empirical cumulative density function data.frame.
 #' @param ... additional arguments passed to \code{points()} or \code{plot()}
-#' @return a plot
+#' @return a data.frame of the empirical cumulative density function
 #' @examples
 #' x <- rlnorm(10000,1,1)
 #' survival_plot(x)
@@ -710,19 +728,24 @@ plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
 #' survival_plot(x2, add = TRUE, col = "green", pch = 19)
 #'
 #' @references Aban, I. B., M. M. Meerschaert, and A. K. Panorska. 2006. Parameter Estimation for the Truncated Pareto Distribution. Journal of the American Statistical Association 101:270–277.
-survival_plot <- function(x, add = FALSE, ...){
+survival_plot <- function(x, add = FALSE, plot = TRUE, ...){
   stopifnot(all(x > 0))
   x2 <- sort(x)
   vals <- unique(x2)
   rval <- cumsum(tabulate(match(x2,vals)))/length(x2)
 
-  if(add){
-    graphics::points(log(1-rval)~log(vals), ...)
-  } else {
-    plot(log(1-rval)~log(vals),
-         xlab = expression(ln(x)),
-         ylab = expression(ln(P(X>x))),
-         ...)
+  if(plot){
+    if(add){
+      graphics::points(log(1-rval)~log(vals), ...)
+    } else {
+      plot(log(1-rval)~log(vals),
+           xlab = expression(ln(x)),
+           ylab = expression(ln(P(X>x))),
+           ...)
+    }
+
   }
+    invisible(data.frame("ecdf" = rval, "x" = vals))
 }
+
 
