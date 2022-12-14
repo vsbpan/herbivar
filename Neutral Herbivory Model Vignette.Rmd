@@ -1,5 +1,5 @@
 ---
-title: "Neutral Herbivory Model Vignette"
+title: "Using ‘herbivar’ to Fit Neutral Models"
 author: "Vincent Pan"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
@@ -18,11 +18,12 @@ output:
 ## Prerequisets 
 
 ```{r}
+library(tidyverse)
+library(herbivar)
+herbivar:::.herbivar_dependencies(include_self = FALSE)
 
 
-
-
-
+devtools::install_github("vsbpan/herbivar")
 
 ```
 
@@ -47,9 +48,54 @@ a<-fit_bite_size(rallo(100,max.phi = 0.4),min.phi = 0.005)
 ### Fitting the generic null models
 
 
+## Model assessment 
+
+```{r}
+
+probe_distribution(ralloT(1000, lambda = 3), 
+                   probes = c("mean", "var", "Skew","median"))
+
+```
+
+
+```{r}
+allo_probed <- lapply(seq_len(100), function(i){
+  x <- ralloT(1000, lambda = 3, max.phi = 1)
+  probe_distribution(x)
+}) %>%
+  do.call("rbind",.)
+
+allo_probed2 <- lapply(seq_len(100), function(i){
+  x <- ralloT(1000, lambda = 3, max.phi = 0.5)
+  probe_distribution(x)
+}) %>%
+  do.call("rbind",.)
+
+
+probed.data <- rbind(
+  data.frame("distribution" = "max.phi = 1", allo_probed),
+  data.frame("distribution" = "max.phi = 0.5", allo_probed2)
+)
+
+vegan::rda(probed.data[,-1]) %>%
+  get_biplot(choices = c(1,2), 
+             group = probed.data$distribution) + 
+  ggplot2::theme_bw(base_size = 15) + 
+  ggplot2::labs(color = "Distribution")
+
+
+vegan::rda(probed.data[,-1] ~ probed.data$distribution)
+```
+
+
+
+## Other handy functions
+
+
 ## Session Info
 
 ```{r}
+herbivar::herbivar.version()
 sessionInfo()
 ```
 

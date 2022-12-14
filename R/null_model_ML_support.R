@@ -308,17 +308,17 @@ coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
 #'
 #' ## allo
 #' Neutral 'bite size' distribution with zero degree of freedom.
-#' \deqn{P(\phi| \phi_M = 1, \phi_m = min.phi, \alpha = \frac{14}{9}) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}}.
+#' \deqn{P(\phi| \phi_M = 1, \phi_m = min.phi, \alpha = \frac{14}{9}) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}.}
 #'
 #'
 #' ## allo_a
 #' Neutral 'bite size' distribution with one degree of freedom, allowing \eqn{\alpha} to be fitted.
-#' \deqn{P(\phi| \phi_M = 1, \phi_m = min.phi, \alpha) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}}.
+#' \deqn{P(\phi| \phi_M = 1, \phi_m = min.phi, \alpha) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}.}
 #'
 #'
 #' ## allo_M
-#' Neutral 'bite size' distribution with one degree of freedom, allowing \eqn{\phi_M} to be fitted.
-#' \deqn{P(\phi| \phi_M, \phi_m = min.phi, \alpha = \frac{14}{9}) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}}.
+#' Neutral 'bite size' distribution with one degree of freedom, allowing \eqn{\phi_M} to be fitted. The MLE of \eqn{\phi_M} is always the maximum observed value in the data (Aban et al. 2006). A convergence code of 2 is returned.
+#' \deqn{P(\phi| \phi_M, \phi_m = min.phi, \alpha = \frac{14}{9}) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha}.}
 #'
 #'
 #' ## tlnorm
@@ -342,7 +342,7 @@ coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
 #'
 #'
 #' ## tpareto
-#' Truncated Pareto distribution with two degrees of freedom.
+#' Truncated Pareto distribution with two degrees of freedom. This is equivalent to the neutral 'bite size' distribution with the parameters \eqn{\phi_m} and \eqn{a} fitted to data.
 #' \deqn{P(x) = \frac{a b^a}{\phi^{a+1}}\frac{1}{1 - (\frac{b}{1})^a},}.
 #' \eqn{a} is the exponent of the Pareto distribution and \eqn{b} is the minimum value of \eqn{\phi}.
 #'
@@ -370,6 +370,10 @@ coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
 #' \code{summary}:
 #' A matrix array of ordered IC values of fitted models.
 #'
+#' @references
+#' Aban, I. B., M. M. Meerschaert, and A. K. Panorska. 2006. Parameter Estimation for the Truncated Pareto Distribution. Journal of the American Statistical Association 101:270–277.
+#' Loaiza-Ganem, G., and J. P. Cunningham. 2019. The continuous Bernoulli: fixing a pervasive error in variational autoencoders. Page Advances in Neural Information Processing Systems. Curran Associates, Inc.
+
 #' @export
 fit_bite_size<-function(object,
                         family = c("allo","allo_a","allo_M",

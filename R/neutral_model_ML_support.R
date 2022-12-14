@@ -1,5 +1,5 @@
 #'@title Neutral 'Bite Size' Distribution Based On Allometric Scaling Laws
-#'@description Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometric scaling laws.
+#'@description Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometric scaling laws. This distribution is a reparameterization of the truncated Pareto distribution.
 #' @param x,q a vector of quantities
 #' @param p a vector of probabilities
 #' @param n number of observations to generate.

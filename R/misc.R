@@ -325,7 +325,7 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
                                                           y = y,
                                                           xend = xend,
                                                           yend = yend),
-                            arrow = ggplot2::arrow(length = unit(0.2, "cm")),
+                            arrow = ggplot2::arrow(length = ggplot2::unit(0.2, "cm")),
                             color = "black",
                             size = 1)
   }

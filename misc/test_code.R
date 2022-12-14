@@ -441,3 +441,34 @@ survival_plot(rallo(1000,max.phi = 5))
 survival_plot()
 
 
+
+
+allo_probed <- lapply(seq_len(100), function(i){
+  x <- ralloT(1000, lambda = 3, max.phi = 1)
+  probe_distribution(x)
+}) %>%
+  do.call("rbind",.)
+
+allo_probed2 <- lapply(seq_len(100), function(i){
+  x <- ralloT(1000, lambda = 3, max.phi = 0.5)
+  probe_distribution(x)
+}) %>%
+  do.call("rbind",.)
+
+
+probed.data <- rbind(
+  data.frame("distribution" = "max.phi = 1", allo_probed),
+  data.frame("distribution" = "max.phi = 0.5", allo_probed2)
+)
+
+vegan::rda(probed.data[,-1]) %>%
+  get_biplot(group = probed.data$distribution)
+
+
+vegan::rda(probed.data[,-1] ~ probed.data$distribution)
+
+
+
+
+
+
