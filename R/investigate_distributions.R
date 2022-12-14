@@ -471,42 +471,43 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
 
 
 #' @export
-get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
+get_dist_test_sim<-function(fit.list,test = c("ks","kl","ad"),
                             nboot=1,n.sim=NULL,digits=2){
   .is_inst("purrr", stop.if.false = TRUE)
   test <- match.arg(test)
   out.list<-vector(mode="list",length=nboot)
-  obs.out<-lapply(allo.fit.list,function(x){
+  obs.out<-lapply(fit.list,function(x){
     x$data
   })
   names(obs.out)<-do.call("c",
-                          lapply(allo.fit.list,function(x){
+                          lapply(fit.list,function(x){
                             x$id
                           }))
 
-  n.rows<-length(allo.fit.list)
-  test.list<-vector(mode = "list",length=n.rows)
+  n.rows<-length(fit.list)
 
   for (j in seq_len(nboot)){
     herb.data.bind<-c(
       list("obs" = obs.out),
       get_data_sim(
-               allo.fit.list = allo.fit.list,
+               fit.list,
                n.sim = n.sim,
                digits = digits,
-               return.obs = F)
+               return.obs = FALSE)
       )
-    for (i in seq_len(n.rows)){
-      test.list[[i]]<-tryCatch(compare_dist(purrr::map(herb.data.bind,i),
-                                                  obs.index = 1,
-                                                  pred.index = 2,
-                                                  test=test,
-                                                  digits = digits)[[
-                                                    match(test, c("ks","kl","ad"))
-                                                  ]],
-                               error = function(e) NA_real_)
+
+    test.list <- lapply(seq_len(n.rows), function(i){
+      out <- tryCatch(compare_dist(purrr::map(herb.data.bind,i),
+                            obs.index = 1,
+                            pred.index = 2,
+                            test = test,
+                            digits = digits)[[
+                              match(test, c("ks","kl","ad"))
+                            ]],
+               error = function(e) NA_real_)
       cat(j,"-",i,"\r","\r")
-    }
+      return(out)
+    })
     out.list[[j]]<-do.call("rbind",test.list)
   }
   out<-simplify2array(out.list)
@@ -867,6 +868,6 @@ LRT <- function(model_candidate, model_null){
   )))
 
   cat("\n \n \r--------- Likelihood Ratio Test --------- \n")
-  print(round(data.frame( "Chisq" = LLR, "df" = df,"P" = P), digits = 4))
+  print(round(data.frame( "Chisq" = LLR, "df" = df,"P" = P, row.names = ""), digits = 4))
   invisible(data.frame( "Chisq" = LLR, "df" = df,"P" = P))
 }

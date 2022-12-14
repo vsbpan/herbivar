@@ -19,7 +19,7 @@ knitr::opts_chunk$set(fig.align = "center")
 
 # Prerequisets 
 
-To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package. 
+To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package.
 
 ```{r}
 if(suppressMessages(!require(herbivar))){
@@ -77,9 +77,17 @@ In this section, I show how one can use the package to assess model fit. There a
 
 ```{r}
 
-get_data_sim(list(allo_fit,))
+predict(allo_fit)
+get_data_sim(list(allo_fit,allo_fit))
 
-compare_dist(data.list = get_data_sim(list(allo_fit)))
+
+get_dist_test_sim(list(allo_fit, allo_fit), nboot = 3)
+
+
+
+compare_dist(data.list = list("obs" = allo_fit$data, 
+                              "pred" = predict(allo_fit)), 
+             test = c("ks","kl","ad"))
 
 probe_distribution(ralloT(1000, lambda = 3), 
                    probes = c("mean", "var", "Skew","median"))

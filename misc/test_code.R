@@ -475,17 +475,16 @@ get_data_sim
 
 
 
+lapply(seq_len(n.rows), function(i) {
+  out <- tryCatch(compare_dist(purrr::map(herb.data.bind,
+                                   i), obs.index = 1, pred.index = 2, test = test,
+                        digits = digits)[[match(test, c("ks", "kl",
+                                                        "ad"))]],
+           error = function(e) NA_real_)
+  cat(j, "-", i, "\r", "\r")
+  return(out)
+})
 
-round(rhtlnorm(n = ifelse(is.null(n.sim),
-                          length(x$data), n.sim),
-               theta = .choose_new_theta_val(x,new.param, "theta"),
-               meanlog = .choose_new_theta_val(x,new.param, "meanlog"),
-               sdlog = .choose_new_theta_val(x,new.param, "sdlog")), digits = digits)
 
-x$param.vals
-is.na(x$param.vals[theta.name])
 
-ifelse(is.na(x$param.vals[theta.name]),
-       match.fun(x$param.val.trans[[theta.name]])(x$par[(x$theta.names ==
-                                                           theta.name)]), x$param.vals[theta.name])
 
