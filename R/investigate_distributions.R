@@ -518,34 +518,104 @@ get_dist_test_sim<-function(allo.fit.list,test = c("ks","kl","ad"),
 }
 
 
-#' @title Generate Neutral Predictions From Fitted Model
-#' @description This is a convenience function that generates predicted distribution from a list of fitted models
-#' @param allo.fit.list A list of "allo_herb_fit" objects.
+#' @title Generate Predictions From Fitted Model
+#' @description These are convenience functions that generate predicted distribution from a list of fitted models or a single fitted model object
+#' @param fit.list A list of "allo_herb_fit" objects or "generic_null_fit"
+#' @param object An "allo_herb_fit" or "generic_null_fit" object
 #' @param n.sim A numeric value indicating number of points to draw from the neutral distribution for each "allo_herb_fit" object. If \code{NULL}, the original sample size of the data will be used.
 #' @param digits A numeric value indicating the number of digits to round data values to
 #' @param return.obs A logical value indicating whether to return observed data as a list in the out put along with the predicted draws
 #' @param obs.raw A logical value indicating whether to round the observed data; ignored if \code{return.obs} is set to \code{FALSE}.
-#' @param  new.param A vector of named values used to make new predictions. If a parameter is set to \code{NA}, the parameter value is extracted from the "allo_herb_fit" object.
+#' @param  new.param A vector of named values used to make new predictions. If a parameter is set to \code{NA}, the parameter value is extracted from the "allo_herb_fit" or "generic_null_fit" object.
 #' @returns A list of list of vectors of numeric values.
+#' @rdname get_data_sim
 #' @export
-get_data_sim<-function(allo.fit.list,n.sim = NULL,digits=2,
+get_data_sim <- function(fit.list, n.sim = NULL, digits = 2,
                        return.obs = TRUE, obs.raw = FALSE,
-                       new.param = c("mean.phi.T" = NA,
-                                     "min.phi" = NA,
-                                     "max.phi" = NA,
-                                     "a" = NA)
+                       new.param
                        ){
-  if(any(
-    unlist(
-      lapply(allo.fit.list,function(x){
-        !inherits(x,"allo_herb_fit")
-        })
-    )
-  )){
-    stop("allo.fit.list contains object of non-'allo_herb_fit' class.")
-  }
 
-    sim.fit.out<-lapply(allo.fit.list,function(x){
+  obj.class <- unique(
+    lapply(fit.list,function(x){
+      class(x)
+    })
+  )
+  stopifnot(length(obj.class) == 1)
+
+  if(obj.class[[1]][1] == "generic_null_fit"){
+    family <- unique(do.call("c",
+                             lapply(fit.list, function(x){
+                               x$family
+                               })
+                             )
+                     )
+
+    stopifnot(
+      length(family) == 1
+    )
+
+    if(family == "htlnorm"){
+      if(missing(new.param)){
+        new.param <- c("theta" = NA,
+                       "meanlog" = NA,
+                       "sdlog" = NA)
+      } else {
+        stopifnot(any(duplicated(names(new.param))))
+        stopifnot(dplyr::setequal(names(new.param), c("theta","meanlog","sdlog")))
+      }
+
+      sim.fit.out<-lapply(fit.list,function(x){
+        predicted.draws<-round(
+          rhtlnorm(n = ifelse(is.null(n.sim),
+                              length(x$data),
+                              n.sim),
+                   theta = .choose_new_theta_val(x,new.param,"theta"),
+                   meanlog = .choose_new_theta_val(x,new.param,"meanlog"),
+                   sdlog = .choose_new_theta_val(x,new.param,"sdlog")
+          ),
+          digits = digits)
+        return(predicted.draws)
+      })
+    } else {
+      if(family == "zoibeta"){
+
+        if(missing(new.param)){
+          new.param <- c("p0" = NA,
+                         "p1" = NA,
+                         "alpha" = NA,
+                         "beta" = NA)
+        } else {
+          stopifnot(any(duplicated(names(new.param))))
+          stopifnot(dplyr::setequal(names(new.param), c("p0","p1","alpha","beta")))
+        }
+
+        sim.fit.out<-lapply(fit.list,function(x){
+          predicted.draws<-round(
+            rzoibeta(n = ifelse(is.null(n.sim),
+                                length(x$data),
+                                n.sim),
+                     p0 = .choose_new_theta_val(x,new.param,"p0"),
+                     p1 = .choose_new_theta_val(x,new.param,"p1"),
+                     alpha = .choose_new_theta_val(x,new.param,"alpha"),
+                     beta = .choose_new_theta_val(x,new.param,"beta")
+            ),
+            digits = digits)
+          return(predicted.draws)
+        })
+      }
+    }
+  } else if(obj.class[[1]][1] == "allo_herb_fit"){
+    if(missing(new.param)){
+      new.param <- c("mean.phi.T" = NA,
+                     "min.phi" = NA,
+                     "max.phi" = NA,
+                     "a" = NA)
+    } else{
+      stopifnot(any(duplicated(names(new.param))))
+      stopifnot(dplyr::setequal(names(new.param), c("mean.phi.T","min.phi","max.phi","a")))
+    }
+
+    sim.fit.out<-lapply(fit.list,function(x){
       predicted.draws<-round(
         ralloT(n = ifelse(is.null(n.sim),
                           length(x$data),
@@ -558,17 +628,21 @@ get_data_sim<-function(allo.fit.list,n.sim = NULL,digits=2,
         digits = digits)
       return(predicted.draws)
     })
+  } else {
+    stop(obj.class, " not supported.")
+  }
+
     names(sim.fit.out)<-do.call("c",
-                                lapply(allo.fit.list,function(x){
+                                lapply(fit.list,function(x){
                                   x$id
                                 }))
     if(return.obs){
       if(obs.raw){
-        obs.out<-lapply(allo.fit.list,function(x){
+        obs.out<-lapply(fit.list,function(x){
           x$data
         })
       } else {
-        obs.out<-lapply(allo.fit.list,function(x){
+        obs.out<-lapply(fit.list,function(x){
           round(x$data, digits = digits)
         })
       }
@@ -583,7 +657,25 @@ get_data_sim<-function(allo.fit.list,n.sim = NULL,digits=2,
 }
 
 
+#' @rdname get_data_sim
+predict.allo_herb_fit <- function(object, n.sim = NULL, digits = 2,
+                                  new.param){
+  stopifnot(inherits(object, "allo_herb_fit"))
+  get_data_sim(list(object),
+               n.sim = n.sim,
+               digits = digits,
+               new.param = new.param)$fitted.pred[[1]]
+}
 
+#' @rdname get_data_sim
+predict.generic_null_fit <- function(object, n.sim = NULL, digits = 2,
+                                  new.param){
+  stopifnot(inherits(object, "generic_null_fit"))
+  get_data_sim(list(object),
+               n.sim = n.sim,
+               digits = digits,
+               new.param = new.param)$fitted.pred[[1]]
+}
 
 #' @title Calculate Lorenz Curve
 #' @description Calculate Lorenz Curve for a vector of data with known frequencies
@@ -749,3 +841,32 @@ survival_plot <- function(x, add = FALSE, plot = TRUE, ...){
 }
 
 
+
+#' @title Likelihood Ratio Test (LRT)
+#' @description Perform likelihood ratio test
+#' @param model_candidate,model_null objects for which the log likelihood can be extracted via \code{stats::logLik()}. Model_null must have more degrees of freedom than model_candidate.
+#' @return a data.frame of the LRT
+LRT <- function(model_candidate, model_null){
+  temp <- as.list(match.call())
+  can_ll <- logLik(model_candidate)
+  null_ll <- logLik(model_null)
+  can_df <-attr(can_ll,"df")
+  null_df <-attr(null_ll,"df")
+
+  LLR <- 2 * (as.numeric(can_ll) - as.numeric(null_ll))
+  df <- can_df - null_df
+  stopifnot(df > 0)
+
+  P <- pchisq(LLR, df = df, lower.tail = FALSE)
+
+  cat("\n \r--------- Models --------- \n")
+  print(data.frame("loglik" = c(can_ll, null_ll),
+             "df" = c(can_df, null_df), row.names = c(
+    as.character(deparse(temp$model_candidate)),
+    as.character(deparse(temp$model_null))
+  )))
+
+  cat("\n \n \r--------- Likelihood Ratio Test --------- \n")
+  print(round(data.frame( "Chisq" = LLR, "df" = df,"P" = P), digits = 4))
+  invisible(data.frame( "Chisq" = LLR, "df" = df,"P" = P))
+}

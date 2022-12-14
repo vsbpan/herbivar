@@ -3,12 +3,13 @@ title: Using *herbivar* to Fit Neutral Models
 author: "Vincent Pan"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
-  html_document:
-    toc_float: true
-    toc: true 
-    toc_depth: 2 
-    number_sections: true 
+  html_document: 
+    toc_float: yes
+    toc: yes
+    toc_depth: 2
+    number_sections: yes
     code_folding: show
+    theme: default
 ---
 
 ```{r, include = FALSE}
@@ -35,9 +36,17 @@ if(suppressMessages(!require(herbivar))){
 
 # Introduction
 
+The goal of this vignette is to introduce to the user on using the *herbivar* package to fit the neutral herbivory model (Pan et al. 2022) to empirical herbivory data and assess model fit. I also demonstrate some handy functions that can be used to characterize probability distributions and wrangle herbivory data more broadly. 
 
 
 # Neutral model
+```{r}
+x <- ralloT(1000, lambda = 3)
+
+allo_fit <- fit_allo_herb(x)
+```
+
+
 
 # Formulation
 
@@ -47,7 +56,7 @@ if(suppressMessages(!require(herbivar))){
 ```{r}
 set.seed(12)
 a<-fit_bite_size(rallo(100, max.phi = 0.4),min.phi = 0.005)
-coef(a,se = TRUE)
+#coef(a,se = TRUE)
 
 ```
 
@@ -62,7 +71,15 @@ coef(a,se = TRUE)
 
 # Model assessment 
 
+In this section, I show how one can use the package to assess model fit. There are numerous ways to determine how well a probability distribution fit to data, but they can be loosely divided into two types: absolute and relative measures of model fit. Absolute measures of model fit compare a model to data using objective measures. They inform how closely a model approximate observed data. Conversely, relative measures of model fit compete a model against alternative null hypotheses, allowing for strong inference (Platt 1964). McGill (2003) and McGill et al. (2006) provided excellent discussion on this important distinction for inference. I will just briefly emphasize that the two measures of model fit achieve slightly different goals. If you are interested purely in approximation or prediction, examining absolute measures of fit is sufficient. However, if you are interested in testing hypotheses, you need to examine the relative fit of a candidate model against other null or alternative hypotheses. In general, there is some burden of proof in ecology when one asserts the truth of a hypothesis, and we often show evidence through hypothesis significance testing. Examining absolute measures of model fit is still important, but not sufficient, because all alternative hypotheses can fit the data well on absolute measures or generate identical predictions. Therefore, tests based on absolute measures of fit maybe unable to falsify any hypothesis.  
+
+## Absolute measures of fit
+
 ```{r}
+
+get_data_sim(list(allo_fit,))
+
+compare_dist(data.list = get_data_sim(list(allo_fit)))
 
 probe_distribution(ralloT(1000, lambda = 3), 
                    probes = c("mean", "var", "Skew","median"))
@@ -100,9 +117,26 @@ vegan::rda(probed.data[,-1] ~ probed.data$distribution)
 ```
 
 
+## Relative measures of fit
+
+
+```{r}
+x <- ralloT(1000, lambda = 3)
+
+allo_fit <- fit_allo_herb(x)
+htlnorm_fit <- fit_generic_null(x, family = "htlnorm")
+
+LRT(htlnorm_fit,allo_fit)
+
+
+```
+
+
 
 # Other handy functions
 
+
+# References
 
 # Session Info
 

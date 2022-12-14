@@ -468,7 +468,24 @@ vegan::rda(probed.data[,-1]) %>%
 vegan::rda(probed.data[,-1] ~ probed.data$distribution)
 
 
+get_data_sim(allo_fit)
+
+
+get_data_sim
 
 
 
+
+round(rhtlnorm(n = ifelse(is.null(n.sim),
+                          length(x$data), n.sim),
+               theta = .choose_new_theta_val(x,new.param, "theta"),
+               meanlog = .choose_new_theta_val(x,new.param, "meanlog"),
+               sdlog = .choose_new_theta_val(x,new.param, "sdlog")), digits = digits)
+
+x$param.vals
+is.na(x$param.vals[theta.name])
+
+ifelse(is.na(x$param.vals[theta.name]),
+       match.fun(x$param.val.trans[[theta.name]])(x$par[(x$theta.names ==
+                                                           theta.name)]), x$param.vals[theta.name])
 

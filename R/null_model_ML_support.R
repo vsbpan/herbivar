@@ -28,6 +28,8 @@
 #'
 #' \code{data}: The data to which the model is fitted to
 #'
+#' \code{param.vals}: A named vector of default values.
+#'
 #' \code{param.val.trans}: A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale).
 #'
 #' \code{id}: name of model supplied via the id argument
@@ -102,6 +104,9 @@ fit_generic_null<- function(data.vec,
                   upper = upper,
                   ...)
 
+ param.vals <- rep(NA,length(optim.vars)) # For consistency
+ names(param.vals) <- optim.vars
+
   generic_null_fit.out<-list("theta.names" = optim.vars,
                           "par" = ML.fit$par,
                           "se" = ML.fit$se,
@@ -115,6 +120,7 @@ fit_generic_null<- function(data.vec,
                                                "lower" = lower,
                                                "upper" = upper),
                           "data" = data.vec,
+                          "param.vals" = param.vals,
                           "param.val.trans" = param.val.trans,
                           "id" = id,
                           "n" = length(data.vec),

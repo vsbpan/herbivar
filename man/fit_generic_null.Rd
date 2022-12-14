@@ -51,6 +51,8 @@ An 'generic_null_fit' object with the following slots:
 
 \code{data}: The data to which the model is fitted to
 
+\code{param.vals}: A named vector of default values.
+
 \code{param.val.trans}: A vector of functions that transform each estimated parameter value in the optimization process (the optimizer find the values on the transformed scale).
 
 \code{id}: name of model supplied via the id argument

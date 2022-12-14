@@ -34,3 +34,6 @@ S3method("print", "bite_size_fit")
 S3method("r2_partial", "brmsfit")
 S3method("plot", "imlist")
 S3method("coef", "bite_size_fit")
+S3method("predict", "allo_herb_fit")
+S3method("predict", "generic_null_fit")
+

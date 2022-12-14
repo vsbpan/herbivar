@@ -2,19 +2,25 @@
 % Please edit documentation in R/investigate_distributions.R
 \name{get_data_sim}
 \alias{get_data_sim}
-\title{Generate Neutral Predictions From Fitted Model}
+\alias{predict.allo_herb_fit}
+\alias{predict.generic_null_fit}
+\title{Generate Predictions From Fitted Model}
 \usage{
 get_data_sim(
-  allo.fit.list,
+  fit.list,
   n.sim = NULL,
   digits = 2,
   return.obs = TRUE,
   obs.raw = FALSE,
-  new.param = c(mean.phi.T = NA, min.phi = NA, max.phi = NA, a = NA)
+  new.param
 )
+
+\method{predict}{allo_herb_fit}(object, n.sim = NULL, digits = 2, new.param)
+
+\method{predict}{generic_null_fit}(object, n.sim = NULL, digits = 2, new.param)
 }
 \arguments{
-\item{allo.fit.list}{A list of "allo_herb_fit" objects.}
+\item{fit.list}{A list of "allo_herb_fit" objects or "generic_null_fit"}
 
 \item{n.sim}{A numeric value indicating number of points to draw from the neutral distribution for each "allo_herb_fit" object. If \code{NULL}, the original sample size of the data will be used.}
 
@@ -24,11 +30,13 @@ get_data_sim(
 
 \item{obs.raw}{A logical value indicating whether to round the observed data; ignored if \code{return.obs} is set to \code{FALSE}.}
 
-\item{new.param}{A vector of named values used to make new predictions. If a parameter is set to \code{NA}, the parameter value is extracted from the "allo_herb_fit" object.}
+\item{new.param}{A vector of named values used to make new predictions. If a parameter is set to \code{NA}, the parameter value is extracted from the "allo_herb_fit" or "generic_null_fit" object.}
+
+\item{object}{An "allo_herb_fit" or "generic_null_fit" object}
 }
 \value{
 A list of list of vectors of numeric values.
 }
 \description{
-This is a convenience function that generates predicted distribution from a list of fitted models
+These are convenience functions that generate predicted distribution from a list of fitted models or a single fitted model object
 }
