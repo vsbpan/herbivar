@@ -329,7 +329,7 @@ probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
 apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
                                              "max","min","median", "Skew",
                                              "Kurt","q25","q75","N","lac"),
-                       trivial.rm = TRUE, na.rm = FALSE, add.id = TRUE){
+                       trivial.rm = TRUE, na.rm = FALSE, add.id = FALSE){
   if(trivial.rm){
     data.list <- data.list[
       simplify2array(lapply(data.list, FUN = function(x){
@@ -471,18 +471,23 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
 
 
 #' @export
-get_dist_test_sim<-function(fit.list,test = c("ks","kl","ad"),
-                            nboot=1,n.sim=NULL,digits=2){
+get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad"),
+                            nboot = 1, n.sim = NULL, digits = 2, silent = FALSE){
   .is_inst("purrr", stop.if.false = TRUE)
   test <- match.arg(test)
   out.list<-vector(mode="list",length=nboot)
   obs.out<-lapply(fit.list,function(x){
     x$data
   })
-  names(obs.out)<-do.call("c",
-                          lapply(fit.list,function(x){
-                            x$id
-                          }))
+
+  if(is.null(names(fit.list))){
+    names(obs.out) <- do.call("c",
+                                  lapply(fit.list,function(x){
+                                    x$id
+                                  }))
+  } else {
+    names(obs.out) <- names(fit.list)
+  }
 
   n.rows<-length(fit.list)
 
@@ -505,14 +510,16 @@ get_dist_test_sim<-function(fit.list,test = c("ks","kl","ad"),
                               match(test, c("ks","kl","ad"))
                             ]],
                error = function(e) NA_real_)
-      cat(j,"-",i,"\r","\r")
+      if(!silent){
+        cat(j,"-",i,"\r","\r")
+      }
       return(out)
     })
     out.list[[j]]<-do.call("rbind",test.list)
   }
   out<-simplify2array(out.list)
 
-  if(!any(is.null(names(obs.out)))){
+  if(!(is.null(names(obs.out)))){
     dimnames(out)[[1]] <- names(obs.out)
   }
   return(out)
@@ -633,10 +640,15 @@ get_data_sim <- function(fit.list, n.sim = NULL, digits = 2,
     stop(obj.class, " not supported.")
   }
 
-    names(sim.fit.out)<-do.call("c",
-                                lapply(fit.list,function(x){
-                                  x$id
-                                }))
+  if(is.null(names(fit.list))){
+    names(sim.fit.out) <- do.call("c",
+                                  lapply(fit.list,function(x){
+                                    x$id
+                                  }))
+  } else {
+    names(sim.fit.out) <- names(fit.list)
+  }
+
     if(return.obs){
       if(obs.raw){
         obs.out<-lapply(fit.list,function(x){

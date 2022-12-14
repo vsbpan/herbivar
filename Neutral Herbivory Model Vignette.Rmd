@@ -40,25 +40,32 @@ The goal of this vignette is to introduce to the user on using the *herbivar* pa
 
 
 # Neutral model
-```{r}
-x <- ralloT(1000, lambda = 3)
-
-allo_fit <- fit_allo_herb(x)
-```
-
-
 
 # Formulation
 
 # Supporting functions
+```{r}
+x <- ralloT(1000, lambda = 3)
+
+allo_fit <- fit_allo_herb(x, 
+                          id = "This_is_a_test_model")
+```
+
 
 ## Fitting the neutral model
 ```{r}
-set.seed(12)
-a<-fit_bite_size(rallo(100, max.phi = 0.4),min.phi = 0.005)
-#coef(a,se = TRUE)
+# Generate some fake herbivory data
+set.seed(1)
+x <- ralloT(1000, mean.phi.T = 0.222)
+allo_fit <- fit_allo_herb(x)
 
+allo_fit
+
+class(allo_fit)
 ```
+
+
+The returned object has the class `allo_herb_fit` and is currently supported by some S3 generic methods `coef()`, `logLik()`, `AIC()`, `AICc()`, `BIC()`, `predict()`, and `print()`.  
 
 
 # Generic null models
@@ -76,14 +83,6 @@ In this section, I show how one can use the package to assess model fit. There a
 ## Absolute measures of fit
 
 ```{r}
-
-predict(allo_fit)
-get_data_sim(list(allo_fit,allo_fit))
-
-
-get_dist_test_sim(list(allo_fit, allo_fit), nboot = 3)
-
-
 
 compare_dist(data.list = list("obs" = allo_fit$data, 
                               "pred" = predict(allo_fit)), 
@@ -141,7 +140,50 @@ LRT(htlnorm_fit,allo_fit)
 
 
 
-# Other handy functions
+# Miscellaneous
+## Batch processing
+
+When dealing with many data sets or many models fitted to many data sets, one may desire to perform one action across all data sets or all models. This is made easier by batch processing wrappers implemented in *herbivar*. To use these functions, in general, multiple data sets or multiple models of the same class should be stored in a named list. The list may be named by some identifier, such as the data set ID or survey ID. 
+
+
+```{r}
+get_data_sim(list(allo_fit,
+                  allo_fit,
+                  allo_fit), 
+             n.sim = 3, 
+             return.obs = FALSE)
+
+
+get_dist_test_sim(list(allo_fit,
+                       allo_fit,
+                       allo_fit),
+                  test = c("ks"), 
+                  nboot = 2, 
+                  silent = TRUE) 
+
+plot_distributions(
+  purrr::map(get_data_sim(list(allo_fit)), 1)
+)
+
+apply_probes(
+  list("a" = x,"b" = x, "c" = x), 
+  add.id = FALSE, 
+  probes = c("mean", "Hoover", "J.index", "cd", "cv", "N","max","lac","Gini")
+)
+
+```
+
+
+
+```{r}
+set.seed(12)
+bite_size_fit <- fit_bite_size(rallo(100, max.phi = 0.4), 
+                               min.phi = 0.005, 
+                               family = "all")
+bite_size_fit
+```
+
+Currently, the following generic methods are supported: `coef()`, `print()`. 
 
 
 # References
