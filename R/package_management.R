@@ -1,5 +1,5 @@
 herbivar.version <- function(silent = FALSE){
-  out <- utils::packageDate("herbivar")
+  out <- as.character(utils::packageDate("herbivar"))
   if(!silent){
     print(out)
     message("Still in development; use with caution!")
@@ -15,8 +15,9 @@ herbivar.version <- function(silent = FALSE){
     paste0("\n \n","Conflicts: \n", conflicts)
   )
   heart <- ifelse(rbinom(1,1,0.1) == 1, " <3", "")
-  packageStartupMessage("herbivar version date: ",utils::packageDate("herbivar"),"\n",
-                        "Package still in development; use with caution!",heart, conflict_msg)
+  cat("herbivar version: ",herbivar.version(silent = TRUE),"\n",
+                        "Package still in development; use with caution!",heart, conflict_msg,
+      sep = "")
 }
 
 detach.herbivar <- function(x){
