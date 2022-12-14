@@ -11,7 +11,9 @@
 
 \item{...}{additional arguments}
 
-\item{backtransform}{A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is \code{TRUE}.}
+\item{backtransform}{A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized. Default is TRUE.}
+
+\item{se}{If \code{TRUE}, the standard error will be returned as well. If \code{backtransform = TRUE}, the standard error on the back transformed scale will be approximated using the first order second moment method. See \code{?FOSM}}
 }
 \value{
 A named vector of estimates. If \code{se = TRUE}, a named list of vectors will be returned instead.

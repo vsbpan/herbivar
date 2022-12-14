@@ -16,9 +16,6 @@ knitr::opts_chunk$set(fig.align = "center")
 ```
 
 
-# Introduction
-
-
 # Prerequisets 
 
 To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package. 
@@ -35,6 +32,11 @@ if(suppressMessages(!require(herbivar))){
 
 ```
 
+
+# Introduction
+
+
+
 # Neutral model
 
 # Formulation
@@ -45,7 +47,7 @@ if(suppressMessages(!require(herbivar))){
 ```{r}
 set.seed(12)
 a<-fit_bite_size(rallo(100, max.phi = 0.4),min.phi = 0.005)
-a$models$allo_a
+coef(a,se = TRUE)
 
 ```
 

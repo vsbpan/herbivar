@@ -1027,7 +1027,8 @@ BIC.allo_herb_fit <- function(object,...){
 #' @description extract model coefficients from allo_herb_fit objects
 #' @param object An 'allo_herb_fit' object
 #' @param ... additional arguments
-#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is TRUE.
+#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized. Default is TRUE.
+#' @param se If \code{TRUE}, the standard error will be returned as well. If \code{backtransform = TRUE}, the standard error on the back transformed scale will be approximated using the first order second moment method. See \code{?FOSM}
 #' @return A named vector of estimates. If \code{se = TRUE}, a named list of vectors will be returned instead.
 coef.allo_herb_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
   if(backtransform){

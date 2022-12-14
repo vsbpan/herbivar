@@ -262,7 +262,8 @@ BIC.generic_null_fit <- function(object,...){
 #' @description extract model coefficient from 'generic_null_fit' objects
 #' @param object A 'generic_null_fit' object
 #' @param ... additional arguments
-#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is \code{TRUE}.
+#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized. Default is TRUE.
+#' @param se If \code{TRUE}, the standard error will be returned as well. If \code{backtransform = TRUE}, the standard error on the back transformed scale will be approximated using the first order second moment method. See \code{?FOSM}
 #' @return A named vector of estimates. If \code{se = TRUE}, a named list of vectors will be returned instead.
 coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
   if(backtransform){
@@ -659,8 +660,8 @@ print.bite_size_fit <- function(x,...){
 #' @description extract model coefficients from bite_size_fit objects
 #' @param object An 'allo_herb_fit' object
 #' @param ... additional arguments
-#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is TRUE.
-#' @return A list of each fitted family of distribution is returned. For each element of the list, a named vector of estimates is returned. If \code{se = TRUE}, a named list of vectors will be returned instead.
+#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized. Default is TRUE.
+#' @param se If \code{TRUE}, the standard error will be returned as well. If \code{backtransform = TRUE}, the standard error on the back transformed scale will be approximated using the first order second moment method. See \code{?FOSM}#' @return A list of each fitted family of distribution is returned. For each element of the list, a named vector of estimates is returned. If \code{se = TRUE}, a named list of vectors will be returned instead.
 coef.bite_size_fit <- function(object, ..., backtransform = TRUE, se = FALSE){
   lapply(object$models, function(model){
     if(backtransform){

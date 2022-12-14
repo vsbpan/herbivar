@@ -196,7 +196,16 @@ bind_vec <- function(x,margin = 1L, keep_row_names = TRUE, row_names_as_col = FA
   return(out)
 }
 
-
+#' @title First Order Second Moment Method
+#' @description Compute the variance of a transformed random variable using first order Taylor's aproximation.
+#' @param x The expectation of the random variable
+#' @param var The variance of the random variable
+#' @param trans A function by which the random variable is transformed
+#' @details
+#' The first order second moment method can be used to approximate the variance of a transformed random variable provided that we know the first derivitive of the transformation function, the mean, and variance of the random variable:
+#' \deqn{\mathbb{Var}[f(X)] \approx f'(\mathbb{E}[X])^2 \mathbb{Var}[X]}
+#'
+#' @return a numeric value
 FOSM <- function(x,var,trans){
   # First order taylor's approximation
   # Var[f(X)] \approx f'(E[X])^2  var[X]
