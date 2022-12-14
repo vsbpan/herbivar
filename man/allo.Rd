@@ -50,7 +50,7 @@ qallo(
 a vector of numeric values
 }
 \description{
-Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometric scaling laws.
+Density, distribution function, quantile function, and random generation for the neutral 'bite size' distribution based on allometric scaling laws. This distribution is a reparameterization of the truncated Pareto distribution.
 }
 \details{
 The neutral 'bite size' distribution has density function
