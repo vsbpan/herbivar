@@ -1,5 +1,5 @@
 ---
-title: "Using ‘herbivar’ to Fit Neutral Models"
+title: Using *herbivar* to Fit Neutral Models
 author: "Vincent Pan"
 date: "`r format(Sys.time(), '%B %d, %Y')`"
 output: 
@@ -11,13 +11,17 @@ output:
     code_folding: show
 ---
 
+```{r, include = FALSE}
+knitr::opts_chunk$set(fig.align = "center")
+```
 
-## Introduction
+
+# Introduction
 
 
-## Prerequisets 
+# Prerequisets 
 
-To follow this vignette and use the *herbivar* package, you'll need to first use the \code{install_github()} function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package. 
+To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package. 
 
 ```{r}
 if(suppressMessages(!require(herbivar))){
@@ -31,28 +35,30 @@ if(suppressMessages(!require(herbivar))){
 
 ```
 
-## Neutral model
+# Neutral model
 
-## Formulation
+# Formulation
 
-## Supporting functions
+# Supporting functions
 
-### Fitting the neutral model
+## Fitting the neutral model
 ```{r}
-a<-fit_bite_size(rallo(100,max.phi = 0.4),min.phi = 0.005)
+set.seed(12)
+a<-fit_bite_size(rallo(100, max.phi = 0.4),min.phi = 0.005)
+a$models$allo_a
 
 ```
 
 
-## Generic null models
-### Formulation
+# Generic null models
+## Formulation
 
-### Supporting functions
+## Supporting functions
 
-### Fitting the generic null models
+## Fitting the generic null models
 
 
-## Model assessment 
+# Model assessment 
 
 ```{r}
 
@@ -93,13 +99,12 @@ vegan::rda(probed.data[,-1] ~ probed.data$distribution)
 
 
 
-## Other handy functions
+# Other handy functions
 
 
-## Session Info
+# Session Info
 
 ```{r}
-herbivar::herbivar.version()
 sessionInfo()
 ```
 

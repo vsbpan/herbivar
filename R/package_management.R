@@ -16,7 +16,8 @@ herbivar.version <- function(silent = FALSE){
   )
   heart <- ifelse(rbinom(1,1,0.1) == 1, " <3", "")
   cat("herbivar version: ",herbivar.version(silent = TRUE),"\n",
-                        "Package still in development; use with caution!",heart, conflict_msg,
+                        "Package still in development; use with caution!",heart,
+      conflict_msg,"\n",
       sep = "")
 }
 

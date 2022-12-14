@@ -299,7 +299,7 @@ coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
 #' @title Fit A 'Bite Size' Distribution To Data
 #' @description Fit multiple distributions to a vector of data using maximum likelihood.
 #' @param object A vector of proportion 'bite sizes' between zero and one, not inclusive. If an object of class 'split_herb' is supplied, the \code{hole_prop} vector will be extracted.
-#' @param family A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", and "cb". See details. If "all", all available families will be selected.
+#' @param family A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", and "cb". See details. If "all", all available families will be selected.
 #' @param min.phi The minimum proportion 'bite size'. If \code{NA} (default), the minimum non-zero value in the data is used. If \code{NA} and \code{object} supplied is of class 'split_herb', the \code{min_prop} is extracted from the \code{object}.
 #' @param method Optimizer used to find the maximum likelihood estimates. Valid options are "Nelder-Mead", "BFGS" (default), and "nlminb".
 #' @param IC An information criteria used to rank the fitted distributions. Default is "AICc".
@@ -341,12 +341,6 @@ coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
 #' \eqn{a} and \eqn{b} are the two shape parameters.
 #'
 #'
-#' ## tpareto
-#' Truncated Pareto distribution with two degrees of freedom. This is equivalent to the neutral 'bite size' distribution with the parameters \eqn{\phi_m} and \eqn{a} fitted to data.
-#' \deqn{P(x) = \frac{a b^a}{\phi^{a+1}}\frac{1}{1 - (\frac{b}{1})^a},}.
-#' \eqn{a} is the exponent of the Pareto distribution and \eqn{b} is the minimum value of \eqn{\phi}.
-#'
-#'
 #' ## cb
 #' Continuous Bernoulli distribution with one degree of freedom.
 #' \deqn{P(\phi) = C(\lambda) \lambda^\phi (1 - \lambda)^{1-\phi},}
@@ -377,13 +371,13 @@ coef.generic_null_fit<-function(object, ..., backtransform = TRUE, se = FALSE){
 #' @export
 fit_bite_size<-function(object,
                         family = c("allo","allo_a","allo_M",
-                                   "tlnorm","beta","kumar", "tpareto", "cb"),
+                                   "tlnorm","beta","kumar", "cb"),
                         min.phi = NA,
                         method = c("BFGS","nlminb", "Nelder-Mead"),
                         IC = "AICc"){
 
   supported.families <- c("allo","allo_a","allo_M",
-                          "tlnorm","beta","kumar", "tpareto", "cb")
+                          "tlnorm","beta","kumar", "cb")
   if(any("all" %in% family)){
     family <- supported.families
   }
@@ -443,11 +437,11 @@ fit_bite_size<-function(object,
                         -sum(dallo(x = data.vec,
                                    min.phi = min.phi,
                                    max.phi = 1,
-                                   a = theta,
+                                   a = exp(theta),
                                    log = TRUE))
                       }, method = "Brent",
                       lower = 0,
-                      upper = 1)
+                      upper = 10)
 
     allo_a.loglik<- structure(-allo_a.fit$value,
                               class= "logLik",
@@ -455,8 +449,9 @@ fit_bite_size<-function(object,
                               nobs= n,
                               df = 1)
 
-    allo_a_out<-list("param" = c("a"=allo_a.fit$par),
+    allo_a_out<-list("param" = c("a" = allo_a.fit$par),
                      "se" = allo_a.fit$se,
+                     "trans" = c("a" = function(x){exp(x)}),
                      "logLik" = allo_a.loglik,
                      "convergence" = allo_a.fit$convergence)
   } else {
@@ -491,8 +486,9 @@ fit_bite_size<-function(object,
 
     # Calculation of the variance of the MLE of the truncation point is nonregular -- cannot be found from the fisher infromation matrix
 
-    allo_M_out<-list("param" = c("max.phi_log" = allo_M.fit$par),
+    allo_M_out<-list("param" = c("max.phi" = allo_M.fit$par),
                      "se" = allo_M.fit$se,
+                     "trans" = c("max.phi" = function(x){x}),
                      "logLik" = allo_M.loglik,
                      "convergence" = allo_M.fit$convergence)
 
@@ -520,8 +516,10 @@ fit_bite_size<-function(object,
                               df = 2)
 
     tlnorm_out<-list("param" = c("meanlog"=tlnorm.fit$par[1],
-                                 "sdlog_log"=tlnorm.fit$par[2]),
+                                 "sdlog"=tlnorm.fit$par[2]),
                      "se" = tlnorm.fit$se,
+                     "trans" = c("meanlog" = function(x){x},
+                                 "sdlog" = function(x){exp(x)}),
                      "logLik" = tlnorm.loglik,
                      "convergence" = tlnorm.fit$convergence)
   } else {
@@ -545,9 +543,11 @@ fit_bite_size<-function(object,
                             nobs= n,
                             df = 2)
 
-    beta_out<-list("param" = c("shape1_log"=beta.fit$par[1],
-                               "shape2_log"=beta.fit$par[2]),
+    beta_out<-list("param" = c("shape1"=beta.fit$par[1],
+                               "shape2"=beta.fit$par[2]),
                    "se" = beta.fit$se,
+                   "trans" = c("shape1" = function(x){exp(x)},
+                               "shape2" = function(x){exp(x)}),
                    "logLik" = beta.loglik,
                    "convergence" = beta.fit$convergence)
   } else {
@@ -571,38 +571,15 @@ fit_bite_size<-function(object,
                             nobs= n,
                             df = 2)
 
-    kumar_out<-list("param" = c("a_log"=kumar.fit$par[1],
-                               "b_log"=kumar.fit$par[2]),
+    kumar_out<-list("param" = c("a"=kumar.fit$par[1],
+                               "b"=kumar.fit$par[2]),
                    "se" = kumar.fit$se,
+                   "trans" = c("a" = function(x){exp(x)},
+                               "b" = function(x){exp(x)}),
                    "logLik" = kumar.loglik,
                    "convergence" = kumar.fit$convergence)
   } else {
     kumar_out <- NULL
-  }
-
-  if("tpareto" %in% family){
-    tpareto.fit<-optim2(init = 1,
-                     fn = function(theta){
-                       -sum(dtpareto(x = data.vec,
-                                               a = exp(theta),
-                                               b = min.phi,
-                                               log = TRUE))
-                     }, method = method,
-                     lower = -10,
-                     upper = 4)
-
-    tpareto.loglik<- structure(-tpareto.fit$value,
-                             class= "logLik",
-                             nall = n,
-                             nobs= n,
-                             df = 1)
-
-    tpareto_out<-list("param" = c("a_log"=tpareto.fit$par),
-                    "se" = tpareto.fit$se,
-                    "logLik" = tpareto.loglik,
-                    "convergence" = tpareto.fit$convergence)
-  } else {
-    tpareto_out <- NULL
   }
 
   if("cb" %in% family){
@@ -621,8 +598,9 @@ fit_bite_size<-function(object,
                              nobs= n,
                              df = 2)
 
-    cb_out<-list("param" = c("lambda_logit"=cb.fit$par[1]),
+    cb_out<-list("param" = c("lambda"=cb.fit$par[1]),
                     "se" = cb.fit$se,
+                 "trans" = c("lambda" = function(x){plogis(x)}),
                     "logLik" = cb.loglik,
                  "convergence" = cb.fit$convergence)
   } else {
@@ -631,7 +609,7 @@ fit_bite_size<-function(object,
 
   out<-list(allo_out, allo_a_out, allo_M_out,
             tlnorm_out, beta_out, kumar_out,
-            tpareto_out, cb_out)
+            cb_out)
   out<-out[!simplify2array(lapply(out,is.null))]
   names(out) <- supported.families[supported.families %in% family]
 
@@ -675,6 +653,55 @@ print.bite_size_fit <- function(x,...){
   } else {
     stop("Object must be of class 'bite_size_fit'.")
   }
+}
+
+#' @title Extract Model Coefficients
+#' @description extract model coefficients from bite_size_fit objects
+#' @param object An 'allo_herb_fit' object
+#' @param ... additional arguments
+#' @param backtransform A logic value indicating whether to back transform coefficients from the scale the coefficient was estimated at to the scale the coefficient is parameterized as for the neutral model. Default is TRUE.
+#' @return A list of each fitted family of distribution is returned. For each element of the list, a named vector of estimates is returned. If \code{se = TRUE}, a named list of vectors will be returned instead.
+coef.bite_size_fit <- function(object, ..., backtransform = TRUE, se = FALSE){
+  lapply(object$models, function(model){
+    if(backtransform){
+      out<-vapply(seq_along(model$param), function(i){
+        model$trans[[names(model$param)[i]]](model$param[i])
+      }, numeric(1))
+
+      if(se){
+        se.out <- vapply(seq_along(model$param), function(i){
+          sqrt(FOSM(model$param[i],
+                    model$se[i]^2,
+                    model$trans[[names(model$param)[i]]]))
+        }, numeric(1))
+        names(se.out) <- names(model$param)
+      }
+    } else {
+      out <- model$param
+      if(se){
+        se.out <- model$se
+        names(se.out) <- names(model$param)
+      }
+    }
+    names(out) <- names(model$param)
+
+    if(se){
+      if(length(model$param) > 0){
+        return(list("Estimate" = out,
+                    "Std." = se.out))
+      } else {
+        return(list("Estimate" = NULL,
+                    "Std." = NULL))
+      }
+
+    } else {
+      if(length(model$param) > 0){
+        return(out)
+      } else {
+        return(NULL)
+      }
+    }
+  })
 }
 
 

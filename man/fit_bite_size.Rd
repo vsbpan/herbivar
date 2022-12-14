@@ -6,7 +6,7 @@
 \usage{
 fit_bite_size(
   object,
-  family = c("allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", "cb"),
+  family = c("allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "cb"),
   min.phi = NA,
   method = c("BFGS", "nlminb", "Nelder-Mead"),
   IC = "AICc"
@@ -15,7 +15,7 @@ fit_bite_size(
 \arguments{
 \item{object}{A vector of proportion 'bite sizes' between zero and one, not inclusive. If an object of class 'split_herb' is supplied, the \code{hole_prop} vector will be extracted.}
 
-\item{family}{A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", "tpareto", and "cb". See details. If "all", all available families will be selected.}
+\item{family}{A vector of distributions to fit to a vector of 'bite sizes'. Valid options are "allo", "allo_a", "allo_M", "tlnorm", "beta", "kumar", and "cb". See details. If "all", all available families will be selected.}
 
 \item{min.phi}{The minimum proportion 'bite size'. If \code{NA} (default), the minimum non-zero value in the data is used. If \code{NA} and \code{object} supplied is of class 'split_herb', the \code{min_prop} is extracted from the \code{object}.}
 
@@ -78,13 +78,6 @@ Beta distribution with two degrees of freedom.
 Kumaraswamy distribution with two degrees of freedom.
 \deqn{P(\phi) = ab\phi^{a-1}(1-\phi^{a-1})(1-\phi^{a})^{b-1}}
 \eqn{a} and \eqn{b} are the two shape parameters.
-}
-
-\subsection{tpareto}{
-
-Truncated Pareto distribution with two degrees of freedom. This is equivalent to the neutral 'bite size' distribution with the parameters \eqn{\phi_m} and \eqn{a} fitted to data.
-\deqn{P(x) = \frac{a b^a}{\phi^{a+1}}\frac{1}{1 - (\frac{b}{1})^a},}.
-\eqn{a} is the exponent of the Pareto distribution and \eqn{b} is the minimum value of \eqn{\phi}.
 }
 
 \subsection{cb}{

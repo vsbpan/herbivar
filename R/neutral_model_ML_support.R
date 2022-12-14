@@ -18,6 +18,10 @@
 #' \deqn{P(\phi \leq q) = \frac{q^{1-\alpha} - \phi_m^{1-\alpha}}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}}} when \eqn{\alpha \neq 1} and
 #' \deqn{P(\phi \leq q) = \frac{\ln{q} - \ln{\phi_m}}{\ln{\phi_M} - \ln{\phi_m}}} when \eqn{\alpha = 1}.
 #'
+#' The neutral 'bite size' distribution is equivalent to a reparameterized truncated Pareto distribution with \eqn{\alpha = a - 1}, \eqn{\phi_m = b}, and \eqn{\phi_M = B}. The truncated Pareto distribution has the density function:
+#' \deqn{P(x) = \frac{ab^a x^{-a-1}}{1-(\frac{b}{B})^a}}
+#'
+#'
 #' @return a vector of numeric values
 #' @references
 #' Damuth, J. 1981. Population density and body size in mammals. Nature 290:699–700.
