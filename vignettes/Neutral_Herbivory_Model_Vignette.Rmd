@@ -37,14 +37,14 @@ knitr::opts_chunk$set(fig.align = "center", comment = NA, eval = TRUE)
 |            The goal of this vignette is to introduce to the user on using the *herbivar* package to fit the neutral herbivory model (Pan et al. 2023) to empirical herbivory data and assess model fit. I also demonstrate some handy functions that can be used to characterize probability distributions and wrangle herbivory data more broadly. 
 
 
-|            To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package.
+|            To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the packages. The *herbivar* package depends on *EBImage*, which can be installed via `BiocManager::install()`. If you not using Windows, you might have a problem with the file `libX11.6.dylib`, which the dependent package *imager* uses. You'll need to install XQuartz (https://www.xquartz.org/) to fix the error. You can set `build_vignettes = TRUE` in `install_github()` if you want to have the vignette. 
 
 ```{r}
+#install.packages("BiocManager")
+#BiocManager::install("EBImage")
+#install.packages("devtools")
 if(suppressMessages(!require(herbivar))){
-  if(!nzchar(system.file(package = "devtools"))){
-    install.packages("devtools")
-  }
-  devtools::install_github("vsbpan/herbivar")
+  devtools::install_github("vsbpan/herbivar", build_vignettes = FALSE, depdendencies = TRUE)
 } else {
   message("Sweet! Herbivar is installed!")
 }

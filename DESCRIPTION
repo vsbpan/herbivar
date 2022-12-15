@@ -25,7 +25,8 @@ Imports:
     DescTools,
     parallel,
     extraDistr,
-    EBImage
+    EBImage, 
+    spatstat.geom
 Suggests: 
     spatstat,
     ineq, 
@@ -43,7 +44,8 @@ Suggests:
     scales,
     stringr,
     insight,
-    kSamples
+    kSamples, 
+    spatstat.explore
 VignetteBuilder: knitr
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

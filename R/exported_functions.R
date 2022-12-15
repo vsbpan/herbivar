@@ -46,51 +46,51 @@ Kurt<-function(x, weights = NULL, na.rm = FALSE, method = 1, ...) {
 
 #' @export
 clarkevans <- function(...){
-  spatstat.core::clarkevans(...)
+  spatstat.explore::clarkevans(...)
 }
 
 #' @export
 clarkevans.test <- function(...){
-  spatstat.core::clarkevans.test(...)
+  spatstat.explore::clarkevans.test(...)
 }
 
 #' @export
 hopskel <- function(...){
-  spatstat.core::hopskel(...)
+  spatstat.explore::hopskel(...)
 }
 
 #' @export
 allstats <- function(...){
-  spatstat.core::allstats(...)
+  spatstat.explore::allstats(...)
 }
 
 #' @export
 Lest <- function(...){
-  spatstat.core::Lest(...)
+  spatstat.explore::Lest(...)
 }
 
 #' @export
 Kest <- function(...){
-  spatstat.core::Kest(...)
+  spatstat.explore::Kest(...)
 }
 
 #' @export
 Gest <- function(...){
-  spatstat.core::Gest(...)
+  spatstat.explore::Gest(...)
 }
 
 #' @export
 Fest <- function(...){
-  spatstat.core::Fest(...)
+  spatstat.explore::Fest(...)
 }
 
 #' @export
 Jest <- function(...){
-  spatstat.core::Jest(...)
+  spatstat.explore::Jest(...)
 }
 
 #' @export
 envelope.ppp <- function(...){
-  spatstat.core::envelope.ppp(...)
+  spatstat.explore::envelope.ppp(...)
 }
 
