@@ -21,7 +21,6 @@ To use the *herbivar* package, you'll need to first use the `install_github()` f
   #install.packages("devtools")
   #install.packages("BiocManager") 
   #BiocManager::install("EBImage")
-  #install.packages("spatstat")
   devtools::install_github("vsbpan/herbivar", build_vignettes = FALSE, dependencies = TRUE)
 ```
 ## Vignette

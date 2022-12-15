@@ -526,7 +526,7 @@ fit_allo_herb(x,
 
 
 
-
+plot_distributions(list(x,x2), type = "ecdf")
 
 P <- 1:10/sum(1:10)
 Q <- 20:29/sum(20:29)
@@ -546,10 +546,30 @@ compare_dist(list("obs" = rbeta(10000,1,1),
 
 debug(compare_dist)
 
-
+library(herbivar)
 x <- ralloT(10000, lambda = 3)
-microbenchmark::microbenchmark(
-  "no parallel" = sum(dalloT(x, lambda = 1, log = TRUE, by = 0.000001, parallel = FALSE)),
-  "with parallel" = sum(dalloT(x, lambda = 1, log = TRUE, by = 0.000001,
-                               parallel = TRUE, cores = 4)),
-  times = 1)
+x2 <- ralloT(10000, lambda = 1)
+
+
+par(mfrow=c(1,2))
+
+
+par(cex = 0.9)
+par(fig=c(0.25,1,0,1))
+survival_plot(x[x>0])
+par(fig=c(0,0.25,0,1), new = TRUE)
+plot(c(mean(x == 0)) ~ 1,
+     ylim = c(0,1), xaxt='n',
+     ylab = "P(X=0)", xlab = "")
+
+
+
+par(cex = 0.9)
+par(fig=c(0.25,1,0,1), new = TRUE)
+survival_plot(x2[x2>0], add=TRUE)
+par(fig=c(0,0.25,0,1), new = TRUE)
+points(c(mean(x2 == 0)) ~ 1,
+     ylim = c(0,1), xaxt='n',
+     ylab = "P(X=0)", xlab = "")
+
+
