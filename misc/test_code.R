@@ -528,12 +528,20 @@ fit_allo_herb(x,
 
 
 
+P <- 1:10/sum(1:10)
+Q <- 20:29/sum(20:29)
+x <- rbind(P,Q)
 
+plot(P)
+plot(Q)
 
+sum(P)
+sum(Q)
 
+KL(x,)
 
+compare_dist(list("obs" = rbeta(100,1,1),
+                       "pred" = rbeta(100,1,1)))
 
-
-
-
+debug(compare_dist)
 

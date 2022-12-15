@@ -471,7 +471,9 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
     }
     if(any(test %in% c("chisq"))){
       chisq <- suppressWarnings(chisq.test(x = obs.count, y = pred.count))
-      chisq.out <- c("chisq" = unname(chisq$statistic), "chisq.P" = chisq$p.value)
+      chisq.out <- c("chisq" = unname(chisq$statistic),
+                     "df" = unname(chisq$parameter),
+                     "chisq.P" = chisq$p.value)
     } else {
       chisq.out <- NULL
     }
