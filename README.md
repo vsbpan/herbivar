@@ -21,11 +21,11 @@ To use the *herbivar* package, you'll need to first use the `install_github()` f
   #install.packages("devtools")
   #install.packages("BiocManager") 
   #BiocManager::install("EBImage")
-  devtools::install_github("vsbpan/herbivar", build_vignettes = FALSE, dependencies = TRUE)
+  devtools::install_github("vsbpan/herbivar", build_vignettes = FALSE, dependencies = TRUE, force = TRUE)
 ```
 ## Vignette
 
-You can access the vignette via the command below. Alternatively, you can find the knitted HTML file in the **vignettes** folder. 
+You can access the vignette via the command below. Alternatively, you can find the knitted HTML file in the **vignettes** folder by first downloading the ZIP file of the repository. 
 
 ```{r}
 browseVignettes("herbivar")
