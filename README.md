@@ -7,13 +7,7 @@
 
 ## Overview 
 
-This package makes available several methods used for analyzing variability in 
-    ecological data. Currently, it supports fitting a neutral herbivory model to data using 
-    Maximum Likelihood Estimation (MLE). It also contains several helper functions for investigating 
-    distributions and wrangling the HerbVar dataset. In addition, using the 'imager' infrastructure, 
-    the package also supports automatic processing of leaf images, mostly in the context of leaf 
-    scans, that can retrieve rich within-leaf herbivory data. The package is integrated with 
-    the 'spatstat' package that allows for spatial analysis of these data. 
+This package makes several methods used for analyzing variability inecological data available. Currently, it supports fitting a neutral herbivory model to data using Maximum Likelihood Estimation (MLE). It also contains several helper functions for investigating distributions and wrangling the HerbVar dataset. In addition, using the *imager* infrastructure, the package also supports automatic processing of leaf images, mostly in the context of leaf scans, that can retrieve rich within-leaf herbivory data. The package is integrated with the *spatstat* package that allows for spatial analysis of these data. 
     
 Currently work in progress, mostly for internal use only. Proceed with caution :)
 
