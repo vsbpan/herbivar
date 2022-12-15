@@ -10,20 +10,34 @@ output:
     number_sections: yes
     code_folding: show
     highlight: tango
+    theme: default
 vignette: >
   %\VignetteIndexEntry{Using_herbivar_to_Fit_Neutral_Models}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
 
-```{r, include = FALSE}
-knitr::opts_chunk$set(fig.align = "center", comment = NA)
+```{r, include=FALSE}
+# vignette: >
+#   %\VignetteIndexEntry{Using_herbivar_to_Fit_Neutral_Models}
+#   %\VignetteEngine{knitr::rmarkdown}
+#   %\VignetteEncoding{UTF-8}
 ```
 
 
-# Prerequisets 
 
-To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package.
+```{r, include = FALSE}
+knitr::opts_chunk$set(fig.align = "center", comment = NA, eval = TRUE)
+```
+
+
+
+# Introduction
+
+|            The goal of this vignette is to introduce to the user on using the *herbivar* package to fit the neutral herbivory model (Pan et al. 2023) to empirical herbivory data and assess model fit. I also demonstrate some handy functions that can be used to characterize probability distributions and wrangle herbivory data more broadly. 
+
+
+|            To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the package.
 
 ```{r}
 if(suppressMessages(!require(herbivar))){
@@ -38,67 +52,234 @@ if(suppressMessages(!require(herbivar))){
 ```
 
 
-# Introduction
-
-The goal of this vignette is to introduce to the user on using the *herbivar* package to fit the neutral herbivory model (Pan et al. 2022) to empirical herbivory data and assess model fit. I also demonstrate some handy functions that can be used to characterize probability distributions and wrangle herbivory data more broadly. 
-
-
-# Neutral model
+# Neutral herbivory model
 
 ## Formulation
 
+|            The neutral herbivory model is a type of compound Poisson distribution, where the cumulative proportion herbivory $\phi_T$ with support over $[0,1]$ is a sum of $k$ individual 'bites' $\phi$ with a cut-off.  
+
+$$
+\phi_T = \Bigg\{ \begin{array}{cc}
+     \begin{array}{cc}
+      \sum_i^k \phi_i & \sum_i^k \phi_i \leq 1 \\
+      1 & \sum_i^k \phi_i > 1
+    \end{array}
+\end{array}
+$$
+
+
+$k$ is drawn from a Poisson distribution with a fixed attack rate $\lambda$. The 'bite size' $\phi$ is not truly the amount of leaf area removed in a single bite, but the amount of leaf area removed in a single discrete and independent feeding bout that can be composed of multiple actual bites. I refer to it as 'bite size' for short. Using allometric scaling laws, Pan et al. (2023) argued that $\phi$ should follow the distribution (see the SI appendix of Pan et al. 2023 for more details):  
+
+$$
+P(\phi) = \Bigg\{ \begin{array}{cc}
+     \begin{array}{cc}
+      \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1} & \alpha =1 \\
+      \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha} & \alpha \neq 1
+    \end{array}
+\end{array}
+$$
+Here, $\phi_M$ and $\phi_m$ are the maximum bite size and minimum bite size, set at 1 and 0.005 by default mostly out of convenience. $\alpha$ is a combined allometric scaling coefficient derived to be roughly $\frac{14}{9}$. It is important to note that this bite size distribution is equivalent to the well-known truncated Pareto distribution,  
+
+$$
+P(x) = \frac{\gamma x_{min}^\gamma x^{-\gamma-1}}{1-(\frac{x_{min}}{x_{max}})^\gamma},
+$$
+ where $\gamma = \alpha  + 1$, $x_{max} = \phi_M$, and $x_{min} = \phi_m$.   
+ 
+
 ## Supporting functions
+
+|            The density function, distribution function, quantile function, and random generation of the 'bite size' distribution can be accessed via `dallo()`, `pallo()`, `qallo()`, and `rallo()` respectively. The exact mean and variance can be accesses with `get_phi_bar()` and `get_phi_var()` provided that the correct distribution parameters are specified.  
+
+|            The density function, distribution function, quantile function, and random generation of the neutral herbivory distribution can be accessed via `dalloT()`, `palloT()`, `qalloT()`, and `ralloT()` respectively. The calculations here are much less trivial as the neutral herbivory distribution does not have a closed form solution. As such, we must resort to numerical approximation for the density, distribution, and quantile function. For the quantile function, a default of 1000 draws from the neutral herbivory distribution are generated and the quantiles are calculate empirically relative to these 1000 draws. The distribution function is calculated via numeric integration of the density function at a default resolution of 0.001. The density function is calculated via a truncated numeric summation:  
+
+$$ 
+P(\phi_T | \lambda) \approx \sum_{k=0}^{k_{max}} P(\phi_T|k)P(k|\lambda)
+$$ 
+$k_{max} = 50$ by default as with sufficiently large $k$, $P(k|\lambda)$ becomes vanishingly small. The function throws a warning when the error tolerance set by the argument `k.max.tolerance` is exceeded, at which point the user should increase the default `k.max` setting. The calculation of $P(\phi_T|k)$ is trickier and involves utilizing the convolution theorem and finding the $k^{th}$ power of the Fourier transformed $P(\phi)$ function. To avoid overflow and improve computational efficiency, convolutions with $k > 100$  are approximated with a normal distribution instead, given the central limit theorem. This limit can be toggled via the `k.fft.limit` setting. More details of the calculation can be found in the help file (`?dalloT`) or the SI appendix of Pan et al. (2023). Broadly speaking, the important thing to note is that increasing the simulation resolution via the arguments `n.sim` or `by` increases the precision of the estimates. This can become important when fitting models to data, the optimizer can fail to find the likelihood peak, yielding inaccurate maximum likelihood estimates and convergence issues as a result. Reducing the resolution below the default values is generally not recommended.    
+
+|            The computational challenge of increasing the numerical approximation resolution is partially alleviated by the parallel computing feature implemented in *herbivar*. This feature can be assess via functions with the argument `cores` and `parallel`. Setting `prallel = TRUE` and `cores` above 1 would enable the feature when the function detects that computational efficiency gain may be acquired. 
+
 ```{r}
+# Generate sum numbers
 x <- ralloT(1000, lambda = 3)
 
-allo_fit <- fit_allo_herb(x, 
-                          id = "This_is_a_test_model")
+# Check number of computer cores available
+parallel::detectCores()
+
+# Compute log likelihood with 4 computer cores
+system.time(
+  sum(dalloT(x, lambda = 3, log = TRUE, by = 0.00001, parallel = TRUE, cores = 4))
+)
+
+# Compute the same expression without parallelization
+system.time(
+  sum(dalloT(x, lambda = 3, log = TRUE, by = 0.00001, parallel = FALSE))
+)
+
+```
+  
+  
+|            An additional challenge of the neutral herbivory model is that its mean is also not trivial to calculate. However, with a slight reparameterization, the model parameter $\lambda$ can be rewritten as $\overline{\phi'}$ with support $[0,\infty]$ that is very close to the true mean.  
+
+$$
+\overline{\phi'} = \overline\phi \lambda
+$$
+For this reason, I opted to write the package using the $\overline{\phi'}$ parameterization by default. However, users can easily convert between $\lambda$ and $\overline{\phi'}$ using the functions `get_mean_phi_T()` and `get_lambda()` provided that the other model parameters are also specified (see `?get_phi_bar()`). Users can also use the `lambda` argument over the `mean.phi.T` argument in supported functions.  
+
+```{r}
+# Compute density function using mean.phi.T paramterization or lambda parameterization
+dalloT(0.5, mean.phi.T = 0.1, 
+       min.phi = 0.01, max.phi = 1, a = 1.5)
+dalloT(0.5, lambda = get_lambda(mean.phi.T = 0.1, 
+                                min.phi = 0.01, max.phi = 1, a = 1.5), 
+       min.phi = 0.01, max.phi = 1, a = 1.5)
+```
+
+We can see that the results are identical.  
+
+```{r}
+# Get the 0.1 to lambda and back
+get_mean_phi_T(
+  get_lambda(mean.phi.T = 0.1, 
+             min.phi = 0.01, max.phi = 1, a = 1.5), 
+  min.phi = 0.01, max.phi = 1, a = 1.5)
 ```
 
 
-## Fitting the neutral model
+## Fitting the neutral herbivory model
+
+|            Currently, the neutral herbivory model can be fitted to data using maximum likelihood estimation through the wrapper `fit_allo_herb()`. Users have the option to fit various parameters to data using the argument `optim.vars`. Default model parameter values that are not fitted can be specified through the argument `param.vals`. If convergence fails, users can change the optimizer via the argument `method`, in addition to changing the numerical approximation resolution via `by`, and/or bounds of optimization via `upper` and `lower`. The argument `id` can be supplied with a character string that serves as a unique identifier of the data set for book keeping.
+
 ```{r}
 # Generate some fake herbivory data
-set.seed(1)
-x <- ralloT(1000, mean.phi.T = 0.222)
-allo_fit <- fit_allo_herb(x)
+set.seed(12)
+x <- ralloT(1000, mean.phi.T = 0.123)
 
+
+allo_fit <- fit_allo_herb(x, method = "Brent") # By default, mean.phi.T is fitted
 allo_fit
 
+# Fit two variables at once
+allo_fit2 <- fit_allo_herb(x,
+              optim.vars = c("mean.phi.T","a"),
+              init = c(10, 1),
+              by = 0.0001,
+              method = "Nelder-Mead",
+              cores = 1, # setting cores > 1, enables parallel
+              id = "This lablel is passed to the object") 
+allo_fit2
+```
+
+The returned object has the class `allo_herb_fit` and is currently supported by some S3 generic methods, including `coef()`, `logLik()`, `AIC()`, `AICc()`, `BIC()`, `predict()`, and `print()`.  
+
+
+```{r}
 class(allo_fit)
 ```
 
 
-The returned object has the class `allo_herb_fit` and is currently supported by some S3 generic methods `coef()`, `logLik()`, `AIC()`, `AICc()`, `BIC()`, `predict()`, and `print()`.  
+|            More information can be retrieved from the model object (see `?fit_allo_herb()` for more details). Of particular note is that `par` and `se` give you the raw estimates of the MLE parameters that are on a transformed scale as shown in `param.val.trans`. To retrieve the model coefficients, the user should use `coef()` or `print()`. Keep in mind that the standard errors (as well as the 95% confidence intervals) from both functions are approximated via the first order second moment method (see `?FSMO()`) by default. 
+
+```{r}
+names(allo_fit)
+coef(allo_fit, se = TRUE)
+```
 
 
 # Generic null models
 ## Formulation
 
+|            In this section, I demonstrate how to fit generic non-neutral non-processes based null models to herbivory data. This becomes important in a later section where I discuss how to compete the neutral herbivory model against the generic null models. Currently, two null distributions are implemented in *herbivar*: Zero-One-Inflated-Beta distribution (ZOIB) and Hurdle Truncated Log-Normal distribution (HTLN). 
+
+
+|            The zero-one-inflated beta distribution has the density function (Ospina & Ferrari 2008), 
+
+$$
+P(x; p_0, p_1,\alpha,\beta) = \Bigg\{ \begin{array}{cc}
+     \begin{array}{cc}
+      p_0 & x = 0 \\
+      p_1 (1-p_0) & x = 1 \\
+      (1-p_0)(1-p_1)\frac{x^{\alpha-1}(1-x)^{\beta - 1}}{B(\alpha,\beta)} & x \neq 0,1
+    \end{array}
+\end{array}
+$$
+
+It can be considered as an extension to the beta distribution commonly used to model proportion herbivory. The parameters $\alpha$ and $\beta$ correspond to the same parameters in a beta distribution. The additional parameters $p_0$ and $p_1$, model the probability of zeros and ones. Using this extension properly models the presence of 0s and 1s in proportion herbivory data without the need for arbitrary transformations (Smithson & Verkuilen 2006, Warton & Hui 2011). Still, in practice, the large number of family parameters and computational limitations may render these transformations more desired. Users can use the function `adjust_prop()` to select from a list of transformation methods.  
+
+|            The hurdle-truncated-log-normal distribution has the density function, 
+$$
+P(x;\theta, \mu, \sigma) = \Bigg\{ \begin{array}{cc}
+     \begin{array}{cc}
+      \theta & x = 0 \\
+      (1-\theta)(1-G(x = 1; \mu, \sigma)) & x = 1 \\
+      (1-\theta)g(x,\mu,\sigma) & x \neq 0,1
+    \end{array}
+\end{array}
+$$
+and can be considered as an extension to the log-normal distribution with density function $g(x;μ,σ)$ and cumulative distribution function $G(x;μ,σ)$. The additional parameter $\theta$ models the probability of zeros and values drawn from the log-normal distribution above one are truncated to one. The extension again allows the distribution to have probability mass at zero and one. The log-normal distribution is a reasonable candidate distribution for its ability to generate high positive skew in addition to being a limiting distribution for repeated multiplicative processes.
+
+
 ## Supporting functions
 
+|            For the ZOIB distribution, the density function and random number generation can be accessed via `dzoibeta()` and `rzoibeta()` respectively. For the HTLN distribution, the density function and random number generation can be access via `dhtlnorm()` and `rhtlnorm()` respectively.  
+
+
 ## Fitting the generic null models
+
+|            Both the ZOIB and HTLN distributions can be fitted to data using maximum likelihood estimation via the function `fit_generic_null()`. Again, the user has the ability to toggle the arguments `init`, `method`, `upper`, and `lower` to mess with the optimizer in case of convergence issues. The outputs and other arguments work pretty much the same way as `fit_allo_herb()`.  
+
+```{r}
+# Generate some fake herbivory data
+set.seed(12)
+x <- ralloT(1000, mean.phi.T = 0.123)
+
+htlnorm_fit <- fit_generic_null(x, family = "htlnorm", method = "BFGS", id = "hmmmmmm")
+htlnorm_fit
+
+
+zoibeta_fit <- fit_generic_null(x, family = "zoibeta", method = "Nelder-Mead")
+zoibeta_fit
+
+
+```
+
+The returned object has the class `generic_null_fit` and is currently supported by some S3 generic methods, including `coef()`, `logLik()`, `AIC()`, `AICc()`, `BIC()`, `predict()`, and `print()`.  
 
 
 # Model assessment 
 
-In this section, I show how one can use the package to assess model fit. There are numerous ways to determine how well a probability distribution fit to data, but they can be loosely divided into two types: absolute and relative measures of model fit. Absolute measures of model fit compare a model to data using objective measures. They inform how closely a model approximate observed data. Conversely, relative measures of model fit compete a model against alternative null hypotheses, allowing for strong inference (Platt 1964). McGill (2003) and McGill et al. (2006) provided excellent discussion on this important distinction for inference. I will just briefly emphasize that the two measures of model fit achieve slightly different goals. If you are interested purely in approximation or prediction, examining absolute measures of fit is sufficient. However, if you are interested in testing hypotheses, you need to examine the relative fit of a candidate model against other null or alternative hypotheses. In general, there is some burden of proof in ecology when one asserts the truth of a hypothesis, and we often show evidence through hypothesis significance testing. Examining absolute measures of model fit is still important, but not sufficient, because all alternative hypotheses can fit the data well on absolute measures or generate identical predictions. Therefore, tests based on absolute measures of fit maybe unable to falsify any hypothesis.  
+|            In this section, I show how one can use the package to assess model fit. There are numerous ways to determine how well a probability distribution fit to data, but they can be loosely divided into two types: absolute and relative measures of model fit. Absolute measures of model fit compare a model to data using objective measures. They inform how closely a model approximate observed data. Conversely, relative measures of model fit compete a model against alternative null hypotheses, allowing for strong inference (Platt 1964). McGill (2003) and McGill et al. (2006) provided excellent discussion on this important distinction for inference. I will just briefly emphasize that the two measures of model fit achieve slightly different goals. If you are interested purely in approximation or prediction, examining absolute measures of fit is sufficient. However, if you are interested in testing hypotheses, you need to examine the relative fit of a candidate model against other null or alternative hypotheses. In general, there is some burden of proof in ecology when one asserts the truth of a hypothesis, and we often show evidence through hypothesis significance testing. Examining absolute measures of model fit is still important, but not sufficient, because all alternative hypotheses can fit the data well on absolute measures or generate identical predictions. Therefore, tests based on absolute measures of fit maybe unable to falsify any hypothesis.  
 
 ## Absolute measures of fit
 
+### Two-sample tests
+
+|            The *herbivar* package implements a couple of methods to compare whether two samples are drawn from the same distribution and can be accessed via the function `compare_dist()`. Users can select the method using the `test` argument. Setting `test = "ks"` performs the Kolmogorov-Smirnov test using `stats::ks.test()`. It is a non-parametric test that looks at whether the maximum distance between two empirical cumulative distribution functions exceed expectation. The test statistic corresponds to the maximum distance. Setting `test = "ad"` performs the Anderson-Darling test using `kSamples::ad.test()`. The test looks at whether the empirical cumulative distribution function of a sample is uniform. Because the test is a permutation test, the computation can be quite intensive. "kl" computes the Kullback-Leibler divergence using `philentropy::KL()`. The unit of the KL divergence is "log" by default. It is a measure of relative entropy and can be interpreted as the expected additional amount of information needed to have the neutral model fully agree with observed data. Setting `test = "chisq"` performs the Chi-square test using `stats::chisq.test()`. In general, the Chi-square test should be avoided as it is quite sensitive to the bin size and does not preserve information on the order of the bins. 
+
 ```{r}
-
 compare_dist(data.list = list("obs" = allo_fit$data, 
-                              "pred" = predict(allo_fit)), 
-             test = c("ks","kl","ad"))
-
-probe_distribution(ralloT(1000, lambda = 3), 
-                   probes = c("mean", "var", "Skew","median"))
-
+                              "pred" = predict(allo_fit)),
+             test = c("ks", "kl","ad","chisq"), 
+             bin_size = 0.01
+            )
 ```
 
 
+### Utilizing statistical 'probes'
+
+|            While the above methods (except for KL divergence) can be used to test whether the observed and predicted distributions are distinguishable, when the methods yield a significant deviation, little can be learned about how two distributions are different. For this reason, we may look towards the classic paper by Kendall et al. (1999) who proposed using 'probes' as an objective measure of model performance. While the paper is about analyzing time series, the more general approach of using 'probes' to characterize the key features of data that we care about is tremendously useful. In this case, we want to use summary statistics of distributions as 'probes' and examine how closely two distributions agree on the values of those 'probes'. We already do this frequently when we compare the mean of two distributions. Occasionally, we compute other summary statistics (e.g. CV, variance) and examine how closely two distributions agree on those single static, using measures such as via RMSE or R^2. This is great if we only care about those particular 'probes'. However, when we examine whole distributions, we care about much more than the agreement of single summary statistic. We want to learn about the mean, variance, skewness, kurtosis, minimum, maximum, and etc. Because many of these summary statistics exhibit constrained relationships (e.g. distributions that follows Taylor's law has a positive mean-variance relationship, the kurtosis-skewness relationship is bounded by an inequality), it is better to treat all summary statics as following a multivariate distribution. We can then use conventional multivariate methods to examine this multivariate distribution. I show an example of an analysis using redundancy analysis (RDA) below. 
+
+
+|            The `probe_distribution()` function in *herbivar* allows you to calculate the value of statistical probes of a vector of data. Users can specify any number of probes that can be matched via R's `match.fun()`.
 ```{r}
+data <- ralloT(1000, lambda = 3)
+probe_distribution(data, 
+                   probes = c("mean", "var", "Skew","median"))
+```
+
+|            Here, I simulated two different distributions (one with $\phi_M = 1$ and the other with $\phi = 0.5$). Each distribution is replicated 100 times, each time drawing 1000 samples. For each replicated distribution, I used `probe_distribution()` to calculate some summary statistics. 
+```{r}
+#Simulate distributions
 allo_probed <- lapply(seq_len(100), function(i){
   x <- ralloT(1000, lambda = 3, max.phi = 1)
   probe_distribution(x)
@@ -111,73 +292,119 @@ allo_probed2 <- lapply(seq_len(100), function(i){
 }) %>%
   do.call("rbind",.)
 
-
+# Bind everything together and create a new column that keeps track of how each sample is generated
 probed.data <- rbind(
   data.frame("distribution" = "max.phi = 1", allo_probed),
   data.frame("distribution" = "max.phi = 0.5", allo_probed2)
 )
+```
 
+  
+  
+|            Then, using the `vegan` package, I can use principal component analysis to see that there is a clear separation of samples generated from the two distributions. The loading scores can be used to find that the two distributions differ most in terms of the kurtosis.  
+
+```{r}
 vegan::rda(probed.data[,-1]) %>%
   get_biplot(choices = c(1,2), 
              group = probed.data$distribution) + 
   ggplot2::theme_bw(base_size = 15) + 
   ggplot2::labs(color = "Distribution")
+```
 
 
+|            Here, I use the distribution as a predictor in a redundancy analysis. We can see that the a substantial proportion of variance in the summary statics can be explained by the predictor (how the distributions are generated). This is clear support that the two distributions are different. Further analysis can be done using the `vegan` package which I will not go into here except that the significance of the predictor can be test via `anova()`. 
+
+```{r}
 vegan::rda(probed.data[,-1] ~ probed.data$distribution)
 ```
 
 
 ## Relative measures of fit
 
+|            Here, I show how one can compete a candidate model against multiple alternative hypotheses. Using the fitted objects from `fit_allo_herb()` and `fit_generic_null()`, we can do likelihood based model selection through the functions `AIC()`, `AICc()`, `BIC()`, and `LRT()`. These functions are also compatible with any model objects for which the log likelihood and other information can be extracted through the generic method `logLik()`. 
 
+|            The likelihood ratio test performed via `LRT()` tests whether a candidate model has a greater likelihood than a null model. It is important to keep in mind that the null model must have fewer degrees of freedom than the candidate model.
 ```{r}
-x <- ralloT(1000, lambda = 3)
-
-allo_fit <- fit_allo_herb(x)
-htlnorm_fit <- fit_generic_null(x, family = "htlnorm")
-
-LRT(htlnorm_fit,allo_fit)
-
-
+# Likelihood ratio test
+# The HTLN model is the candidate model and the neutral herbivory model is the null.
+LRT(model_candidate = htlnorm_fit,
+    model_null = allo_fit)
 ```
 
+
+
+|            A more versatile method is to use information criterion to compare models. This method allows the degrees of freedom of the null model to be equal or greater than the candidate model. The model complexity penalty is by default 2, but can be changed via the argument `k`. We can see here that the neutral model fits the data best as we generated the data from the same distribution. 
+
+```{r}
+# Akaike's Information Criterion
+AIC(allo_fit) # extract single criterion
+AIC(htlnorm_fit, allo_fit, zoibeta_fit) # Or provide multiple models to get a table
+
+# Akaike's small sample size Corrected Information Criterion
+AICc(allo_fit)
+
+# Bayesian information criterion
+BIC(allo_fit)
+
+```
 
 
 # Miscellaneous
 ## Batch processing
 
-When dealing with many data sets or many models fitted to many data sets, one may desire to perform one action across all data sets or all models. This is made easier by batch processing wrappers implemented in *herbivar*. To use these functions, in general, multiple data sets or multiple models of the same class should be stored in a named list. The list may be named by some identifier, such as the data set ID or survey ID. 
-
-
+|            When dealing with many data sets or many models fitted to many data sets, one may desire to perform one action across all data sets or all models. This is made easier by batch processing wrappers implemented in *herbivar*. To use these functions, in general, multiple data sets or multiple models of the same class should be stored in a named list. The list may be named by some identifier, such as the data set ID or survey ID.  
+|  
+|  
+For instance, `get_data_sim()` is a batch processing wrapper for `predict()`. 
 ```{r}
 get_data_sim(list("a" = allo_fit,
                   "b" = allo_fit,
                   "c" = allo_fit), 
              n.sim = 3, 
              return.obs = FALSE)
+```
 
 
+
+  
+The function `get_dist_test_sim()` is a batch processing wrapper for `compare_dist()` and supports doing bootstrap simulations.   
+```{r}
 get_dist_test_sim(list("a" = allo_fit,
                        "b" = allo_fit,
                        "c" = allo_fit),
                   test = c("ks"), 
                   nboot = 2, 
                   silent = TRUE) 
+```
 
-plot_distributions(
-  purrr::map(get_data_sim(list(allo_fit)), 1)
-)
 
+
+  
+The `apply_probes()` function is a batch processing wrapper for `probe_distribution`. 
+
+```{r}
 apply_probes(
   list("a" = x,"b" = x, "c" = x), 
   add.id = FALSE, 
   probes = c("mean", "Hoover", "J.index", "cd", "cv", "N","lac","Gini")
 )
-
 ```
 
 
+
+  
+Histogram and empirical cumulative distribution function plots can be easily made with the function `plot_distributions()`. 
+
+```{r}
+plot_distributions(
+  purrr::map(get_data_sim(list(allo_fit)), 1)
+) %>% suppressMessages()
+```
+
+
+## Fit 'bite size'
+  
+|            Finally, the *herbivar* package supports fitting observed 'bite size' distribution to seven different candidate models. More details can be found in `?bite_size_fit()`. 
 
 ```{r}
 set.seed(12)
@@ -186,13 +413,22 @@ bite_size_fit <- fit_bite_size(z,
                                min.phi = 0.005, 
                                family = "all")
 bite_size_fit
-survival_plot(z)
 ```
 
-Currently, the following generic methods are supported: `coef()`, `print()`. 
+Currently, the following generic methods are supported for the fitted object: `coef()`, `print()`. 
 
 
 # References
+
+Kendall, B. E., C. J. Briggs, W. W. Murdoch, P. Turchin, S. P. Ellner, E. McCauley, R. M. Nisbet, and S. N. Wood. 1999. Why Do Populations Cycle? A Synthesis of Statistical and Mechanistic Modeling Approaches. Ecology 80:1789–1805.  
+McGill, B. 2003. Strong and weak tests of macroecological theory. Oikos 102:679–685.  
+McGill, B. J., B. A. Maurer, and M. D. Weiser. 2006. Empirical Evaluation of Neutral Theory. Ecology 87:1411–1423.  
+Ospina, R., and S. L. P. Ferrari. 2008. Inflated beta distributions. Statistical Papers 51:111.
+Platt, J. R. 1964. Strong Inference. Science 146:347–353.  
+Smithson, M., and J. Verkuilen. 2006. A better lemon squeezer? Maximum-likelihood regression with beta-distributed dependent variables. Psychological Methods 11:54–71.  
+Warton, D. I., and F. K. C. Hui. 2011. The arcsine is asinine: the analysis of proportions in ecology. Ecology 92:3–10.  
+
+
 
 # Session Info
 

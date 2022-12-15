@@ -45,7 +45,7 @@ where \eqn{C(\lambda)} is defined as
 if \eqn{\lambda = \frac{1}{2}}, otherwise,
 \deqn{C(\lambda) = \frac{2 \tanh^{-1}(1-2\lambda)}{1-2\lambda}.}
 
-The cumulative density function is defined as
+The cumulative distribution function is defined as
 \deqn{P(X \leq x) = x}
 if \eqn{\lambda = \frac{1}{2}}, otherwise,
 \deqn{P(X \leq x) = \frac{\lambda^x (1-\lambda)^{1-x} + \lambda - 1}{2 \lambda - 1}.}

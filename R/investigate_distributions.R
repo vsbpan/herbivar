@@ -424,9 +424,19 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
   }
 }
 
+
+#' @title Compare whether two samples are drawn from the same distribution
+#' @description Compare whether two samples are drawn from the same distribution, via a two-sample Kolmogorov-Smirnov tests (KS test), Anderson-Darling test (AD test), Chi-square test, and Kullback-Leibler Divergence (KL divergence).
+#' @param data.list A list of two numeric vectors that are compared with each other.
+#' @param obs.index The index of the numeric vector in the list that correspond to the observations (defaults to 1).
+#' @param pred.index The index of the numeric vector in the list that correspond to the predictions (defaults to 2).
+#' @param test A vector of character string indicating which method to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.
+#' @param digits An integer indicating the number of digits the samples should be rounded to before doing the calculations. This can be important when rounding gets rid of some sampling artifacts in the data.
+#' @param bin_size The bin size used to calculate KL divergence and Chi-square test.
+#' @return A list of named numeric vectors.
 #' @export
 compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
-                             test = c("ks","kl","ad"), digits = 2, kl.by = 0.1){
+                             test = c("ks","kl","ad","chisq"), digits = 2, bin_size = 0.1){
   test <- match.arg(test, several.ok = TRUE)
   obs.data<-data.list[[obs.index]]
   pred.data<-data.list[[pred.index]]
@@ -440,17 +450,34 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
   } else {
     ks.out <- NULL
   }
-  if(any(test%in%"kl")){
-    kl.div<-suppressMessages(KL(
-      x = rbind(
-        density(obs.data,from = 0,to = 1,bw = kl.by)$y,
-        density(pred.data,from = 0,to = 1,bw = kl.by)$y
-      ),
-      unit = "log",
-      est.prob = "empirical"))
-    kl.out<-c("kl.div"=unname(kl.div))
+  if(any(test %in% c("kl", "chisq"))){
+    x <- seq(0,1,by = bin_size)
+    obs.count  <- as.vector(table(factor(x[findInterval(obs.data, x)], levels = x)))
+    obs.p <- obs.count/sum(obs.count)
+    pred.count <- as.vector(table(factor(x[findInterval(pred.data, x)], levels = x)))
+    pred.p <- pred.count/sum(pred.count)
+
+    if(any(test %in% c("kl"))){
+      kl.div<-suppressMessages(KL(
+        x = rbind(
+          obs.p,
+          pred.p
+        ),
+        unit = "log",
+        est.prob = "empirical"))
+      kl.out<-c("kl.div"=unname(kl.div))
+    } else {
+      kl.out <- NULL
+    }
+    if(any(test %in% c("chisq"))){
+      chisq <- suppressWarnings(chisq.test(x = obs.count, y = pred.count))
+      chisq.out <- c("chisq" = unname(chisq$statistic), "chisq.P" = chisq$p.value)
+    } else {
+      chisq.out <- NULL
+    }
   } else {
-    kl.out<-NULL
+    kl.out <- NULL
+    chisq.out <- NULL
   }
   if(any(test%in%"ad")){
     ad.out<-ad.test(
@@ -464,14 +491,15 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
   out<-list(
     "ks"=ks.out,
     "kl"=kl.out,
-    "ad"=ad.out
+    "ad"=ad.out,
+    "chisq" = chisq.out
   )
   return(out)
 }
 
 
 #' @export
-get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad"),
+get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
                             nboot = 1, n.sim = NULL, digits = 2, silent = FALSE){
   .is_inst("purrr", stop.if.false = TRUE)
   test <- match.arg(test)
@@ -507,7 +535,7 @@ get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad"),
                             pred.index = 2,
                             test = test,
                             digits = digits)[[
-                              match(test, c("ks","kl","ad"))
+                              match(test, c("ks","kl","ad","chisq"))
                             ]],
                error = function(e) NA_real_)
       if(!silent){
@@ -822,9 +850,9 @@ plot.lc <- function(x, spaghetti = FALSE, main = "Lorenz curve",
 #' @description Generate a log-log survival plot of positive only sample. Can be useful for visualizing the tail of the distribution.
 #' @param x a vector of numeric values greater than 0
 #' @param add a logical value indicating whether to overlay points upon an existing plot
-#' @param plot a logical value indicating whether to plot the results. Set to \code{FALSE} to just getting the empirical cumulative density function data.frame.
+#' @param plot a logical value indicating whether to plot the results. Set to \code{FALSE} to just getting the empirical cumulative distribution function data.frame.
 #' @param ... additional arguments passed to \code{points()} or \code{plot()}
-#' @return a data.frame of the empirical cumulative density function
+#' @return a data.frame of the empirical cumulative distribution function
 #' @examples
 #' x <- rlnorm(10000,1,1)
 #' survival_plot(x)

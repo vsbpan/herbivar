@@ -485,6 +485,55 @@ lapply(seq_len(n.rows), function(i) {
   return(out)
 })
 
+a<-chisq.test(x = rpois(10,1), y = rpois(10,1))
+a$p.value
+
+suppressMessages(KL(
+  x = rbind(
+  p,
+  p2
+  ),
+  unit = "log",
+  est.prob = "empirical"))
+
+suppressMessages(KL(
+  x = rbind(
+    obs.data,
+    pred.data
+  ),
+  unit = "log",
+  est.prob = "empirical"))
+
+
+?density
+chisq.test(
+  rbind(density(obs.data,
+                from = 0, to = 1, bw = kl.by)$y,
+        table(pred.data, from = 0, to = 1, bw = kl.by)$y)
+)
+?chisq.test
+
+
+p
+
+fit_allo_herb(x,
+              optim.vars = c("mean.phi.T","a"),
+              init = c(10, 1),
+              by = 0.0001,
+              method = "Nelder-Mead",
+              cores = 4)
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

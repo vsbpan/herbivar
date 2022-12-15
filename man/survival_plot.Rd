@@ -11,12 +11,12 @@ survival_plot(x, add = FALSE, plot = TRUE, ...)
 
 \item{add}{a logical value indicating whether to overlay points upon an existing plot}
 
-\item{plot}{a logical value indicating whether to plot the results. Set to \code{FALSE} to just getting the empirical cumulative density function data.frame.}
+\item{plot}{a logical value indicating whether to plot the results. Set to \code{FALSE} to just getting the empirical cumulative distribution function data.frame.}
 
 \item{...}{additional arguments passed to \code{points()} or \code{plot()}}
 }
 \value{
-a data.frame of the empirical cumulative density function
+a data.frame of the empirical cumulative distribution function
 }
 \description{
 Generate a log-log survival plot of positive only sample. Can be useful for visualizing the tail of the distribution.
