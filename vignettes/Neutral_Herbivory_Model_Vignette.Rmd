@@ -9,11 +9,15 @@ output:
     toc_depth: 2
     number_sections: yes
     code_folding: show
-    theme: default
+    highlight: tango
+vignette: >
+  %\VignetteIndexEntry{Using_herbivar_to_Fit_Neutral_Models}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
-knitr::opts_chunk$set(fig.align = "center")
+knitr::opts_chunk$set(fig.align = "center", comment = NA)
 ```
 
 
@@ -41,9 +45,9 @@ The goal of this vignette is to introduce to the user on using the *herbivar* pa
 
 # Neutral model
 
-# Formulation
+## Formulation
 
-# Supporting functions
+## Supporting functions
 ```{r}
 x <- ralloT(1000, lambda = 3)
 
@@ -147,16 +151,16 @@ When dealing with many data sets or many models fitted to many data sets, one ma
 
 
 ```{r}
-get_data_sim(list(allo_fit,
-                  allo_fit,
-                  allo_fit), 
+get_data_sim(list("a" = allo_fit,
+                  "b" = allo_fit,
+                  "c" = allo_fit), 
              n.sim = 3, 
              return.obs = FALSE)
 
 
-get_dist_test_sim(list(allo_fit,
-                       allo_fit,
-                       allo_fit),
+get_dist_test_sim(list("a" = allo_fit,
+                       "b" = allo_fit,
+                       "c" = allo_fit),
                   test = c("ks"), 
                   nboot = 2, 
                   silent = TRUE) 
@@ -168,7 +172,7 @@ plot_distributions(
 apply_probes(
   list("a" = x,"b" = x, "c" = x), 
   add.id = FALSE, 
-  probes = c("mean", "Hoover", "J.index", "cd", "cv", "N","max","lac","Gini")
+  probes = c("mean", "Hoover", "J.index", "cd", "cv", "N","lac","Gini")
 )
 
 ```
@@ -177,10 +181,12 @@ apply_probes(
 
 ```{r}
 set.seed(12)
-bite_size_fit <- fit_bite_size(rallo(100, max.phi = 0.4), 
+z <- rallo(100, max.phi = 0.4)
+bite_size_fit <- fit_bite_size(z, 
                                min.phi = 0.005, 
                                family = "all")
 bite_size_fit
+survival_plot(z)
 ```
 
 Currently, the following generic methods are supported: `coef()`, `print()`. 
