@@ -152,7 +152,7 @@ optim2 <- function(init, fn, method, lower, upper, silent = TRUE, ...){
 }
 
 
-.is_inst <- function(pkg, stop.if.false = FALSE, prompt = TRUE) {
+.is_inst <- function(pkg, stop.if.false = FALSE, prompt = FALSE) {
   out <- nzchar(system.file(package = pkg))
   if(!out){
     message(pkg," is not installed. Install ",  pkg, " and dependencies?")

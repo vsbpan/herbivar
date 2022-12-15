@@ -15,15 +15,15 @@ Report any bugs to vsbpan@gmail.com Thanks!
 
 ## Installation
 
-To install the package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. The package depends on *EBImage* and some of the packages associated with *spatstat*, so you'll need to install those too. Installing them can be kind of tricky, so I have provided the code below. 
+To install the package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. The package depends on *EBImage* and some of the packages associated with *spatstat*, so you'll need to install those too. Installing them can be kind of tricky, so I have provided the code below. If you not using Windows, you might have a problem with the file `libX11.6.dylib`, which the dependent package *imager* uses. You'll need to install XQuartz (https://www.xquartz.org/) to fix the error. 
 
 
 ```{r}
   #install.packages("devtools")
-  #install.packages("BiocManager") Needed for BiocManager::install()
+  #install.packages("BiocManager") Needed for BiocManager::install
   #BiocManager::install("EBImage")
   #install.packages("spatstat")
-  devtools::install_github("vsbpan/herbivar")
+  devtools::install_github("vsbpan/herbivar", build_opts = c("--no-resave-data", "--no-manual"))
 ```
 ## Vignette
 
