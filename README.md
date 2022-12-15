@@ -11,6 +11,7 @@ This package makes several methods used for analyzing variability inecological d
     
 Currently work in progress, mostly for internal use only. Proceed with caution :)
 
+Report any bugs to vsbpan@gmail.com Thanks!
 
 ## Installation
 
