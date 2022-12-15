@@ -15,9 +15,9 @@ get_data_sim(
   new.param
 )
 
-\method{predict}{allo_herb_fit}(object, n.sim = NULL, digits = 2, new.param)
+\method{predict}{allo_herb_fit}(object, ..., n.sim = NULL, digits = 2, new.param)
 
-\method{predict}{generic_null_fit}(object, n.sim = NULL, digits = 2, new.param)
+\method{predict}{generic_null_fit}(object, ..., n.sim = NULL, digits = 2, new.param)
 }
 \arguments{
 \item{fit.list}{A list of "allo_herb_fit" objects or "generic_null_fit"}
@@ -33,6 +33,8 @@ get_data_sim(
 \item{new.param}{A vector of named values used to make new predictions. If a parameter is set to \code{NA}, the parameter value is extracted from the "allo_herb_fit" or "generic_null_fit" object.}
 
 \item{object}{An "allo_herb_fit" or "generic_null_fit" object}
+
+\item{...}{additional arguments}
 }
 \value{
 A list of list of vectors of numeric values.

@@ -590,6 +590,7 @@ get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
 #' @param return.obs A logical value indicating whether to return observed data as a list in the out put along with the predicted draws
 #' @param obs.raw A logical value indicating whether to round the observed data; ignored if \code{return.obs} is set to \code{FALSE}.
 #' @param  new.param A vector of named values used to make new predictions. If a parameter is set to \code{NA}, the parameter value is extracted from the "allo_herb_fit" or "generic_null_fit" object.
+#' @param ... additional arguments
 #' @returns A list of list of vectors of numeric values.
 #' @rdname get_data_sim
 #' @export
@@ -726,7 +727,8 @@ get_data_sim <- function(fit.list, n.sim = NULL, digits = 2,
 
 
 #' @rdname get_data_sim
-predict.allo_herb_fit <- function(object, n.sim = NULL, digits = 2,
+#' @export
+predict.allo_herb_fit <- function(object, ..., n.sim = NULL, digits = 2,
                                   new.param){
   stopifnot(inherits(object, "allo_herb_fit"))
   get_data_sim(list(object),
@@ -736,7 +738,8 @@ predict.allo_herb_fit <- function(object, n.sim = NULL, digits = 2,
 }
 
 #' @rdname get_data_sim
-predict.generic_null_fit <- function(object, n.sim = NULL, digits = 2,
+#' @export
+predict.generic_null_fit <- function(object, ..., n.sim = NULL, digits = 2,
                                   new.param){
   stopifnot(inherits(object, "generic_null_fit"))
   get_data_sim(list(object),

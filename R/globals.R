@@ -1,1 +1,1 @@
-utils::globalVariables(c(".", "%$%", "xx", "xy", "yy", "x","y","i","value", "n.plants.in.survey", "n.avg","percHerbPlant2", "n.leaves.on.plant", "group","herb","ids", "all_zero_check ", ".rs.restartR","centroids","xend","yend","surveyID","species","percLf","pchisq","n.avg.med", "m","nll"))
+utils::globalVariables(c(".", "%$%", "xx", "xy", "yy", "x","y","i","value", "n.plants.in.survey", "n.avg","percHerbPlant2", "n.leaves.on.plant", "group","herb","ids", "all_zero_check", ".rs.restartR","centroids","xend","yend","surveyID","species","percLf","pchisq","n.avg.med", "m","nll"))

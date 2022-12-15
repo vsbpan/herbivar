@@ -354,6 +354,7 @@ hellinger_trans <- function(x){
 #' @param var the name of the variable for which to assess the partial R2
 #' @param ... additional parameters
 #' @return the partial r2
+#' @export
 r2_partial <- function(object, var, ...){
   UseMethod("r2_partial")
 }
@@ -368,8 +369,13 @@ r2_partial <- function(object, var, ...){
 #' @param summary if \code{TRUE} (default), the posterior draws are summarized
 #' @param robust if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate
 #' @param probs The lower and upper interval of posterior summary
+#' @param ... additional arguments
 #' @return a matrix of partial r2 draws or a vector of partial r2 summary.
-r2_partial.brmsfit<-function(object,var,summary=TRUE,robust=FALSE,probs = c(0.025,0.975)){
+#' @rdname r2_partial.brmsfit
+#' @export
+r2_partial.brmsfit<-function(object, var, summary = TRUE,
+                             robust = FALSE, probs = c(0.025,0.975),
+                             ...){
   .is_inst("brms", stop.if.false = TRUE)
   .is_inst("matrixStats", stop.if.false = TRUE)
   stopifnot(inherits(object, "brmsfit"))

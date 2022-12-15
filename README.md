@@ -15,11 +15,14 @@ Report any bugs to vsbpan@gmail.com Thanks!
 
 ## Installation
 
-To install the package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. 
+To install the package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. The package depends on *EBImage* and some of the packages associated with *spatstat*, so you'll need to install those too. Installing them can be kind of tricky, so I have provided the code below. 
 
 
 ```{r}
   #install.packages("devtools")
+  #install.packages("BiocManager") Needed for BiocManager::install()
+  #BiocManager::install("EBImage")
+  #install.packages("spatstat")
   devtools::install_github("vsbpan/herbivar")
 ```
 ## Vignette

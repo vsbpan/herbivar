@@ -9,7 +9,8 @@
   var,
   summary = TRUE,
   robust = FALSE,
-  probs = c(0.025, 0.975)
+  probs = c(0.025, 0.975),
+  ...
 )
 }
 \arguments{
@@ -22,6 +23,8 @@
 \item{robust}{if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate}
 
 \item{probs}{The lower and upper interval of posterior summary}
+
+\item{...}{additional arguments}
 }
 \value{
 a matrix of partial r2 draws or a vector of partial r2 summary.
