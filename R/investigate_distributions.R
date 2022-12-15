@@ -569,7 +569,7 @@ get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
     })
     out.list[[j]] <- do.call("rbind",
                            lapply(test.list, function(x){
-                             do.call("c",x)
+                             do.call("c",unname(x))
                            }))
   }
   out <- simplify2array(out.list)
