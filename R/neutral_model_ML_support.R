@@ -878,7 +878,7 @@ print.allo_herb_fit <- function(x, ..., trans = "backtransform", digits = 3){
   cat("\n")
 
   if(!is.null(trans) && trans == "backtransform"){
-    back.trans.coef <-coef(object = x, backtransform = TRUE, se = TRUE)
+    back.trans.coef <-coef.allo_herb_fit(object = x, backtransform = TRUE, se = TRUE)
     x$par <- back.trans.coef$Estimate
     x$se <- back.trans.coef$Std.
 

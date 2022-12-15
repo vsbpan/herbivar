@@ -218,7 +218,7 @@ FOSM <- function(x,var,trans){
   if(fun.string == "plogis(x)"){
     deriv.expression <- expression(1/x + 1/(1-x))
   } else {
-    deriv.expression <- D(parse(text = fun.string), "x")
+    deriv.expression <- stats::D(parse(text = fun.string), "x")
   }
 
   var.trans <- eval(deriv.expression)^2 * var

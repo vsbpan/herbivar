@@ -540,8 +540,16 @@ sum(Q)
 
 KL(x,)
 
-compare_dist(list("obs" = rbeta(100,1,1),
-                       "pred" = rbeta(100,1,1)))
+compare_dist(list("obs" = rbeta(10000,1,1),
+                       "pred" = rbeta(10000,1,1)),
+             bin_size = 0.01)
 
 debug(compare_dist)
 
+
+x <- ralloT(10000, lambda = 3)
+microbenchmark::microbenchmark(
+  "no parallel" = sum(dalloT(x, lambda = 1, log = TRUE, by = 0.000001, parallel = FALSE)),
+  "with parallel" = sum(dalloT(x, lambda = 1, log = TRUE, by = 0.000001,
+                               parallel = TRUE, cores = 4)),
+  times = 1)

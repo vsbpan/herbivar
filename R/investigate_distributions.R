@@ -324,7 +324,15 @@ probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
   return(probe.val)
 }
 
-
+#' @title Generate Summary Statistics For A List of Vectors of Data
+#' @description Get values for a set of statistical probes for each vector in a list
+#' @param data.list a list of numeric vectors
+#' @param probes a vector of function names, character string, or functions that can be found with \code{match.fun()}. Default probes are \code{mean()}, \code{var()}, \code{cv()}, \code{Gini()}, \code{max()}, \code{min()}, \code{median()}, \code{Skew()}, \code{Kurt()}, \code{q25()}, \code{q75()}, \code{N()}, and \code{Lasym()}.
+#' @param na.rm a logical value indicating whether to drop \code{NA} values
+#' @param trivial.rm a logical value indicating whether to drop rows where the data are all zeros. Default to \code{TRUE}.
+#' @param add.id An argument for internal use only. Default is \code{FALSE}. Adds a column called "surveyID" from the data.list name supplied.
+#' @return
+#'  A named vector of numeric values
 #' @export
 apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
                                              "max","min","median", "Skew",
@@ -370,7 +378,13 @@ apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
   return(out)
 }
 
-
+#' @title Generate Empirical Cumulative Distribution and Histogram Plot
+#' @description Generate ECDF and histogram plot for each vector in a list
+#' @param data.list a list of numeric vectors
+#' @param type a character vector indicating which plots to display. Acceptable options are "ecdf" and "hist".
+#' @param by the bin size
+#' @param ecdf.xlim the x-axis bounds of the ECDF plot.
+#' @param ... additional arguments passed to \code{stats::plot.ecdf()}
 #' @export
 plot_distributions<-function(data.list,type=c("ecdf","hist"),
                              by=0.1,ecdf.xlim=c(0,1),...){
@@ -378,8 +392,8 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
     for (i in seq_along(data.list)){
       data.list[[i]] %>%
         round(digits = floor(log10(by)*-1)) %>%
-        ecdf() %>%
-        plot(col=i, add = c(i>1),xlim = ecdf.xlim,...)
+        stats::ecdf() %>%
+        stats::plot.ecdf(col=i, add = c(i>1),xlim = ecdf.xlim,...)
     }
   }
   if(any(type%in%"hist")){
@@ -387,14 +401,14 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
     for (i in seq_along(data.list)){
       data.tally.list[[i]]<-graphics::hist(data.list[[i]],
                                  breaks = seq(0,1,by=by),
-                                 plot = F)
+                                 plot = FALSE)
       data.tally.list[[i]]<-data.frame(
         x=data.tally.list[[i]]$mids,
         y=data.tally.list[[i]]$counts,
         type=names(data.list)[i])
     }
     tally.data<-do.call("rbind",data.tally.list)
-    g<-tally.data %>%
+    suppressWarnings({g<-tally.data %>%
       dplyr::group_by(type) %>%
       dplyr::mutate(y=y/sum(y)) %>%
       ggplot2::ggplot(ggplot2::aes(x=x,y=(y)^0.1,group=type))+
@@ -414,7 +428,7 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
            x="Prop. herbivory",
            color="Data",
            fill="Data")+
-      ggplot2::theme_bw(base_size=15)
+      ggplot2::theme_bw(base_size=15)})
     if(.is_inst("ggpubr")){
       return(ggpubr::ggarrange(g,g2,common.legend = TRUE,legend = "top"))
     } else {
@@ -430,13 +444,13 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
 #' @param data.list A list of two numeric vectors that are compared with each other.
 #' @param obs.index The index of the numeric vector in the list that correspond to the observations (defaults to 1).
 #' @param pred.index The index of the numeric vector in the list that correspond to the predictions (defaults to 2).
-#' @param test A vector of character string indicating which method to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.
+#' @param test A vector of character string indicating which methods to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.
 #' @param digits An integer indicating the number of digits the samples should be rounded to before doing the calculations. This can be important when rounding gets rid of some sampling artifacts in the data.
-#' @param bin_size The bin size used to calculate KL divergence and Chi-square test.
+#' @param bin_size The bin size used to calculate KL divergence and Chi-square test. Default is 0.001.
 #' @return A list of named numeric vectors.
 #' @export
 compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
-                             test = c("ks","kl","ad","chisq"), digits = 2, bin_size = 0.1){
+                             test = c("ks","kl","ad","chisq"), digits = 2, bin_size = 0.001){
   test <- match.arg(test, several.ok = TRUE)
   obs.data<-data.list[[obs.index]]
   pred.data<-data.list[[pred.index]]
@@ -470,7 +484,7 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
       kl.out <- NULL
     }
     if(any(test %in% c("chisq"))){
-      chisq <- suppressWarnings(chisq.test(x = obs.count, y = pred.count))
+      chisq <- suppressWarnings(stats::chisq.test(x = obs.count, y = pred.count))
       chisq.out <- c("chisq" = unname(chisq$statistic),
                      "df" = unname(chisq$parameter),
                      "chisq.P" = chisq$p.value)
@@ -499,12 +513,21 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
   return(out)
 }
 
-
+#' @title Compare whether two samples are drawn from the same distribution En Mass
+#' @description A batch processing wrapper for \code{compare_dist()} and \code{get_data_sim()}
+#' @param fit.list A list of fitted objects that is passed to \code{get_data_sim()}
+#' @param test A vector of character string indicating which methods to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.
+#' @param digits An integer indicating the number of digits the samples should be rounded to before doing the calculations. This can be important when rounding gets rid of some sampling artifacts in the data.
+#' @param nboot Number of times to repeat the simulation. That is, drawing samples from each fitted object then comparing the draws to observed data.
+#' @param n.sim A numeric value indicating number of points to draw from the neutral distribution for each "allo_herb_fit" object. If \code{NULL}, the original sample size of the data will be used.
+#' @param silent If \code{TRUE}, the function will not print a progress counter.
+#' @param ... additional parameters passed to \code{get_data_sim()}
+#' @return A length(fit.list) X length(test statistics) X nboot array.
 #' @export
 get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
-                            nboot = 1, n.sim = NULL, digits = 2, silent = FALSE){
+                            nboot = 1, n.sim = NULL, digits = 2, silent = FALSE, ...){
   .is_inst("purrr", stop.if.false = TRUE)
-  test <- match.arg(test)
+  test <- match.arg(test,several.ok = TRUE)
   out.list<-vector(mode="list",length=nboot)
   obs.out<-lapply(fit.list,function(x){
     x$data
@@ -536,18 +559,20 @@ get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
                             obs.index = 1,
                             pred.index = 2,
                             test = test,
-                            digits = digits)[[
-                              match(test, c("ks","kl","ad","chisq"))
-                            ]],
+                            digits = digits,
+                            ...),
                error = function(e) NA_real_)
       if(!silent){
-        cat(j,"-",i,"\r","\r")
+        cat(paste(j,"-",i,"                               \r")) # fix annoying blinking
       }
       return(out)
     })
-    out.list[[j]]<-do.call("rbind",test.list)
+    out.list[[j]] <- do.call("rbind",
+                           lapply(test.list, function(x){
+                             do.call("c",x)
+                           }))
   }
-  out<-simplify2array(out.list)
+  out <- simplify2array(out.list)
 
   if(!(is.null(names(obs.out)))){
     dimnames(out)[[1]] <- names(obs.out)
@@ -902,14 +927,14 @@ LRT <- function(model_candidate, model_null){
 
   P <- pchisq(LLR, df = df, lower.tail = FALSE)
 
-  cat("\n \r--------- Models --------- \n")
+  cat("\r--------- Models --------- \n")
   print(data.frame("loglik" = c(can_ll, null_ll),
              "df" = c(can_df, null_df), row.names = c(
     as.character(deparse(temp$model_candidate)),
     as.character(deparse(temp$model_null))
   )))
 
-  cat("\n \n \r--------- Likelihood Ratio Test --------- \n")
+  cat("\n \r--------- Likelihood Ratio Test --------- \n")
   print(round(data.frame( "Chisq" = LLR, "df" = df,"P" = P, row.names = ""), digits = 4))
   invisible(data.frame( "Chisq" = LLR, "df" = df,"P" = P))
 }

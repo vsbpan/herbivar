@@ -10,7 +10,7 @@ compare_dist(
   pred.index = 2,
   test = c("ks", "kl", "ad", "chisq"),
   digits = 2,
-  bin_size = 0.1
+  bin_size = 0.001
 )
 }
 \arguments{
@@ -20,11 +20,11 @@ compare_dist(
 
 \item{pred.index}{The index of the numeric vector in the list that correspond to the predictions (defaults to 2).}
 
-\item{test}{A vector of character string indicating which method to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.}
+\item{test}{A vector of character string indicating which methods to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.}
 
 \item{digits}{An integer indicating the number of digits the samples should be rounded to before doing the calculations. This can be important when rounding gets rid of some sampling artifacts in the data.}
 
-\item{bin_size}{The bin size used to calculate KL divergence and Chi-square test.}
+\item{bin_size}{The bin size used to calculate KL divergence and Chi-square test. Default is 0.001.}
 }
 \value{
 A list of named numeric vectors.

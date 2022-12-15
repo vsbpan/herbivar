@@ -128,7 +128,7 @@ get.data.lists<-function(data,variable,id.name,ok.ids,n.sim=NA,
                                           "phi.min.corrected",drop=T],na.rm = T),
                                 min.phi)
       herb.pred.list[[i]]<-tryCatch(
-        allometry.herb.quasi.sim(
+        .allometry.herb.quasi.sim(
           mean.phi.T = mean(herb.obs.list[[i]]),
           n.sim = ifelse(is.na(n.sim),
                          length(herb.obs.list[[i]]),

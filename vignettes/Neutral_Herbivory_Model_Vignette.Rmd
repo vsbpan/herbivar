@@ -97,24 +97,26 @@ P(\phi_T | \lambda) \approx \sum_{k=0}^{k_{max}} P(\phi_T|k)P(k|\lambda)
 $$ 
 $k_{max} = 50$ by default as with sufficiently large $k$, $P(k|\lambda)$ becomes vanishingly small. The function throws a warning when the error tolerance set by the argument `k.max.tolerance` is exceeded, at which point the user should increase the default `k.max` setting. The calculation of $P(\phi_T|k)$ is trickier and involves utilizing the convolution theorem and finding the $k^{th}$ power of the Fourier transformed $P(\phi)$ function. To avoid overflow and improve computational efficiency, convolutions with $k > 100$  are approximated with a normal distribution instead, given the central limit theorem. This limit can be toggled via the `k.fft.limit` setting. More details of the calculation can be found in the help file (`?dalloT`) or the SI appendix of Pan et al. (2023). Broadly speaking, the important thing to note is that increasing the simulation resolution via the arguments `n.sim` or `by` increases the precision of the estimates. This can become important when fitting models to data, the optimizer can fail to find the likelihood peak, yielding inaccurate maximum likelihood estimates and convergence issues as a result. Reducing the resolution below the default values is generally not recommended.    
 
-|            The computational challenge of increasing the numerical approximation resolution is partially alleviated by the parallel computing feature implemented in *herbivar*. This feature can be assess via functions with the argument `cores` and `parallel`. Setting `prallel = TRUE` and `cores` above 1 would enable the feature when the function detects that computational efficiency gain may be acquired. 
+|            The computational challenge of increasing the numerical approximation resolution is partially alleviated by the parallel computing feature implemented in *herbivar*. This feature can be assess via functions with the argument `cores` and `parallel`. Setting `prallel = TRUE` and `cores` above 1 would enable the feature when the function detects that computational efficiency gain may be acquired. In general, functions like `dalloT()` are fast enough to not gain that much from parallel computing, unless the numerical approximation solution is set very high (0.00001 < by). Even then, the gain in efficiency is only very modest. However, this feature would become important when fitting the neutral model to data in which repeated evaluations of the log likelihood function is required, but the overhead of setting up the parallel sessions is only paid once. 
 
 ```{r}
 # Generate sum numbers
-x <- ralloT(1000, lambda = 3)
+x <- ralloT(10000, lambda = 3)
 
 # Check number of computer cores available
 parallel::detectCores()
 
 # Compute log likelihood with 4 computer cores
-system.time(
-  sum(dalloT(x, lambda = 3, log = TRUE, by = 0.00001, parallel = TRUE, cores = 4))
-)
-
 # Compute the same expression without parallelization
-system.time(
-  sum(dalloT(x, lambda = 3, log = TRUE, by = 0.00001, parallel = FALSE))
-)
+# microbenchmark::microbenchmark(
+#   "no parallel" = sum(dalloT(x, lambda = 1, log = TRUE, by = 0.000001, parallel = FALSE)),
+#   "with parallel" = sum(dalloT(x, lambda = 1, log = TRUE, by = 0.000001,
+#                                parallel = TRUE, cores = 4)),
+#   times = 1)
+# Unit: seconds
+#           expr      min       lq     mean   median       uq      max neval
+#    no parallel 27.10942 27.10942 27.10942 27.10942 27.10942 27.10942     1
+#  with parallel 24.49700 24.49700 24.49700 24.49700 24.49700 24.49700     1
 
 ```
   
@@ -372,7 +374,7 @@ The function `get_dist_test_sim()` is a batch processing wrapper for `compare_di
 get_dist_test_sim(list("a" = allo_fit,
                        "b" = allo_fit,
                        "c" = allo_fit),
-                  test = c("ks"), 
+                  test = c("ks","ad","kl"), 
                   nboot = 2, 
                   silent = TRUE) 
 ```
@@ -433,6 +435,7 @@ Warton, D. I., and F. K. C. Hui. 2011. The arcsine is asinine: the analysis of p
 # Session Info
 
 ```{r}
+herbivar.version()
 sessionInfo()
 ```
 

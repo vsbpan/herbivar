@@ -174,7 +174,7 @@ print.generic_null_fit<-function(x, ..., trans = "backtransform", digits = 3){
   }
 
   if(!is.null(trans) && trans == "backtransform"){
-    back.trans.coef <-coef(object = x, backtransform = TRUE, se = TRUE)
+    back.trans.coef <-coef.generic_null_fit(object = x, backtransform = TRUE, se = TRUE)
     x$par <- back.trans.coef$Estimate
     x$se <- back.trans.coef$Std.
 
