@@ -15,7 +15,7 @@ Report any bugs to vsbpan@gmail.com Thanks!
 
 ## Installation
 
-To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the packages. The *herbivar* package depends on *EBImage*, which can be installed via `BiocManager::install()`. If you not using Windows, you might have a problem with the file `libX11.6.dylib`, which the dependent package *imager* uses. You'll need to install XQuartz (https://www.xquartz.org/) to fix the error. You can set `build_vignettes = TRUE` in `install_github()` if you want to have the vignette. 
+To use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the packages. The *herbivar* package depends on *EBImage*, which can be installed via `BiocManager::install()`. If you not using Windows, you might have a problem with the file `libX11.6.dylib`, which the dependent package *imager* uses. You'll need to install XQuartz (https://www.xquartz.org/) to fix the error. You can set `build_vignettes = TRUE` in `install_github()` if you want to have the vignette. 
 
 ```{r}
   #install.packages("devtools")
@@ -26,7 +26,7 @@ To follow this vignette and use the *herbivar* package, you'll need to first use
 ```
 ## Vignette
 
-You can access the vignette via this command:
+You can access the vignette via the command below. Alternatively, you can find the knitted HTML file in the **vignettes** folder. 
 
 ```{r}
 browseVignettes("herbivar")
