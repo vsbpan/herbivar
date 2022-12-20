@@ -107,12 +107,12 @@ get_data_list<-function(data,
                          group.n = "n.avg"){
   variable <- match.arg(variable)
   variable <- switch(variable,
-                     "leaf" = "leaf",
-                     "plant" = "plant",
-                     "percLf" = "leaf",
-                     "percHerbPlant" = "plant")
+                     "leaf" = "percLf",
+                     "plant" = "percHerbPlant",
+                     "percLf" = "percLf",
+                     "percHerbPlant" = "percHerbPlant")
   if(is.list(data)){
-    if(variable == "leaf"){
+    if(variable == "percLf"){
       data<-data[["long"]]
     } else {
       data<-data[["short"]]
@@ -124,7 +124,7 @@ get_data_list<-function(data,
   id.vector <- unique(ok.ids)
 
   herb.obs.list <- lapply(id.vector, function(x, data, variable){
-    data[data$id == x, variable, drop = TRUE]
+    data[data$ids == x, variable, drop = TRUE]
   }, data = data, variable = variable)
 
   names(herb.obs.list) <- id.vector
@@ -189,7 +189,7 @@ get_data_list<-function(data,
 #' @export
 randomize_leaves<-function(data_list, meta_data, nboot = 1, summarise_plant = TRUE){
   out <- lapply(
-    nboot,
+    seq_len(nboot),
     FUN = function(i, data_list, meta_data, summarise_plant){
       rout <- .randomize_leaves_engin(data_list,
                              meta_data = meta_data,
