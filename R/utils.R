@@ -1,9 +1,9 @@
 #' @export
-combine_data_lists<-function(data.list,data.list2){
-  for (i in seq_along(data.list2)){
-    data.list2[[i]]<-data.list2[[i]][names(data.list[[1]])]
+combine_data_lists<-function(data_list,data_list2){
+  for (i in seq_along(data_list2)){
+    data_list2[[i]]<-data_list2[[i]][names(data_list[[1]])]
   }
-  out<-c(data.list,data.list2)
+  out<-c(data_list,data_list2)
   return(out)
 }
 

@@ -303,12 +303,12 @@ lac <- function(x, n = NULL, interval = FALSE, na.rm = FALSE) {
 #'  A named vector of numeric values
 #' @examples
 #' x <- runif(100,0.1,1)
-#' probe_distribution(x)
-#' probe_distribution(x, probes = "cv")
-#' probe_distribution(x, probes = c("sd", "length","se"))
-#' probe_distribution(x, probes = c(function(v){sd(v)/length(v)^0.5}))
+#' probe_dist(x)
+#' probe_dist(x, probes = "cv")
+#' probe_dist(x, probes = c("sd", "length","se"))
+#' probe_dist(x, probes = c(function(v){sd(v)/length(v)^0.5}))
 #' @export
-probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
+probe_dist<-function(x, probes = c("mean","var","cv","Gini",
                                            "max","min","median", "Skew",
                                            "Kurt","q25","q75","N","lac"),
                              na.rm = FALSE){
@@ -326,28 +326,28 @@ probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
 
 #' @title Generate Summary Statistics For A List of Vectors of Data
 #' @description Get values for a set of statistical probes for each vector in a list
-#' @param data.list a list of numeric vectors
+#' @param data_list a list of numeric vectors
 #' @param probes a vector of function names, character string, or functions that can be found with \code{match.fun()}. Default probes are \code{mean()}, \code{var()}, \code{cv()}, \code{Gini()}, \code{max()}, \code{min()}, \code{median()}, \code{Skew()}, \code{Kurt()}, \code{q25()}, \code{q75()}, \code{N()}, and \code{Lasym()}.
 #' @param na.rm a logical value indicating whether to drop \code{NA} values
 #' @param trivial.rm a logical value indicating whether to drop rows where the data are all zeros. Default to \code{TRUE}.
-#' @param add.id An argument for internal use only. Default is \code{FALSE}. Adds a column called "surveyID" from the data.list name supplied.
+#' @param add.id An argument for internal use only. Default is \code{FALSE}. Adds a column called "surveyID" from the data_list name supplied.
 #' @return
 #'  A named vector of numeric values
 #' @export
-probe_distribution_list<-function(data.list, probes = c("mean","var","cv","Gini",
+probe_dist_list<-function(data_list, probes = c("mean","var","cv","Gini",
                                              "max","min","median", "Skew",
                                              "Kurt","q25","q75","N","lac"),
                        trivial.rm = TRUE, na.rm = FALSE, add.id = FALSE){
   if(trivial.rm){
-    data.list <- data.list[
-      simplify2array(lapply(data.list, FUN = function(x){
+    data_list <- data_list[
+      simplify2array(lapply(data_list, FUN = function(x){
         sum(x) > 0
       }))
     ] # All zeros gets thrown out
   }
 
-  out <- simplify2array(lapply(data.list,function(x, na.rm, probes) {
-    probe_distribution(x, na.rm = na.rm, probes = probes)
+  out <- simplify2array(lapply(data_list,function(x, na.rm, probes) {
+    probe_dist(x, na.rm = na.rm, probes = probes)
   }, na.rm = na.rm, probes = probes))
 
   if(length(probes) > 1){
@@ -355,7 +355,7 @@ probe_distribution_list<-function(data.list, probes = c("mean","var","cv","Gini"
   }
 
   out <- as.data.frame(out,row.names = NULL)
-  out$id<-names(data.list)
+  out$id<-names(data_list)
 
   colnames(out)[seq_along(probes)] <- do.call("c",lapply(probes,FUN = function(x){
     if(!is.character(x)){
@@ -371,7 +371,7 @@ probe_distribution_list<-function(data.list, probes = c("mean","var","cv","Gini"
       grepl("--",unique(out$id)),
       na.rm = TRUE)
   ){
-    out$surveyID<-gsub("--.*","",out$id) # Add survey id if data.list is detected at the plant level
+    out$surveyID<-gsub("--.*","",out$id) # Add survey id if data_list is detected at the plant level
   }
   rownames(out) <- NULL
 
@@ -380,50 +380,53 @@ probe_distribution_list<-function(data.list, probes = c("mean","var","cv","Gini"
 
 #' @title Generate Empirical Cumulative Distribution and Histogram Plot
 #' @description Generate ECDF and histogram plot for each vector in a list
-#' @param data.list a list of numeric vectors
+#' @param data_list a list of numeric vectors
 #' @param type a character vector indicating which plots to display. Acceptable options are "ecdf" and "hist".
 #' @param by the bin size
+#' @param plot_smooth if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram.
 #' @param ecdf.xlim the x-axis bounds of the ECDF plot.
 #' @param ... additional arguments passed to \code{stats::plot.ecdf()}
 #' @export
-plot_distributions<-function(data.list,type=c("ecdf","hist"),
-                             by=0.1,ecdf.xlim=c(0,1),...){
+plot_distributions<-function(data_list, type = c("ecdf","hist"),
+                             by = 0.1, plot_smooth = TRUE, ecdf.xlim=c(0,1),...){
   if(any(type%in%"ecdf")){
-    for (i in seq_along(data.list)){
-      data.list[[i]] %>%
+    for (i in seq_along(data_list)){
+      data_list[[i]] %>%
         round(digits = floor(log10(by)*-1)) %>%
         stats::ecdf() %>%
         stats::plot.ecdf(col=i, add = c(i>1),xlim = ecdf.xlim,...)
     }
   }
   if(any(type%in%"hist")){
-    data.tally.list<-vector(mode="list",length=length(data.list))
-    for (i in seq_along(data.list)){
-      data.tally.list[[i]]<-graphics::hist(data.list[[i]],
+    data.tally.list<-vector(mode="list",length=length(data_list))
+    for (i in seq_along(data_list)){
+      data.tally.list[[i]]<-graphics::hist(data_list[[i]],
                                  breaks = seq(0,1,by=by),
                                  plot = FALSE)
       data.tally.list[[i]]<-data.frame(
         x=data.tally.list[[i]]$mids,
         y=data.tally.list[[i]]$counts,
-        type=names(data.list)[i])
+        type=names(data_list)[i])
     }
     tally.data<-do.call("rbind",data.tally.list)
-    suppressWarnings({g<-tally.data %>%
+    suppressMessages({g<-tally.data %>%
       dplyr::group_by(type) %>%
       dplyr::mutate(y=y/sum(y)) %>%
       ggplot2::ggplot(ggplot2::aes(x=x,y=(y)^0.1,group=type))+
-      ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge")+
-      ggplot2::geom_line(stat="smooth",ggplot2::aes(color=type),size=1)+
+      ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
       ggplot2::labs(y="Pr(Prop. herbivory)^0.1",
            x="Prop. herbivory",
            color="Data",
            fill="Data")+
       ggplot2::theme_bw(base_size=15)
+    if(plot_smooth){
+      g <- g + ggplot2::geom_line(stat="smooth",ggplot2::aes(color=type),size=1)
+    }
     g2<-tally.data %>%
       dplyr::group_by(type) %>%
       dplyr::mutate(y=y/sum(y)) %>%
       ggplot2::ggplot(ggplot2::aes(x=x,y=(y),group=type))+
-      ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge")+
+      ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
       ggplot2::labs(y="Pr(Prop. herbivory)",
            x="Prop. herbivory",
            color="Data",
@@ -441,7 +444,7 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
 
 #' @title Compare whether two samples are drawn from the same distribution
 #' @description Compare whether two samples are drawn from the same distribution, via a two-sample Kolmogorov-Smirnov tests (KS test), Anderson-Darling test (AD test), Chi-square test, and Kullback-Leibler Divergence (KL divergence).
-#' @param data.list A list of two numeric vectors that are compared with each other.
+#' @param data_list A list of two numeric vectors that are compared with each other.
 #' @param obs.index The index of the numeric vector in the list that correspond to the observations (defaults to 1).
 #' @param pred.index The index of the numeric vector in the list that correspond to the predictions (defaults to 2).
 #' @param test A vector of character string indicating which methods to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.
@@ -449,11 +452,11 @@ plot_distributions<-function(data.list,type=c("ecdf","hist"),
 #' @param bin_size The bin size used to calculate KL divergence and Chi-square test. Default is 0.001.
 #' @return A list of named numeric vectors.
 #' @export
-compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
+compare_dist<-function(data_list = NULL, obs.index = 1, pred.index = 2,
                              test = c("ks","kl","ad","chisq"), digits = 2, bin_size = 0.001){
   test <- match.arg(test, several.ok = TRUE)
-  obs.data<-data.list[[obs.index]]
-  pred.data<-data.list[[pred.index]]
+  obs.data<-data_list[[obs.index]]
+  pred.data<-data_list[[pred.index]]
 
   if(any(test%in%"ks")){
     ks.out<-suppressWarnings(ks.test(

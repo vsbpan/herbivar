@@ -259,7 +259,7 @@ The returned object has the class `generic_null_fit` and is currently supported 
 |            The *herbivar* package implements a couple of methods to compare whether two samples are drawn from the same distribution and can be accessed via the function `compare_dist()`. Users can select the method using the `test` argument. Setting `test = "ks"` performs the Kolmogorov-Smirnov test using `stats::ks.test()`. It is a non-parametric test that looks at whether the maximum distance between two empirical cumulative distribution functions exceed expectation. The test statistic corresponds to the maximum distance. Setting `test = "ad"` performs the Anderson-Darling test using `kSamples::ad.test()`. The test looks at whether the empirical cumulative distribution function of a sample is uniform. Because the test is a permutation test, the computation can be quite intensive. "kl" computes the Kullback-Leibler divergence using `philentropy::KL()`. The unit of the KL divergence is "log" by default. It is a measure of relative entropy and can be interpreted as the expected additional amount of information needed to have the neutral model fully agree with observed data. Setting `test = "chisq"` performs the Chi-square test using `stats::chisq.test()`. In general, the Chi-square test should be avoided as it is quite sensitive to the bin size and does not preserve information on the order of the bins. 
 
 ```{r}
-compare_dist(data.list = list("obs" = allo_fit$data, 
+compare_dist(data_list = list("obs" = allo_fit$data, 
                               "pred" = predict(allo_fit)),
              test = c("ks", "kl","ad","chisq"), 
              bin_size = 0.01
@@ -272,25 +272,24 @@ compare_dist(data.list = list("obs" = allo_fit$data,
 |            While the above methods (except for KL divergence) can be used to test whether the observed and predicted distributions are distinguishable, when the methods yield a significant deviation, little can be learned about how two distributions are different. For this reason, we may look towards the classic paper by Kendall et al. (1999) who proposed using 'probes' as an objective measure of model performance. While the paper is about analyzing time series, the more general approach of using 'probes' to characterize the key features of data that we care about is tremendously useful. In this case, we want to use summary statistics of distributions as 'probes' and examine how closely two distributions agree on the values of those 'probes'. We already do this frequently when we compare the mean of two distributions. Occasionally, we compute other summary statistics (e.g. CV, variance) and examine how closely two distributions agree on those single static, using measures such as via RMSE or R^2. This is great if we only care about those particular 'probes'. However, when we examine whole distributions, we care about much more than the agreement of single summary statistic. We want to learn about the mean, variance, skewness, kurtosis, minimum, maximum, and etc. Because many of these summary statistics exhibit constrained relationships (e.g. distributions that follows Taylor's law has a positive mean-variance relationship, the kurtosis-skewness relationship is bounded by an inequality), it is better to treat all summary statics as following a multivariate distribution. We can then use conventional multivariate methods to examine this multivariate distribution. I show an example of an analysis using redundancy analysis (RDA) below. 
 
 
-|            The `probe_distribution()` function in *herbivar* allows you to calculate the value of statistical probes of a vector of data. Users can specify any number of probes that can be matched via R's `match.fun()`.
+|            The `probe_dist()` function in *herbivar* allows you to calculate the value of statistical probes of a vector of data. Users can specify any number of probes that can be matched via R's `match.fun()`.
 ```{r}
 data <- ralloT(1000, lambda = 3)
-probe_distribution(data, 
-                   probes = c("mean", "var", "Skew","median"))
+probe_dist(data, probes = c("mean", "var", "Skew","median"))
 ```
 
-|            Here, I simulated two different distributions (one with $\phi_M = 1$ and the other with $\phi = 0.5$). Each distribution is replicated 100 times, each time drawing 1000 samples. For each replicated distribution, I used `probe_distribution()` to calculate some summary statistics. 
+|            Here, I simulated two different distributions (one with $\phi_M = 1$ and the other with $\phi = 0.5$). Each distribution is replicated 100 times, each time drawing 1000 samples. For each replicated distribution, I used `probe_dist()` to calculate some summary statistics. 
 ```{r}
 #Simulate distributions
 allo_probed <- lapply(seq_len(100), function(i){
   x <- ralloT(1000, lambda = 3, max.phi = 1)
-  probe_distribution(x)
+  probe_dist(x)
 }) %>%
   do.call("rbind",.)
 
 allo_probed2 <- lapply(seq_len(100), function(i){
   x <- ralloT(1000, lambda = 3, max.phi = 0.5)
-  probe_distribution(x)
+  probe_dist(x)
 }) %>%
   do.call("rbind",.)
 
@@ -382,10 +381,10 @@ compare_dist_list(list("a" = allo_fit,
 
 
   
-The `probe_distribution_list()` function is a batch processing wrapper for `probe_distribution()`. 
+The `probe_dist_list()` function is a batch processing wrapper for `probe_dist()`. 
 
 ```{r}
-probe_distribution_list(
+probe_dist_list(
   list("a" = x,"b" = x, "c" = x), 
   add.id = FALSE, 
   probes = c("mean", "Hoover", "J.index", "cd", "cv", "N","lac","Gini")
