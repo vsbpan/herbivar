@@ -5,19 +5,22 @@
 \title{Generate Empirical Cumulative Distribution and Histogram Plot}
 \usage{
 plot_distributions(
-  data.list,
+  data_list,
   type = c("ecdf", "hist"),
   by = 0.1,
+  plot_smooth = TRUE,
   ecdf.xlim = c(0, 1),
   ...
 )
 }
 \arguments{
-\item{data.list}{a list of numeric vectors}
+\item{data_list}{a list of numeric vectors}
 
 \item{type}{a character vector indicating which plots to display. Acceptable options are "ecdf" and "hist".}
 
 \item{by}{the bin size}
+
+\item{plot_smooth}{if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram.}
 
 \item{ecdf.xlim}{the x-axis bounds of the ECDF plot.}
 

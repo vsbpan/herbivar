@@ -5,7 +5,7 @@
 \title{Compare whether two samples are drawn from the same distribution}
 \usage{
 compare_dist(
-  data.list = NULL,
+  data_list = NULL,
   obs.index = 1,
   pred.index = 2,
   test = c("ks", "kl", "ad", "chisq"),
@@ -14,7 +14,7 @@ compare_dist(
 )
 }
 \arguments{
-\item{data.list}{A list of two numeric vectors that are compared with each other.}
+\item{data_list}{A list of two numeric vectors that are compared with each other.}
 
 \item{obs.index}{The index of the numeric vector in the list that correspond to the observations (defaults to 1).}
 
