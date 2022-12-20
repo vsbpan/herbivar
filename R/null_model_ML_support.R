@@ -193,8 +193,8 @@ print.generic_null_fit<-function(x, ..., trans = "backtransform", digits = 3){
       data.frame(row.names = x$theta.names,
                  "Estimate" = x$par,
                  "Std." = x$se,
-                 "lower" = x$par-x$se*1.96,
-                 "upper" = x$par+x$se*1.96)
+                 "lower95" = x$par-x$se*1.96,
+                 "upper95" = x$par+x$se*1.96)
     ), 2, FUN = FUN),
     digits = digits)
   if(is.vector(out)){

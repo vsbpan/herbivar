@@ -210,19 +210,7 @@ ralloT<-function(n, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
                                   min.phi = min.phi,
                                   max.phi = max.phi,
                                   a = a,
-                                  truncate = T)
-  # while(any(phi.T>1)){
-  #   phi.T[phi.T>1] <- .allometry.herb.quasi.sim(mean.phi.T = mean.phi.T,
-  #                                              n.sim = sum(phi.T>1),
-  #                                              min.phi = min.phi,
-  #                                              max.phi = max.phi,
-  #                                              a = a,
-  #                                              truncate = F)
-  # }
-  # This method has less numeric error than sampling using dalloT() directly.
-  # If using sample(), the sampling grid resolution needs to be at least <= 0.0001
-  # which is computationally intensive. If the resolution is too low, there would be
-  # a downward bias on the variance and mean approximation
+                                  truncate = TRUE)
   return(phi.T)
 }
 
@@ -897,8 +885,8 @@ print.allo_herb_fit <- function(x, ..., trans = "backtransform", digits = 3){
       data.frame(row.names = x$theta.names,
                  "Estimate" = x$par,
                  "Std." = x$se,
-                 "lower" = x$par-x$se*1.96,
-                 "upper" = x$par+x$se*1.96)
+                 "lower95" = x$par-x$se*1.96,
+                 "upper95" = x$par+x$se*1.96)
     ), 2, FUN = FUN),
     digits = digits)
 

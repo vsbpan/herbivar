@@ -357,9 +357,9 @@ BIC(allo_fit)
 |            When dealing with many data sets or many models fitted to many data sets, one may desire to perform one action across all data sets or all models. This is made easier by batch processing wrappers implemented in *herbivar*. To use these functions, in general, multiple data sets or multiple models of the same class should be stored in a named list. The list may be named by some identifier, such as the data set ID or survey ID.  
 |  
 |  
-For instance, `get_data_sim()` is a batch processing wrapper for `predict()`. 
+For instance, `predict_list()` is a batch processing wrapper for `predict()`. 
 ```{r}
-get_data_sim(list("a" = allo_fit,
+predict_list(list("a" = allo_fit,
                   "b" = allo_fit,
                   "c" = allo_fit), 
              n.sim = 3, 
@@ -369,9 +369,9 @@ get_data_sim(list("a" = allo_fit,
 
 
   
-The function `get_dist_test_sim()` is a batch processing wrapper for `compare_dist()` and supports doing bootstrap simulations.   
+The function `compare_dist_list()` is a batch processing wrapper for `compare_dist()` and supports doing bootstrap simulations.   
 ```{r}
-get_dist_test_sim(list("a" = allo_fit,
+compare_dist_list(list("a" = allo_fit,
                        "b" = allo_fit,
                        "c" = allo_fit),
                   test = c("ks","ad","kl"), 
@@ -382,10 +382,10 @@ get_dist_test_sim(list("a" = allo_fit,
 
 
   
-The `apply_probes()` function is a batch processing wrapper for `probe_distribution`. 
+The `probe_distribution_list()` function is a batch processing wrapper for `probe_distribution()`. 
 
 ```{r}
-apply_probes(
+probe_distribution_list(
   list("a" = x,"b" = x, "c" = x), 
   add.id = FALSE, 
   probes = c("mean", "Hoover", "J.index", "cd", "cv", "N","lac","Gini")
@@ -399,7 +399,7 @@ Histogram and empirical cumulative distribution function plots can be easily mad
 
 ```{r}
 plot_distributions(
-  purrr::map(get_data_sim(list(allo_fit)), 1)
+  purrr::map(predict_list(list(allo_fit)), 1)
 ) %>% suppressMessages()
 ```
 

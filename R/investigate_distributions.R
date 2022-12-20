@@ -334,7 +334,7 @@ probe_distribution<-function(x, probes = c("mean","var","cv","Gini",
 #' @return
 #'  A named vector of numeric values
 #' @export
-apply_probes<-function(data.list, probes = c("mean","var","cv","Gini",
+probe_distribution_list<-function(data.list, probes = c("mean","var","cv","Gini",
                                              "max","min","median", "Skew",
                                              "Kurt","q25","q75","N","lac"),
                        trivial.rm = TRUE, na.rm = FALSE, add.id = FALSE){
@@ -514,17 +514,17 @@ compare_dist<-function(data.list = NULL, obs.index = 1, pred.index = 2,
 }
 
 #' @title Compare whether two samples are drawn from the same distribution En Mass
-#' @description A batch processing wrapper for \code{compare_dist()} and \code{get_data_sim()}
-#' @param fit.list A list of fitted objects that is passed to \code{get_data_sim()}
+#' @description A batch processing wrapper for \code{compare_dist()} and \code{predict_list()}
+#' @param fit.list A list of fitted objects that is passed to \code{predict_list()}
 #' @param test A vector of character string indicating which methods to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.
 #' @param digits An integer indicating the number of digits the samples should be rounded to before doing the calculations. This can be important when rounding gets rid of some sampling artifacts in the data.
 #' @param nboot Number of times to repeat the simulation. That is, drawing samples from each fitted object then comparing the draws to observed data.
 #' @param n.sim A numeric value indicating number of points to draw from the neutral distribution for each "allo_herb_fit" object. If \code{NULL}, the original sample size of the data will be used.
 #' @param silent If \code{TRUE}, the function will not print a progress counter.
-#' @param ... additional parameters passed to \code{get_data_sim()}
+#' @param ... additional parameters passed to \code{predict_list()}
 #' @return A length(fit.list) X length(test statistics) X nboot array.
 #' @export
-get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
+compare_dist_list<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
                             nboot = 1, n.sim = NULL, digits = 2, silent = FALSE, ...){
   .is_inst("purrr", stop.if.false = TRUE)
   test <- match.arg(test,several.ok = TRUE)
@@ -547,7 +547,7 @@ get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
   for (j in seq_len(nboot)){
     herb.data.bind<-c(
       list("obs" = obs.out),
-      get_data_sim(
+      predict_list(
                fit.list,
                n.sim = n.sim,
                digits = digits,
@@ -592,9 +592,9 @@ get_dist_test_sim<-function(fit.list, test = c("ks", "kl", "ad","chisq"),
 #' @param  new.param A vector of named values used to make new predictions. If a parameter is set to \code{NA}, the parameter value is extracted from the "allo_herb_fit" or "generic_null_fit" object.
 #' @param ... additional arguments
 #' @returns A list of list of vectors of numeric values.
-#' @rdname get_data_sim
+#' @rdname predict_list
 #' @export
-get_data_sim <- function(fit.list, n.sim = NULL, digits = 2,
+predict_list <- function(fit.list, n.sim = NULL, digits = 2,
                        return.obs = TRUE, obs.raw = FALSE,
                        new.param
                        ){
@@ -726,23 +726,23 @@ get_data_sim <- function(fit.list, n.sim = NULL, digits = 2,
 }
 
 
-#' @rdname get_data_sim
+#' @rdname predict_list
 #' @export
 predict.allo_herb_fit <- function(object, ..., n.sim = NULL, digits = 2,
                                   new.param){
   stopifnot(inherits(object, "allo_herb_fit"))
-  get_data_sim(list(object),
+  predict_list(list(object),
                n.sim = n.sim,
                digits = digits,
                new.param = new.param)$fitted.pred[[1]]
 }
 
-#' @rdname get_data_sim
+#' @rdname predict_list
 #' @export
 predict.generic_null_fit <- function(object, ..., n.sim = NULL, digits = 2,
                                   new.param){
   stopifnot(inherits(object, "generic_null_fit"))
-  get_data_sim(list(object),
+  predict_list(list(object),
                n.sim = n.sim,
                digits = digits,
                new.param = new.param)$fitted.pred[[1]]

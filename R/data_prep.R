@@ -1,11 +1,11 @@
 
-#' @export
-phi.min.obs.test<-function(mean.phi.T,n,min.phi=0.005,max.phi=1,a=14/9){
-  lambda<-mean.phi.T*(2-a)/(1-a)*((max.phi^(1-a)-min.phi^(1-a))/(max.phi^(2-a)-min.phi^(2-a))) # lambda = mean phi.T / mean phi
-  prob<-(1-dpois(1,lambda = lambda))^n
-  return(prob)
-} #Test probability of not observing the minimum phi in n samples of leaves
-#Prob of seeing phi min = P(k=1|lambda=mean.phi.T/mean.phi)
+
+# phi.min.obs.test<-function(mean.phi.T,n,min.phi=0.005,max.phi=1,a=14/9){
+#   lambda<-mean.phi.T*(2-a)/(1-a)*((max.phi^(1-a)-min.phi^(1-a))/(max.phi^(2-a)-min.phi^(2-a))) # lambda = mean phi.T / mean phi
+#   prob<-(1-dpois(1,lambda = lambda))^n
+#   return(prob)
+# } #Test probability of not observing the minimum phi in n samples of leaves
+# #Prob of seeing phi min = P(k=1|lambda=mean.phi.T/mean.phi)
 
 #' @export
 rep_data.frame<-function(x,n){
@@ -25,7 +25,10 @@ rep_data.frame<-function(x,n){
 id.screener<-function(data,variable = c("percHerbPlant",
                                         "percLf",
                                         "leaf",
-                                        "plant"),cond=TRUE,min.leaves = 1,min.plants = 15,
+                                        "plant"),
+                      cond=TRUE,
+                      min.leaves = 1,
+                      min.plants = 15,
                       min.herb = 0.005){
   variable <- match.arg(variable)
   variable <- switch(variable,
@@ -94,100 +97,62 @@ id.screener<-function(data,variable = c("percHerbPlant",
 
 
 #' @export
-get.data.lists<-function(data,variable,id.name,ok.ids,n.sim=NA,
-                         min.phi.prop=FALSE,max.phi.prop=FALSE,min.phi=0.005,max.phi=1,
-                         correct.min.phi=FALSE,try=FALSE,group.n="n.avg",sim.pred=TRUE,...){
-  variable<-ifelse(variable=="l","percLf",
-                   ifelse(variable=="p1","percHerbPlant",
-                          ifelse(variable=="p2","percHerbPlant2",
-                                 variable)))
+get_data_list<-function(data,
+                         variable = c("percHerbPlant",
+                                      "percLf",
+                                      "leaf",
+                                      "plant"),
+                         id.name,
+                         ok.ids,
+                         group.n = "n.avg"){
+  variable <- match.arg(variable)
+  variable <- switch(variable,
+                     "leaf" = "leaf",
+                     "plant" = "plant",
+                     "percLf" = "leaf",
+                     "percHerbPlant" = "plant")
   if(is.list(data)){
-    if(variable=="percLf"){
+    if(variable == "leaf"){
       data<-data[["long"]]
     } else {
       data<-data[["short"]]
     }
   }
-  data$ids<-data[,id.name,drop=T]
-  data<-data %>% dplyr::filter(ids%in%ok.ids)
 
-  n.ids<-length(unique(data$ids))
-  herb.obs.list<-vector(mode="list",length=n.ids)
-  herb.pred.list<-vector(mode="list",length=n.ids)
-  id.vector<-unique(data$ids)
+  data$ids <- data[,id.name,drop=TRUE]
+  data <- data %>% dplyr::filter(ids%in%ok.ids)
+  id.vector <- unique(ok.ids)
 
-  for (i in seq_len(n.ids)){
-    herb.obs.list[[i]]<-data[data$ids==id.vector[i],variable,drop=T]
-    if(sim.pred){
-      if(id.name=="surveyID"){
-        leaf.prop.of.whole<-1/mean(data[data$ids==id.vector[i],
-                                        group.n,drop=T],na.rm = T)
-      }
-      min.phi.corrected<-ifelse(correct.min.phi,
-                                mean(data[data$ids==id.vector[i],
-                                          "phi.min.corrected",drop=T],na.rm = T),
-                                min.phi)
-      herb.pred.list[[i]]<-tryCatch(
-        .allometry.herb.quasi.sim(
-          mean.phi.T = mean(herb.obs.list[[i]]),
-          n.sim = ifelse(is.na(n.sim),
-                         length(herb.obs.list[[i]]),
-                         n.sim),
-          min.phi = ifelse(min.phi.prop&id.name=="surveyID",
-                           min.phi.corrected*leaf.prop.of.whole,
-                           min.phi.corrected),
-          max.phi = ifelse(max.phi.prop&id.name=="surveyID",
-                           max.phi*leaf.prop.of.whole,
-                           max.phi),
-          ...),
-        error=function(e){
-          message(e,"\n")
-          message("error id = ",i,"\n")
-          if(try){
-            return(NA)
-          } else {
-            stop(id.vector[i])
-          }
-        }
-      )
-    } else {
-      herb.pred.list[[i]]<-NA
-    }
+  herb.obs.list <- lapply(id.vector, function(x, data, variable){
+    data[data$id == x, variable, drop = TRUE]
+  }, data = data, variable = variable)
 
-    cat(signif(i/n.ids,2)*100,"%     ",
-        id.vector[i],"                                ",
-        "\r")
-  }
-  names(herb.obs.list)<-id.vector
-  names(herb.pred.list)<-id.vector
+  names(herb.obs.list) <- id.vector
 
-  out<-list(
-    "herb.obs.list"=herb.obs.list,
-    "herb.pred.list"=herb.pred.list
-  )
-  return(out)
+  return(herb.obs.list)
 }
 
 
 
-.randomize_leaves_engin <- function(data.list, meta.data, summarise.plant){
-  #first column of meta.data is the surveyID
-  #second column of meta.data is the plant id
-  #third column of the meta.data is the number of leaves on that plant
-  data.list.length <- length(data.list)
-  rand.list <- vector(mode = "list", length = data.list.length)
-  survey.ids <- names(data.list)
-  for (i in seq_len(data.list.length)){
-    n.leaves<-length(data.list[[i]])
-    data<-meta.data[meta.data[,1]==survey.ids[i],]
-    rand.list[[i]]<-data.frame(
-      "herb"=data.list[[i]],
-      "group"=rep(data[,2,drop=TRUE],data[,3,drop=TRUE]) %>%
-        sample(size = n.leaves,replace = FALSE)
-    )
-  }
+.randomize_leaves_engin <- function(data_list, meta_data, summarise_plant){
+  #first column of meta_data is the surveyID
+  #second column of meta_data is the plant id
+  #third column of the meta_data is the number of leaves on that plant
 
-  if(summarise.plant){
+  survey.ids <- names(data_list)
+  rand.list <- lapply(seq_along(data_list),
+                      function(i){
+                        data<-meta_data[meta_data[,1]==survey.ids[i],]
+                        out <- data.frame(
+                          "herb" = data_list[[i]],
+                          "group"= sample(rep(data[,2,drop=TRUE],data[,3,drop=TRUE]),
+                                          size = length(data_list[[i]]),
+                                          replace = FALSE)
+                        )
+                        return(out)
+                        })
+
+  if(summarise_plant){
     rand.list <- lapply(rand.list,
                         function(x){
                           unname(tapply(x$herb,
@@ -214,24 +179,29 @@ get.data.lists<-function(data,variable,id.name,ok.ids,n.sim=NA,
   return(rand.list)
 }
 
+#' @title Randomize Leaf Herbivory Observations
+#' @description Randomize leaf herbivory observations using provided meta data. Used to generate null distribution where leaves on individual plants are random draws from all leaves within a population or survey.
+#' @param data_list a named list of data to be randomized. The name should match the data set ID provided with the meta_data argument.
+#' @param meta_data a data.frame of meta data to be used in the randomization procedure. First column of meta_data is the data set ID. Second column of meta_data is the plant ID. Third column of the meta_data is the number of leaves on that plant that has herbivory data.
+#' @param nboot the number of times to repeat the randomization procedure. Default is one.
+#' @param summarise_plant if \code{TRUE} (default), the randomized leaf herbivory will be averaged by plant.
+#' @return a list of list of numeric vectors
 #' @export
-randomize_leaves<-function(data.list.list, meta.data, summarise.plant = TRUE, bind.lists = NULL){
+randomize_leaves<-function(data_list, meta_data, nboot = 1, summarise_plant = TRUE){
   out <- lapply(
-    data.list.list,
-    FUN = function(x){
-      .randomize_leaves_engin(data.list = x,
-                             meta.data = meta.data[,c("surveyID","plantID3.long","n.avg")],
-                             summarise.plant = summarise.plant)
-    }
+    nboot,
+    FUN = function(i, data_list, meta_data, summarise_plant){
+      rout <- .randomize_leaves_engin(data_list,
+                             meta_data = meta_data,
+                             summarise_plant = summarise_plant)
+      cat(i, "/", nboot, "                    \r")
+      return(rout)
+    },
+    data_list = data_list,
+    summarise_plant = summarise_plant,
+    meta_data = meta_data
   )
-  names(out) <- paste0("rand.",names(data.list.list))
+  names(out) <- paste(names(data_list), paste0("randomized",seq_len(nboot)), sep = "_")
 
-
-  if(!is.null(bind.lists)){
-    for (i in seq_along(bind.lists)){
-      bind.lists[[i]]<-bind.lists[[i]][names(out[[1]])]
-    }
-    out<-c(out,bind.lists)
-  }
   return(out)
 }
