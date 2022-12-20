@@ -201,7 +201,7 @@ randomize_leaves<-function(data_list, meta_data, nboot = 1, summarise_plant = TR
     summarise_plant = summarise_plant,
     meta_data = meta_data
   )
-  names(out) <- paste(names(data_list), paste0("randomized",seq_len(nboot)), sep = "_")
+  names(out) <- paste0("randomized",seq_len(nboot))
 
   return(out)
 }
