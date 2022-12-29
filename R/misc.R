@@ -293,12 +293,15 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
   s$dummy <- data.frame(1,2)
   names(s$dummy) <- c(dim1, dim2)
 
+  egv <- vegan::eigenvals(x)
+  prec_var <- signif((egv / sum(egv) * 100)[choices], digits = 2)
+
   g <- s$dummy %>%
     ggplot2::ggplot(ggplot2::aes_string(paste0("x = ", dim1),paste0("y = ", dim2))) +
     ggplot2::geom_vline(ggplot2::aes(xintercept=0),linetype="dashed",color="grey",size=1) +
     ggplot2::geom_hline(ggplot2::aes(yintercept=0),linetype="dashed",color="grey",size=1) +
     ggplot2::theme_bw() +
-    ggplot2::labs(x = dim1, y= dim2)
+    ggplot2::labs(x = paste0(dim1, " (",prec_var[1],"%)"), y= paste0(dim1, " (",prec_var[2],"%)"))
 
   if("sites" %in% display){
     if(!is.null(group)){

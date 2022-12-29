@@ -30,6 +30,19 @@ vignette: >
 knitr::opts_chunk$set(fig.align = "center", comment = NA, eval = TRUE)
 ```
 
+# This document is being updated: 
+```{r}
+# to do: 
+# Motivation section in the intro explaining the use / application of the model 
+# Biological interpretation of model 
+# Make dalloT() more explicit
+# Model output interpretation section. What to make of the parameter etc 
+# Include worked example using real datasets. Explain how the package can be useful. -- Use image read from dames rocket photos
+# Demo randomize leaves
+
+```
+
+
 
 
 # Introduction

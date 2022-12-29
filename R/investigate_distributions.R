@@ -397,6 +397,7 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
         stats::plot.ecdf(col=i, add = c(i>1),xlim = ecdf.xlim,...)
     }
   }
+  suppressMessages({
   if(any(type%in%"hist")){
     data.tally.list<-vector(mode="list",length=length(data_list))
     for (i in seq_along(data_list)){
@@ -409,7 +410,7 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
         type=names(data_list)[i])
     }
     tally.data<-do.call("rbind",data.tally.list)
-    suppressMessages({g<-tally.data %>%
+    g<-tally.data %>%
       dplyr::group_by(type) %>%
       dplyr::mutate(y=y/sum(y)) %>%
       ggplot2::ggplot(ggplot2::aes(x=x,y=(y)^0.1,group=type))+
@@ -431,14 +432,14 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
            x="Prop. herbivory",
            color="Data",
            fill="Data")+
-      ggplot2::theme_bw(base_size=15)})
+      ggplot2::theme_bw(base_size=15)
     if(.is_inst("ggpubr")){
       return(ggpubr::ggarrange(g,g2,common.legend = TRUE,legend = "top"))
     } else {
       return(list(g,g2))
     }
-
   }
+  })
 }
 
 
