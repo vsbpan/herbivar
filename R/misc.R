@@ -1,3 +1,4 @@
+#'
 slide_show<-function(data_list,expression,sleep.time=1,length=1){
   for (i in seq_len(length)){
     eval(parse(text=expression))
