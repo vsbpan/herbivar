@@ -14,7 +14,7 @@
   rescale = TRUE,
   colourscale = NULL,
   colorscale = NULL,
-  interpolate = TRUE,
+  interpolate = FALSE,
   axes = TRUE,
   main = "",
   xaxs = "i",

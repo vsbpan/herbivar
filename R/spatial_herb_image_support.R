@@ -928,7 +928,7 @@ plot.singleton <- function (x, ...){
 plot.cimg <- function(x, frame, xlim = c(1, width(x)),
                       ylim = c(height(x), 1), xlab = "x", ylab = "y",
                       rescale = TRUE, colourscale = NULL,
-                      colorscale = NULL, interpolate = TRUE, axes = TRUE, main = "",
+                      colorscale = NULL, interpolate = FALSE, axes = TRUE, main = "",
                       xaxs = "i", yaxs = "i", asp = 1, col.na = grDevices::rgb(0, 0, 0, 0),
                       ...) {
   v <- unique(c(x))
@@ -983,10 +983,11 @@ plot.cimg <- function(x, frame, xlim = c(1, width(x)),
 #' @description plot image list via \code{spatstat.geom::plot.imlist()}
 #' @param x an object of class 'imlist'
 #' @param main a character string for the plot title
+#' @param interpolate a logical value indicating whether to interpolate the raster
 #' @param ... additional arguments passed to \code{spatstat.geom::plot.imlist()}
 #' @return \code{NULL}
-plot.imlist <- function(x,main = "", ...){
-  spatstat.geom::plot.imlist(x,plotcommand = "plot", main = main, ...)
+plot.imlist <- function(x,main = "", interpolate = FALSE, ...){
+  spatstat.geom::plot.imlist(x,plotcommand = "plot", main = main, interpolate = interpolate, ...)
 }
 
 

@@ -4,7 +4,7 @@
 \alias{plot.imlist}
 \title{Plot image list}
 \usage{
-\method{plot}{imlist}(x, main = "", ...)
+\method{plot}{imlist}(x, main = "", interpolate = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class 'imlist'}

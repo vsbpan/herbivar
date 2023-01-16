@@ -582,12 +582,12 @@ grow_edge <- function(object, background = NA){
 
 
   object <- EBImage::abind(
-    array(rep(NA,z*spec*(x+2)),dim = c(1,x+2,z,spec)),
-    EBImage::abind(array(rep(NA,z*spec*y),dim = c(y,1,z,spec)),
+    array(rep(background,z*spec*(x+2)),dim = c(1,x+2,z,spec)),
+    EBImage::abind(array(rep(background,z*spec*y),dim = c(y,1,z,spec)),
                    object[],
-                   array(rep(NA,z*spec*y),dim = c(y,1,z,spec)),
+                   array(rep(background,z*spec*y),dim = c(y,1,z,spec)),
                    along = 2),
-    array(rep(NA,z*spec*(x+2)),dim = c(1,x+2,z,spec)),
+    array(rep(background,z*spec*(x+2)),dim = c(1,x+2,z,spec)),
     along = 1
   ) %>% as.cimg()
 
