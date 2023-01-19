@@ -11,6 +11,8 @@
 
 \item{main}{a character string for the plot title}
 
+\item{interpolate}{a logical value indicating whether to interpolate the raster}
+
 \item{...}{additional arguments passed to \code{spatstat.geom::plot.imlist()}}
 }
 \value{

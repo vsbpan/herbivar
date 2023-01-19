@@ -945,3 +945,34 @@ LRT <- function(model_candidate, model_null){
   print(round(data.frame( "Chisq" = LLR, "df" = df,"P" = P, row.names = ""), digits = 4))
   invisible(data.frame( "Chisq" = LLR, "df" = df,"P" = P))
 }
+
+
+#' @title Generalized Mean
+#' @description Calculate generalized mean for a vector \code{x}. If \eqn{p = 0}, the function returns the geometric mean. If \eqn{p = -1}, the function returns the harmonic mean. If \eqn{p = 1} or \eqn{p = 2}, the arithmetic mean or the root mean square (quadratic mean) is returned. If \eqn{p = \infty} or \eqn{p = -\infty}, the function returns the maximum or minimum respectively. For other values of \eqn{p}, the power mean is returned. For large values of \eqn{|p|}, the function can be numerically unstable.
+#' @param x a vector of numeric data
+#' @param p a numeric value of length 1 choosing the type of mean computed.
+#' @return a numeric value of length 1
+gen_mean <- function(x, p, na.rm = FALSE){
+  if(na.rm){
+    x <- x[!is.na(x)]
+  }
+
+  if(p == Inf){
+    m <- max(x)
+  } else {
+    if(p == -Inf){
+      m <- min(x)
+    } else {
+      if(p == 0){
+        m <- exp(
+          1 / length(x) * sum(log(x))
+        )
+      } else {
+        m <- (1 / length(x) * sum(x^p))^(1 / p)
+      }
+    }
+  }
+  return(m)
+}
+
+
