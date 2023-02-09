@@ -1,7 +1,7 @@
 # *herbivar*
 <img src="man/figures/logo.png" align="right" height="200"/>
 
-### Quantitative Tools For Variance Explicit Ecology and Herbivory
+### Quantitative Tools for Variance Explicit Ecology and Herbivory
 
 
 

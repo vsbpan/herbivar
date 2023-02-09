@@ -1,6 +1,6 @@
 Package: herbivar
 Type: Package
-Title: Quantitative Tools For Variance Explicit Ecology and Herbivory
+Title: Quantitative Tools for Variance Explicit Ecology and Herbivory
 Version: 0.1.0
 Authors@R: 
     person("Vincent", "Pan", , email = "vsbpan@gmail.com",

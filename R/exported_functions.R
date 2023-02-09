@@ -27,6 +27,13 @@ stopCluster<-function(...){parallel::stopCluster(...)}
 
 #' @export
 Gini<-function(x, ...) {
+  if(any(is.na(x))){
+    if(na.rm){
+      x <- x[!is.na(x)]
+    } else {
+      return(NA_real_)
+    }
+  }
   if(any(x < 0)){
     warning("Vector contains negative one or more values. Interpert with caution.")
   }
@@ -36,12 +43,12 @@ Gini<-function(x, ...) {
 
 #' @export
 Skew<-function(x, weights = NULL, na.rm = FALSE, method = 1, ...) {
-  DescTools::Skew(x, weights = NULL, na.rm = FALSE, method = 1, ...)
+  DescTools::Skew(x, weights = weights, na.rm = na.rm, method = method, ...)
 }
 
 #' @export
 Kurt<-function(x, weights = NULL, na.rm = FALSE, method = 1, ...) {
-  DescTools::Kurt(x, weights = NULL, na.rm = FALSE, method = 1, ...) + 3
+  DescTools::Kurt(x, weights = weights, na.rm = na.rm, method = method, ...) + 3
 }
 
 #' @export
