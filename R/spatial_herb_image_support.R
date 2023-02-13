@@ -310,14 +310,14 @@ leaf_herb <- function(object, type = c("proportion","percent",
 #' @return a vector of the number of pixels and milometer squared area of leaf area. The object must have a "px.size" attribute or the \code{px.size} argument must be defined to return values for mm2 leaf area.
 #' @export
 leaf_area <- function(object, px.size = NA){
-  if(is.na(px.size)){
-    px.size <- attr(object,"px.size")
-  }
-
   if(inherits(object, "split_herb")){
     mat <- object$px
   } else {
     mat <- object
+  }
+
+  if(is.na(px.size)){
+    px.size <- attr(mat,"px.size")
   }
 
   if(is.array(mat) && any(dim(mat)[c(-1,-2)] > 1)){

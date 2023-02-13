@@ -4,7 +4,7 @@
 \name{herbivar-package}
 \alias{herbivar}
 \alias{herbivar-package}
-\title{herbivar: Quantitative Tools For Variance Explicit Ecology and Herbivory}
+\title{herbivar: Quantitative Tools for Variance Explicit Ecology and Herbivory}
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
