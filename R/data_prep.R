@@ -70,7 +70,7 @@ id.screener<-function(data,variable = c("percHerbPlant",
   } else {
     if(variable=="plant"){
       ids<-data %>%
-        dplyr::filter(!is.na(percHerbPlant2)) %>%
+        dplyr::filter(!is.na(percHerbPlant)) %>%
         dplyr::filter(eval(parse(text = cond))) %>%
         dplyr::filter(n.avg >= min.leaves) %>%
         dplyr::group_by(surveyID) %>%
@@ -79,11 +79,11 @@ id.screener<-function(data,variable = c("percHerbPlant",
         dplyr::ungroup() %>%
         dplyr::filter(n.plants.in.survey >=
                         min.plants) %>%
-        dplyr::mutate(percHerbPlant2 = ifelse(percHerbPlant2 < min.herb * 1/n.avg.med,
+        dplyr::mutate(percHerbPlant = ifelse(percHerbPlant < min.herb * 1/n.avg.med,
                                               0,
-                                              percHerbPlant2)) %>%
+                                              percHerbPlant)) %>%
         dplyr::group_by(surveyID) %>%
-        dplyr::mutate(all_zero_check = all(percHerbPlant2 == 0)) %>%
+        dplyr::mutate(all_zero_check = all(percHerbPlant == 0)) %>%
         dplyr::filter(!all_zero_check) %>%
         dplyr::select(surveyID) %>%
         unique() %>%
