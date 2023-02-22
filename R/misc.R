@@ -267,10 +267,36 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 #' @param choices a vector of length 2 defining the axes to plot
 #' @param scaling scaling argument passed to \code{vegan::scores()}
 #' @param display a vector of characters defining what to plot
+#' @param ellipse a character string passed to the \code{type} argument of \code{ggplot2::stat_ellipse()}. If \code{NA}, no ellipse is plotted.
 #' @param group a vector in the same length and order as the sites data used to fit the model that is used to color the site points
 #' @return a ggplot object
+#' @examples
+#'
+#' # Simulate some data
+#' probed.data <- do.call("rbind", lapply(1:3,
+#' function(z){
+#' bind_vec(lapply(seq_len(100),
+#' function(i){
+#' x <- rpois(n = 1000, lambda = z)
+#' c(probe_dist(x), "z" = z)
+#' }))
+#' }))
+#' std_probes <- scale(probed.data[,-which(names(probed.data) %in% c("z","N","min"))])
+#' probed.data$z <- as.factor(probed.data$z)
+#'
+#' # Fit a simple RDA model
+#' m <- vegan::rda(std_probes ~ z, data = probed.data)
+#'
+#' get_biplot(m, group = probed.data$z) # Triplot
+#'
+#' # The function returns a ggplot object, so you can modify the plot as you would normally with ggplot()
+#' get_biplot(m, group = probed.data$z) + ggplot2::labs(color = "z") # Change color label
+#'
+#' get_biplot(m, group = probed.data$z, ellipse = "t") + ggplot2::scale_color_brewer(type = "qual")
+#'
 get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        display = c("sites", "species", "biplot", "centroids"),
+                       ellipse = NA,
                        group = NULL){
   display <- match.arg(display,several.ok = TRUE)
   if(.is_inst("vegan",stop.if.false = TRUE)){
@@ -309,6 +335,17 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
       g <- g + ggplot2::geom_point(data = s$sites, ggplot2::aes(color = group))
     } else {
       g <- g + ggplot2::geom_point(data = s$sites,color = "deepskyblue")
+    }
+  }
+
+  if(!is.na(ellipse)){
+    if(!is.null(group)){
+      s$sites <- cbind(s$sites, "z" = group)
+      g <- g + ggplot2::stat_ellipse(data = s$sites, ggplot2::aes(group = z), color = "navy",
+                                     linetype = 4, size = 1)
+    } else {
+      g <- g + ggplot2::stat_ellipse(data = s$sites, color = "navy",
+                                     linetype = 4, size = 1)
     }
   }
 

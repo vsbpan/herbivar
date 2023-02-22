@@ -602,6 +602,7 @@ predict_list <- function(fit.list, n.sim = NULL, digits = 2,
                        return.obs = TRUE, obs.raw = FALSE,
                        new.param
                        ){
+  stopifnot(is.list(fit.list))
 
   obj.class <- unique(
     lapply(fit.list,function(x){
@@ -697,7 +698,7 @@ predict_list <- function(fit.list, n.sim = NULL, digits = 2,
       return(predicted.draws)
     })
   } else {
-    stop(obj.class, " not supported.")
+    stop("list of ",obj.class, " objects not supported.")
   }
 
   if(is.null(names(fit.list))){
