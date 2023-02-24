@@ -10,7 +10,8 @@ get_biplot(
   scaling = 2,
   display = c("sites", "species", "biplot", "centroids"),
   ellipse = NA,
-  group = NULL
+  group = NULL,
+  sites_alpha = 1
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ get_biplot(
 \item{ellipse}{a character string passed to the \code{type} argument of \code{ggplot2::stat_ellipse()}. If \code{NA}, no ellipse is plotted.}
 
 \item{group}{a vector in the same length and order as the sites data used to fit the model that is used to color the site points}
+
+\item{sites_alpha}{the transparency of the sites plotted as points}
 }
 \value{
 a ggplot object

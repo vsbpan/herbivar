@@ -269,6 +269,7 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 #' @param display a vector of characters defining what to plot
 #' @param ellipse a character string passed to the \code{type} argument of \code{ggplot2::stat_ellipse()}. If \code{NA}, no ellipse is plotted.
 #' @param group a vector in the same length and order as the sites data used to fit the model that is used to color the site points
+#' @param sites_alpha the transparency of the sites plotted as points
 #' @return a ggplot object
 #' @examples
 #'
@@ -297,7 +298,8 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        display = c("sites", "species", "biplot", "centroids"),
                        ellipse = NA,
-                       group = NULL){
+                       group = NULL,
+                       sites_alpha = 1){
   display <- match.arg(display,several.ok = TRUE)
   if(.is_inst("vegan",stop.if.false = TRUE)){
     s <- vegan::scores(x,choices = choices,scaling = scaling)
@@ -332,9 +334,9 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
   if("sites" %in% display){
     if(!is.null(group)){
       s$sites <- cbind(s$sites, "group" = group)
-      g <- g + ggplot2::geom_point(data = s$sites, ggplot2::aes(color = group))
+      g <- g + ggplot2::geom_point(data = s$sites, ggplot2::aes(color = group), alpha = sites_alpha)
     } else {
-      g <- g + ggplot2::geom_point(data = s$sites,color = "deepskyblue")
+      g <- g + ggplot2::geom_point(data = s$sites,color = "deepskyblue", alpha = sites_alpha)
     }
   }
 
