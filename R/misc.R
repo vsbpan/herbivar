@@ -270,6 +270,7 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 #' @param ellipse a character string passed to the \code{type} argument of \code{ggplot2::stat_ellipse()}. If \code{NA}, no ellipse is plotted.
 #' @param group a vector in the same length and order as the sites data used to fit the model that is used to color the site points
 #' @param sites_alpha the transparency of the sites plotted as points
+#' @param species_color the color of the species labels
 #' @return a ggplot object
 #' @examples
 #'
@@ -299,7 +300,8 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        display = c("sites", "species", "biplot", "centroids"),
                        ellipse = NA,
                        group = NULL,
-                       sites_alpha = 1){
+                       sites_alpha = 1,
+                       species_color = "violetred"){
   display <- match.arg(display,several.ok = TRUE)
   if(.is_inst("vegan",stop.if.false = TRUE)){
     s <- vegan::scores(x,choices = choices,scaling = scaling)
@@ -353,7 +355,7 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
 
   if("species" %in% display && !is.null(s$species)){
     g <- g + ggplot2::geom_text(data = s$species,
-                                ggplot2::aes(label = species), color = "violetred")
+                                ggplot2::aes(label = species), color = species_color)
     # maybe include ggrepel::geom_text_repel()
   }
 
@@ -423,7 +425,7 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
   .is_inst("matrixStats", stop.if.false = TRUE)
   stopifnot(inherits(object, "brmsfit"))
   pred.data <- object$data
-  var.names <- names(object$data)[-1]
+  var.names <- names(object$data)
   if(!is.null(stats::formula(object)$response)){
     warning("Multivariate model is untested. Proceed with caution.")
   }

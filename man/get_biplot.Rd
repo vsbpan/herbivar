@@ -11,7 +11,8 @@ get_biplot(
   display = c("sites", "species", "biplot", "centroids"),
   ellipse = NA,
   group = NULL,
-  sites_alpha = 1
+  sites_alpha = 1,
+  species_color = "violetred"
 )
 }
 \arguments{
@@ -28,6 +29,8 @@ get_biplot(
 \item{group}{a vector in the same length and order as the sites data used to fit the model that is used to color the site points}
 
 \item{sites_alpha}{the transparency of the sites plotted as points}
+
+\item{species_color}{the color of the species labels}
 }
 \value{
 a ggplot object
