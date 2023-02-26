@@ -429,9 +429,9 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
   if(!is.null(stats::formula(object)$response)){
     warning("Multivariate model is untested. Proceed with caution.")
   }
-  if(!any(var%in%var.names)){
-    stop(paste0("Cannot find variable in model. Try: ", paste0(var.names, collapse = ", ")))
-  }
+
+  var <- match.arg(var, var.names[-1])
+
   pred.data[,match(var,var.names)] <- 0
 
   y <- brms::get_y(object)
