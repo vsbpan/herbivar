@@ -430,7 +430,7 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
     warning("Multivariate model is untested. Proceed with caution.")
   }
 
-  var <- match.arg(var, var.names[-1])
+  var <- match.arg(var, var.names[-1], several.ok = TRUE)
 
   pred.data[,match(var,var.names)] <- 0
 
@@ -450,4 +450,3 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
   rownames(partial_r2) <- "partial_R2"
   return(partial_r2)
 }
-
