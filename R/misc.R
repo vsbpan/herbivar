@@ -447,6 +447,6 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
   if(summary){
     partial_r2 <- brms::posterior_summary(partial_r2, probs = probs, robust = robust)
   }
-  rownames(partial_r2) <- "partial_R2"
+  rownames(partial_r2) <- rep("partial_R2", nrow(partial_r2))
   return(partial_r2)
 }
