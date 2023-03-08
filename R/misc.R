@@ -414,12 +414,13 @@ r2_partial <- function(object, var, ...){
 #' @param summary if \code{TRUE} (default), the posterior draws are summarized
 #' @param robust if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate
 #' @param probs The lower and upper interval of posterior summary
+#' @param ndraws The number of posterior samples used in the simulation, passed to the \code{'ndraw'} argument of \code{brms:::posterior_epred.brmsfit()}. If \code{NULL} (default), all samples are used.
 #' @param ... additional arguments
 #' @return a matrix of partial r2 draws or a vector of partial r2 summary.
 #' @rdname r2_partial.brmsfit
 #' @export
 r2_partial.brmsfit<-function(object, var, summary = TRUE,
-                             robust = FALSE, probs = c(0.025,0.975),
+                             robust = FALSE, probs = c(0.025,0.975), ndraws = NULL,
                              ...){
   .is_inst("brms", stop.if.false = TRUE)
   .is_inst("matrixStats", stop.if.false = TRUE)
@@ -436,8 +437,8 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
 
   y <- brms::get_y(object)
   ypred <- brms::posterior_epred(object, newdata = pred.data,
-                                 allow_new_levels = TRUE)
-  ypred.og <- brms::posterior_epred(object)
+                                 allow_new_levels = TRUE, ndraws = ndraws)
+  ypred.og <- brms::posterior_epred(object, ndraws = ndraws)
   var_ypred <- matrixStats::rowVars(ypred)
   var_ypred.og <- matrixStats::rowVars(ypred.og)
   var_e <- matrixStats::rowVars(-1 * sweep(ypred, 2, y))

@@ -10,6 +10,7 @@
   summary = TRUE,
   robust = FALSE,
   probs = c(0.025, 0.975),
+  ndraws = NULL,
   ...
 )
 }
@@ -23,6 +24,8 @@
 \item{robust}{if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate}
 
 \item{probs}{The lower and upper interval of posterior summary}
+
+\item{ndraws}{The number of posterior samples used in the simulation, passed to the \code{'ndraw'} argument of \code{brms:::posterior_epred.brmsfit()}. If \code{NULL} (default), all samples are used.}
 
 \item{...}{additional arguments}
 }
