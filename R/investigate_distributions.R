@@ -451,10 +451,13 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
 #' @param test A vector of character string indicating which methods to use to compare the two samples. "ks" performs the KS test using \code{stats::ks.test()}. "ad" performs the AD test using \code{kSamples::ad.test()}. "kl" computes the KL divergence using \code{philentropy::KL()}. The unit of the KL divergence is "log" by default. "chisq" performs the Chi-square test using \code{stats::chisq.test()}.
 #' @param digits An integer indicating the number of digits the samples should be rounded to before doing the calculations. This can be important when rounding gets rid of some sampling artifacts in the data.
 #' @param bin_size The bin size used to calculate KL divergence and Chi-square test. Default is 0.001.
+#' @param smooth If \code{TRUE} (default is \code{FALSE}), \code{stats::density()} is used to compute a smooth density estimate with a Gaussian kernel. Only affects \code{test = c('kl','chisq')}
+#' @param support a vector of length two specifying the bounds of the distribution for calculating smoothed density.
 #' @return A list of named numeric vectors.
 #' @export
 compare_dist<-function(data_list = NULL, obs.index = 1, pred.index = 2,
-                             test = c("ks","kl","ad","chisq"), digits = 2, bin_size = 0.001){
+                             test = c("ks","kl","ad","chisq"), digits = 2,
+                       bin_size = 0.001, smooth = FALSE, support = c(0,1)){
   test <- match.arg(test, several.ok = TRUE)
   obs.data<-data_list[[obs.index]]
   pred.data<-data_list[[pred.index]]
@@ -469,11 +472,18 @@ compare_dist<-function(data_list = NULL, obs.index = 1, pred.index = 2,
     ks.out <- NULL
   }
   if(any(test %in% c("kl", "chisq"))){
-    x <- seq(0,1,by = bin_size)
-    obs.count  <- as.vector(table(factor(x[findInterval(obs.data, x)], levels = x)))
-    obs.p <- obs.count/sum(obs.count)
-    pred.count <- as.vector(table(factor(x[findInterval(pred.data, x)], levels = x)))
-    pred.p <- pred.count/sum(pred.count)
+    if(smooth){
+      obs.p <- density(obs.data, from = support[1], to = support[2], bw = bin_size)$y
+      obs.count <- obs.p / sum(obs.p) * length(obs.p)
+      pred.p <- density(pred.data, from = support[1], to = support[2], bw = bin_size)$y
+      pred.count <- pred.p / sum(pred.p) * length(pred.p)
+    } else {
+      x <- seq(0,1,by = bin_size)
+      obs.count  <- as.vector(table(factor(x[findInterval(obs.data, x)], levels = x)))
+      obs.p <- obs.count/sum(obs.count)
+      pred.count <- as.vector(table(factor(x[findInterval(pred.data, x)], levels = x)))
+      pred.p <- pred.count/sum(pred.count)
+    }
 
     if(any(test %in% c("kl"))){
       kl.div<-suppressMessages(KL(

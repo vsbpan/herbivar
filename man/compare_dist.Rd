@@ -10,7 +10,9 @@ compare_dist(
   pred.index = 2,
   test = c("ks", "kl", "ad", "chisq"),
   digits = 2,
-  bin_size = 0.001
+  bin_size = 0.001,
+  smooth = FALSE,
+  support = c(0, 1)
 )
 }
 \arguments{
@@ -25,6 +27,10 @@ compare_dist(
 \item{digits}{An integer indicating the number of digits the samples should be rounded to before doing the calculations. This can be important when rounding gets rid of some sampling artifacts in the data.}
 
 \item{bin_size}{The bin size used to calculate KL divergence and Chi-square test. Default is 0.001.}
+
+\item{smooth}{If \code{TRUE} (default is \code{FALSE}), \code{stats::density()} is used to compute a smooth density estimate with a Gaussian kernel. Only affects \code{test = c('kl','chisq')}}
+
+\item{support}{a vector of length two specifying the bounds of the distribution for calculating smoothed density.}
 }
 \value{
 A list of named numeric vectors.
