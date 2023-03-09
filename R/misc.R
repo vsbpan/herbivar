@@ -271,6 +271,7 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 #' @param group a vector in the same length and order as the sites data used to fit the model that is used to color the site points
 #' @param sites_alpha the transparency of the sites plotted as points
 #' @param species_color the color of the species labels
+#' @param species_alpha the transparency of the species plotted as text
 #' @return a ggplot object
 #' @examples
 #'
@@ -301,7 +302,8 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        ellipse = NA,
                        group = NULL,
                        sites_alpha = 1,
-                       species_color = "violetred"){
+                       species_color = "violetred",
+                       species_alpha = 1){
   display <- match.arg(display,several.ok = TRUE)
   if(.is_inst("vegan",stop.if.false = TRUE)){
     s <- vegan::scores(x,choices = choices,scaling = scaling)
@@ -355,7 +357,8 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
 
   if("species" %in% display && !is.null(s$species)){
     g <- g + ggplot2::geom_text(data = s$species,
-                                ggplot2::aes(label = species), color = species_color)
+                                ggplot2::aes(label = species),
+                                color = species_color, alpha = species_alpha)
     # maybe include ggrepel::geom_text_repel()
   }
 
@@ -414,13 +417,15 @@ r2_partial <- function(object, var, ...){
 #' @param summary if \code{TRUE} (default), the posterior draws are summarized
 #' @param robust if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate
 #' @param probs The lower and upper interval of posterior summary
-#' @param ndraws The number of posterior samples used in the simulation, passed to the \code{'ndraw'} argument of \code{brms:::posterior_epred.brmsfit()}. If \code{NULL} (default), all samples are used.
+#' @param ndraws The number of posterior samples used in the simulation, passed to the \code{'ndraws'} argument of \code{brms:::posterior_epred.brmsfit()}. If \code{NULL} (default), all samples are used.
+#' @param draw_ids An integer vector specifying the posterior draws to be used. If \code{NULL} (default), all draws are used.
 #' @param ... additional arguments
 #' @return a matrix of partial r2 draws or a vector of partial r2 summary.
 #' @rdname r2_partial.brmsfit
 #' @export
 r2_partial.brmsfit<-function(object, var, summary = TRUE,
-                             robust = FALSE, probs = c(0.025,0.975), ndraws = NULL,
+                             robust = FALSE, probs = c(0.025,0.975),
+                             ndraws = NULL, draw_ids = NULL,
                              ...){
   .is_inst("brms", stop.if.false = TRUE)
   .is_inst("matrixStats", stop.if.false = TRUE)
@@ -437,8 +442,8 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
 
   y <- brms::get_y(object)
   ypred <- brms::posterior_epred(object, newdata = pred.data,
-                                 allow_new_levels = TRUE, ndraws = ndraws)
-  ypred.og <- brms::posterior_epred(object, ndraws = ndraws)
+                                 allow_new_levels = TRUE, ndraws = ndraws, draw_ids = draw_ids)
+  ypred.og <- brms::posterior_epred(object, ndraws = ndraws, draw_ids = draw_ids)
   var_ypred <- matrixStats::rowVars(ypred)
   var_ypred.og <- matrixStats::rowVars(ypred.og)
   var_e <- matrixStats::rowVars(-1 * sweep(ypred, 2, y))
@@ -450,4 +455,73 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
   }
   rownames(partial_r2) <- rep("partial_R2", nrow(partial_r2))
   return(partial_r2)
+}
+
+
+#' @title Partial R2 of All Fitted Model Predictors
+#' @description Generic method of finding the partial R2 of all predictor variables by finding the change in r2 when the predictor variable is set to zero.
+#' @param object a supported model fit object
+#' @param ... additional parameters passed to \code{r2_partial()}
+#' @return a data.frame of partial R2 values
+#' @export
+r2_partial_all <- function(object, ...){
+  UseMethod("r2_partial_all")
+}
+
+
+#' @title Partial R2 of All Fitted 'brmsfit' Model Predictors
+#' @description Calculate the Bayesian partial R2 of all predictor variables by finding the change in r2 when the predictor variable is set to zero.
+#' @param object A 'brmsfit' object
+#' @param summary if \code{TRUE} (default), the posterior draws are summarized
+#' @param robust if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate
+#' @param probs The lower and upper interval of posterior summary
+#' @param ndraws The number of posterior samples used in the simulation, passed to the \code{'ndraws'} argument of \code{brms:::posterior_epred.brmsfit()}. If \code{NULL} (default), all samples are used.
+#' @param draw_ids An integer vector specifying the posterior draws to be used. If \code{NULL} (default), all draws are used.
+#' @param ... additional arguments passed to \code{r2_partial()}
+#' @return a data.frame of partial R2 values
+#' @export
+r2_partial_all.brmsfit <- function(object, summary = TRUE,
+                                   robust = FALSE, probs = c(0.025,0.975),
+                                   ndraws = NULL, draw_ids = NULL, ...){
+  vars <- names(object$data)[-1]
+
+  if(!is.null(ndraws) && is.null(draw_ids)){
+    draw_ids <- seq_len(ndraws)
+  }
+
+
+  z <- lapply(vars, function(v){
+    r2_partial(object,v, summary = summary, robust = robust, probs = probs,
+               ndraws = ndraws, draw_ids = draw_ids, ...)
+  }) %>% do.call(ifelse(summary, "rbind", "cbind"),.) %>%
+    as.data.frame()
+  z.resid <- unlist(r2_partial(object, var = vars, summary = FALSE,
+                               robust = robust, probs = probs,
+                               ndraws = ndraws, draw_ids = draw_ids, ...))
+  z.resid <- 1 - z.resid
+
+  if(summary){
+    z.resid <- brms::posterior_summary(z.resid, robust = robust, probs = probs)
+    z <- rbind(z, z.resid)
+    rownames(z) <- c(vars,"residual")
+  } else {
+    z <- cbind(z, z.resid)
+    colnames(z) <- c(vars,"residual")
+  }
+  return(z)
+}
+
+
+
+
+#' @title Turn data frame to named vector
+#' @description Turn data frame to named vector
+#' @param x the data.frame
+#' @param id_col the index or column name (as a character string) of the names
+#' @param val_col the index or column name (as a character string) of the values
+#' @return a named vector
+as_named_vector <- function(x, id_col = 1, val_col = 2){
+  z <- x[,val_col,drop = TRUE]
+  names(z) <- x[,id_col,drop = TRUE]
+  return(z)
 }

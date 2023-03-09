@@ -1,12 +1,5 @@
 
 
-# phi.min.obs.test<-function(mean.phi.T,n,min.phi=0.005,max.phi=1,a=14/9){
-#   lambda<-mean.phi.T*(2-a)/(1-a)*((max.phi^(1-a)-min.phi^(1-a))/(max.phi^(2-a)-min.phi^(2-a))) # lambda = mean phi.T / mean phi
-#   prob<-(1-dpois(1,lambda = lambda))^n
-#   return(prob)
-# } #Test probability of not observing the minimum phi in n samples of leaves
-# #Prob of seeing phi min = P(k=1|lambda=mean.phi.T/mean.phi)
-
 #' @export
 rep_data.frame<-function(x,n){
   if(inherits(x,"data.frame")){

@@ -12,7 +12,8 @@ get_biplot(
   ellipse = NA,
   group = NULL,
   sites_alpha = 1,
-  species_color = "violetred"
+  species_color = "violetred",
+  species_alpha = 1
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ get_biplot(
 \item{sites_alpha}{the transparency of the sites plotted as points}
 
 \item{species_color}{the color of the species labels}
+
+\item{species_alpha}{the transparency of the species plotted as text}
 }
 \value{
 a ggplot object
