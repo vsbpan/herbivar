@@ -34,7 +34,7 @@ detach.herbivar <- function(x){
   }
 }
 
-reinstall.herbivar <- function(package_path = "C:/R Projects/Package Building/herbivar_0.1.0.tar.gz"){
+.reinstall.herbivar <- function(package_path = "C:/R Projects/Package Building/herbivar_0.1.0.tar.gz"){
   load.herbivar <- "herbivar" %in% (.packages())
   detach.herbivar()
   install.packages(package_path, repos = NULL, type="source")
@@ -45,7 +45,6 @@ reinstall.herbivar <- function(package_path = "C:/R Projects/Package Building/he
 }
 
 ### To do:
-## Patch a = 1, a = 2, add documentation
 ## Vignette for neutral model & leaf scan pipeline
 ## Documentation & more commentary
 ## Add leaf number support

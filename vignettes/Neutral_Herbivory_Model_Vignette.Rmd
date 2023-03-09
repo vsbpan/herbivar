@@ -30,8 +30,8 @@ vignette: >
 knitr::opts_chunk$set(fig.align = "center", comment = NA, eval = TRUE)
 ```
 
+```{r, include = FALSE}
 # This document is being updated: 
-```{r}
 # to do: 
 # Motivation section in the intro explaining the use / application of the model 
 # Biological interpretation of model 
@@ -163,7 +163,7 @@ get_mean_phi_T(
 
 ## Fitting the neutral herbivory model
 
-|            Currently, the neutral herbivory model can be fitted to data using maximum likelihood estimation through the wrapper `fit_allo_herb()`. Users have the option to fit various parameters to data using the argument `optim.vars`. Default model parameter values that are not fitted can be specified through the argument `param.vals`. If convergence fails, users can change the optimizer via the argument `method`, in addition to changing the numerical approximation resolution via `by`, and/or bounds of optimization via `upper` and `lower`. The argument `id` can be supplied with a character string that serves as a unique identifier of the data set for book keeping.
+|            Currently, the neutral herbivory model can be fitted to data using maximum likelihood estimation through the wrapper `fit_allo_herb()`. Users have the option to fit various parameters to data using the argument `optim.vars`. Default model parameter values that are not fitted can be specified through the argument `param.vals`. If convergence fails, users can change the optimizer via the argument `method`, in addition to changing the numerical approximation resolution via `by`, and/or bounds of optimization via `upper` and `lower`. The argument `id` can be supplied with a character string that serves as a unique identifier of the data set for book keeping.  
 
 ```{r}
 # Generate some fake herbivory data
@@ -193,7 +193,7 @@ class(allo_fit)
 ```
 
 
-|            More information can be retrieved from the model object (see `?fit_allo_herb()` for more details). Of particular note is that `par` and `se` give you the raw estimates of the MLE parameters that are on a transformed scale as shown in `param.val.trans`. To retrieve the model coefficients, the user should use `coef()` or `print()`. Keep in mind that the standard errors (as well as the 95% confidence intervals) from both functions are approximated via the first order second moment method (see `?FSMO()`) by default. 
+|            More information can be retrieved from the model object (see `?fit_allo_herb()` for more details). Of particular note is that `par` and `se` give you the raw estimates of the MLE parameters that are on a transformed scale as shown in `param.val.trans`. To retrieve the model coefficients, the user should use `coef()` or `print()`. Keep in mind that the standard errors (as well as the 95% confidence intervals) from both functions are approximated via the first order second moment method (see `?FOSM()`) by default. 
 
 ```{r}
 names(allo_fit)
@@ -204,8 +204,7 @@ coef(allo_fit, se = TRUE)
 # Generic null models
 ## Formulation
 
-|            In this section, I demonstrate how to fit generic non-neutral non-processes based null models to herbivory data. This becomes important in a later section where I discuss how to compete the neutral herbivory model against the generic null models. Currently, two null distributions are implemented in *herbivar*: Zero-One-Inflated-Beta distribution (ZOIB) and Hurdle Truncated Log-Normal distribution (HTLN). 
-
+|            In this section, I demonstrate how to fit generic non-neutral non-processes based null models to herbivory data. This becomes important in a later section where I discuss how to compete the neutral herbivory model against the generic null models. Currently, two null distributions are implemented in *herbivar*: Zero-One-Inflated-Beta distribution (ZOIB) and Hurdle Truncated Log-Normal distribution (HTLN). An alternative non-parametric way of generating a null distribution can be accessed via `randomize_leaves()`.  
 
 |            The zero-one-inflated beta distribution has the density function (Ospina & Ferrari 2008), 
 
@@ -320,7 +319,8 @@ probed.data <- rbind(
 ```{r}
 vegan::rda(probed.data[,-1]) %>%
   get_biplot(choices = c(1,2), 
-             group = probed.data$distribution) + 
+             group = probed.data$distribution, 
+             ellipse = "t") + 
   ggplot2::theme_bw(base_size = 15) + 
   ggplot2::labs(color = "Distribution")
 ```
@@ -399,7 +399,6 @@ The `probe_dist_list()` function is a batch processing wrapper for `probe_dist()
 ```{r}
 probe_dist_list(
   list("a" = x,"b" = x, "c" = x), 
-  add.id = FALSE, 
   probes = c("mean", "Hoover", "J.index", "cd", "cv", "N","lac","Gini")
 )
 ```
