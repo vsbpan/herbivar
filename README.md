@@ -1,4 +1,4 @@
-# *herbivar*
+# *herbivar*: An R package
 <img src="man/figures/logo.png" align="right" height="200"/>
 
 ### Quantitative Tools for Variance Explicit Ecology and Herbivory
