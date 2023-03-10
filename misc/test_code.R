@@ -610,14 +610,27 @@ lines(1:100, x1, col = "blue", cex = 1.5)
 plot(y)
 
 
+library(herbivar)
+library(tidyverse)
+
+saveRDS(z, "real_herbivory_data.rds")
 
 
 
+d$x
+z <- list("field" = d$x, "lab" = lab_herb)
+
+
+d <- readRDS("misc/z.rds")
+lab_herb <- readRDS("misc/x.rds")
 
 
 
+white_herb <-d$x[d$morph == "w"]
+purple_herb <-d$x[d$morph == "p"]
 
 
-
-
+probes_d %>%
+  group_by(source,type) %>%
+  summarise_all(mean)
 

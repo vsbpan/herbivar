@@ -383,12 +383,15 @@ probe_dist_list<-function(data_list, probes = c("mean","var","cv","Gini",
 #' @param data_list a list of numeric vectors
 #' @param type a character vector indicating which plots to display. Acceptable options are "ecdf" and "hist".
 #' @param by the bin size
+#' @param return_transformed if \code{TRUE}, return a zoomed-in histogram.
 #' @param plot_smooth if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram.
 #' @param ecdf.xlim the x-axis bounds of the ECDF plot.
 #' @param ... additional arguments passed to \code{stats::plot.ecdf()}
 #' @export
 plot_distributions<-function(data_list, type = c("ecdf","hist"),
-                             by = 0.1, plot_smooth = TRUE, ecdf.xlim=c(0,1),...){
+                             by = 0.1, plot_smooth = TRUE, ecdf.xlim=c(0,1),
+                             return_transformed = FALSE,
+                             ...){
   if(any(type%in%"ecdf")){
     for (i in seq_along(data_list)){
       data_list[[i]] %>%
@@ -410,33 +413,40 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
         type=names(data_list)[i])
     }
     tally.data<-do.call("rbind",data.tally.list)
-    g<-tally.data %>%
-      dplyr::group_by(type) %>%
-      dplyr::mutate(y=y/sum(y)) %>%
-      ggplot2::ggplot(ggplot2::aes(x=x,y=(y)^0.1,group=type))+
-      ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
-      ggplot2::labs(y="Pr(Prop. herbivory)^0.1",
-           x="Prop. herbivory",
-           color="Data",
-           fill="Data")+
-      ggplot2::theme_bw(base_size=15)
-    if(plot_smooth){
-      g <- g + ggplot2::geom_line(stat="smooth",ggplot2::aes(color=type),size=1)
-    }
+
     g2<-tally.data %>%
       dplyr::group_by(type) %>%
       dplyr::mutate(y=y/sum(y)) %>%
       ggplot2::ggplot(ggplot2::aes(x=x,y=(y),group=type))+
       ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
       ggplot2::labs(y="Pr(Prop. herbivory)",
-           x="Prop. herbivory",
-           color="Data",
-           fill="Data")+
+                    x="Prop. herbivory",
+                    color="Data",
+                    fill="Data")+
       ggplot2::theme_bw(base_size=15)
-    if(.is_inst("ggpubr")){
-      return(ggpubr::ggarrange(g,g2,common.legend = TRUE,legend = "top"))
+
+    if(return_transformed){
+      g<-tally.data %>%
+        dplyr::group_by(type) %>%
+        dplyr::mutate(y=y/sum(y)) %>%
+        ggplot2::ggplot(ggplot2::aes(x=x,y=(y)^0.1,group=type))+
+        ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
+        ggplot2::labs(y="Pr(Prop. herbivory)^0.1",
+                      x="Prop. herbivory",
+                      color="Data",
+                      fill="Data")+
+        ggplot2::theme_bw(base_size=15)
+      if(plot_smooth){
+        g <- g + ggplot2::geom_line(stat="smooth",ggplot2::aes(color=type),size=1)
+      }
+
+      if(.is_inst("ggpubr")){
+        return(ggpubr::ggarrange(g,g2,common.legend = TRUE,legend = "top"))
+      } else {
+        return(list(g,g2))
+      }
     } else {
-      return(list(g,g2))
+      return(g2)
     }
   }
   })

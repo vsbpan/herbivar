@@ -47,8 +47,7 @@ knitr::opts_chunk$set(fig.align = "center", comment = NA, eval = TRUE)
 
 # Introduction
 
-|            The goal of this vignette is to introduce to the user on using the *herbivar* package to fit the neutral herbivory model (Pan et al. 2023) to empirical herbivory data and assess model fit. I also demonstrate some handy functions that can be used to characterize probability distributions and wrangle herbivory data more broadly. 
-
+|            The goal of this vignette is to introduce to the user on using the *herbivar* package to fit the neutral herbivory model (Pan et al. 2023) to empirical herbivory data and assess model fit. I also demonstrate some handy functions that can be used to characterize probability distributions and wrangle herbivory data more broadly. Finally, I provide some example applications of the neutral model. 
 
 |            To follow this vignette and use the *herbivar* package, you'll need to first use the `install_github()` function from the *devtools* package to install the latest version of *herbivar* from github. You can just run the code chunk below on your machine to install the packages. The *herbivar* package depends on *EBImage*, which can be installed via `BiocManager::install()`. If you not using Windows, you might have a problem with the file `libX11.6.dylib`, which the dependent package *imager* uses. You'll need to install XQuartz (https://www.xquartz.org/) to fix the error. You can set `build_vignettes = TRUE` in `install_github()` if you want to have the vignette. 
 
@@ -314,19 +313,18 @@ probed.data <- rbind(
 
   
   
-|            Then, using the `vegan` package, I can use principal component analysis to see that there is a clear separation of samples generated from the two distributions. The loading scores can be used to find that the two distributions differ most in terms of the kurtosis.  
+|            Then, using the *vegan* package, I can use principal component analysis to see that there is a clear separation of samples generated from the two distributions. The loading scores can be used to find that the two distributions differ most in terms of the kurtosis.  
 
 ```{r}
 vegan::rda(probed.data[,-1]) %>%
   get_biplot(choices = c(1,2), 
-             group = probed.data$distribution, 
-             ellipse = "t") + 
+             group = probed.data$distribution) + 
   ggplot2::theme_bw(base_size = 15) + 
   ggplot2::labs(color = "Distribution")
 ```
 
 
-|            Here, I use the distribution as a predictor in a redundancy analysis. We can see that the a substantial proportion of variance in the summary statics can be explained by the predictor (how the distributions are generated). This is clear support that the two distributions are different. Further analysis can be done using the `vegan` package which I will not go into here except that the significance of the predictor can be test via `anova()`. 
+|            Here, I use the distribution as a predictor in a redundancy analysis. We can see that the a substantial proportion of variance in the summary statics can be explained by the predictor (how the distributions are generated). This is clear support that the two distributions are different. Further analysis can be done using the *vegan* package which I will not go into here except that the significance of the predictor can be test via `anova()`. 
 
 ```{r}
 vegan::rda(probed.data[,-1] ~ probed.data$distribution)
@@ -430,16 +428,157 @@ bite_size_fit
 
 Currently, the following generic methods are supported for the fitted object: `coef()`, `print()`. 
 
+# Applications
+
+## Benchmarking Your $r^2$
+
+|            Here, I show how one can use the neutral herbivory model to conduct simulations to benchmark observed $r^2$ of herbivory from experiments. The motivation is that in ecology, we tend to observe very low variance explained ($r^2$) and it is unclear how to interpret the size of the magnitude itself. For instance, a meta-analysis by Moller and Jennions (2002) reports most studies have an r2 between 1.99 and 7.05%. This might be expected if the process we are measuring has a lot of baked in process variance. For instance, flipping a set of $n$ perfectly fair coins ($p = 0.5$) once would yield a variance of $0.25n$ in the number of heads. If we let the set of coins to differ in their probability of getting heads (i.e. $\mathbb{Var}[P] > 0$), we would see greater variance in the number of heads $H$, but some of the total variance would still be from the process itself. More precisely, $$\mathbb{Var}[H] = \mathbb{Var}[\mathbb{E}[H|P]] + \mathbb{E}[\mathbb{Var}[H|P]]$$. 
+
+If as functional ecologists, we wish to explain the variation of the number of heads with the variation of the quality of the coins, we would expect to obtain an $r^2$ value of $$r^2 = \frac{ \mathbb{Var}[\mathbb{E}[H|P]]}{\mathbb{Var}[H]}.$$ 
+
+This is very nice because if we know (or assume) the data generating process and have a good prior for how much variability there is in trait mediated effect on our variable of interest (i.e. $\mathbb{E}[H|P]]$), we can calculate the maximum proportion of variance that can be explained (upper bound of $r^2$). This upper bound can then be used as a bench mark to understand the actual $r^2$ you observe in a study. 
+
+|            For example, let there be two equally abundant plant phenotypes in a landscape. One phenotype has a high rate of being attacked $\lambda = 1$, while the other phenotype has a low rate of being attacked $\lambda = 0.1$. For most ecologically realistic scenarios, this is a pretty big effect size (Carmona et al. 2011). If we assume that the neutral herbivory model approximate the data generating process well, then we can simulate the maximum proportion variance explained due to traits. In this case, if a trait we study (e.g. leaf N content) has a marginal $r^2$ of 3%, that is already roughly half of all the variance that can be explained! 
+
+```{r}
+# High lambda phenotype
+lambda_h <- 1
+
+# Low lambda phenotype
+lambda_l <- 0.1
+
+# n simulations
+n <- 1000
+
+# Simulate herbivory as one would observe them in the field
+set.seed(100)
+y <- c(ralloT(n, lambda = lambda_h), ralloT(n, lambda = lambda_l))
+
+# Simulate phenotype data
+x <- c(rep(lambda_h, n), rep(lambda_l, n)) 
+
+# r2 benchmark
+var(predict(lm(y~x))) / var(y)
+
+```
+
+
+
+
+## Detection of unexpected deviations
+
+|            Here, I show how one can detect unexpected deviations from neutrality in two real herbivory data sets. The example data sets can be assessed through `herbivar::herb_data_example`. The first data set (`field`) comes from 200 *Hesperis matronalis* leaves I collected along the North Country Trail around Kellogg Biological Station in June. The second data set (`lab`) comes from 100 artificial agar blocks I fed to a single *Spodoptera exigua* caterpillar. In both cases, I scanned the leaves or agar blocks and used the `leaf_herb()` function to measure the proportion chewing damage. The minimum non-zero proportion herbivory is 0.5%. Because the regional herbivore pool is limited, we expect to see greater deviation of the `lab` herbivory distribution from the neutral herbivory distribution.  
+
+```{r}
+# Histogram of included example data set
+plot_distributions(herb_data_example, by = 0.05)
+
+```
+
+
+|            Here, I fitted the neutral herbivory distribution to each data set then calculated the value of statistical probes for each data set. I repeated this for the observed distribution and 100 predicted distributions generated from the fitted neutral model.  
+
+
+```{r}
+# Fit neutral model for each data set
+lab_herb_fit <- fit_allo_herb(herb_data_example$lab, method = "Brent")
+field_herb_fit <- fit_allo_herb(herb_data_example$field, method = "Brent")
+
+# Select some interesting statistical probes
+probes <- c("mean","var","max","Skew","Kurt","cv","Gini","lac")
+
+# Get value of probes of the raw data sets and 100 predicted distributions each
+set.seed(123)
+probes_d <- probe_dist_list(c(lapply(seq_len(100), function(x){
+  predict(field_herb_fit)
+}),
+list(field_herb_fit$data),
+lapply(seq_len(100), function(x){
+  predict(lab_herb_fit)
+}),
+list(lab_herb_fit$data)),
+probes = probes) %>%
+  cbind("source" = c(rep("field", 101), rep("lab", 101)),
+        "type" = rep(c(rep("predicted", 100), "observed"), 2)
+  )
+
+```
+
+
+As we can see, the two distributions (red vs blue) separately nicely in the first two principal components. More interestingly, we can see that the observed distribution of the `lab` data set is very different from the neutral distributions as we expects (circles = observed; triangles = neutral prediction). On the other hand, the observed distribution of the `field` data set appears indistinguishable from the neutral distributions. Looking at the species scores more closely, it seems that the observed `lab` herbivory distribution has a much lower maximum herbivory and Lorenz asymmetry coefficient (lac) value compared to the neutral expectation. 
+
+```{r}
+# Reduce the dimension of probes with PCA and plot
+vegan::rda(scale(probes_d[,probes])) %>%
+  get_biplot(group = probes_d$source,
+             group2 = probes_d$type,
+             ellipse = "t",
+             site_size = ifelse(probes_d$type == "observed", 5, 2)) +
+  ggplot2::scale_shape_manual(values = c(19,2)) + 
+  ggplot2::labs(shape = "type", 
+       color = "source")
+```
+
+
+Indeed, when we look at more holistic tests of distributions, we find that the observed `lab` distribution deviate from the neutral distribution significantly. 
+
+```{r}
+# Do other test of absolute fit
+set.seed(123)
+compare_dist_list(list("lab" = lab_herb_fit,
+                       "field" = field_herb_fit), 
+                  test = c("ks", "kl","ad"), 
+                  silent = TRUE)
+```
+
+
+## Economic Injury Threshold
+
+|            Here, I show how one can use the neutral herbivory model to inform pest management decisions. The motivation is that the injury threshold is often based on mean level of herbivory, but individual plants (the actual production unit) sustains different levels of herbivory and this leads to under or over estimation of yield. Suppose a crop (e.g. soybeans) has an injury threshold of 20%, we can use the distribution function to calculate the proportion of plants above the injury threshold. Let's assume that all plants have one leaf. 
+
+```{r}
+x <- seq(0.4,10, by = 0.4)
+y <- vapply(x,
+       function(x) palloT(0.2, 
+                          lambda = x,
+                          lower.tail = FALSE), 
+       FUN.VALUE = numeric(1))
+
+plot(y~x, 
+     ylab = "Pr(Herbivory > 20%)", 
+     xlab = expression(Attack~rate~lambda))
+graphics::abline(v = 3.3, col = "red") 
+graphics::segments(x0 = 0,x1 = 3.3, y0 = 0.3, y1 = 0.3, col = "black", lty = "dashed")
+
+```
+
+Here, I plotted the proportion of crop above the 20% injury threshold under different mean herbivory intensities. The red line corresponds to 20% mean herbivory. We can see that roughly a third of crop experience herbivory greater than the injury threshold if management action is only taken when the mean
+herbivory reaches 20%.  
+
+
+If we assume a yield function of $Yield = 100 -100 \phi_T^4$, we can calculate the yield gap due to overlooking the variation in herbivory individual plants sustain (i.e. non-linear averaging effect). 
+
+```{r}
+JE(model = function(x){100 -100*x^4}, 
+   x = ralloT(n = 1000, lambda = 3.3), 
+   plot = TRUE)
+
+```
+
+
 
 # References
 
+Carmona, D., M. J. Lajeunesse, and M. T. J. Johnson. 2011. Plant traits that predict resistance to herbivores. Functional Ecology 25:358–367.  
 Kendall, B. E., C. J. Briggs, W. W. Murdoch, P. Turchin, S. P. Ellner, E. McCauley, R. M. Nisbet, and S. N. Wood. 1999. Why Do Populations Cycle? A Synthesis of Statistical and Mechanistic Modeling Approaches. Ecology 80:1789–1805.  
 McGill, B. 2003. Strong and weak tests of macroecological theory. Oikos 102:679–685.  
 McGill, B. J., B. A. Maurer, and M. D. Weiser. 2006. Empirical Evaluation of Neutral Theory. Ecology 87:1411–1423.  
+Moller, A. P., and M. D. Jennions. 2002. How Much Variance Can Be Explained by Ecologists and Evolutionary Biologists? Oecologia 132:492–500.  
 Ospina, R., and S. L. P. Ferrari. 2008. Inflated beta distributions. Statistical Papers 51:111.
 Platt, J. R. 1964. Strong Inference. Science 146:347–353.  
 Smithson, M., and J. Verkuilen. 2006. A better lemon squeezer? Maximum-likelihood regression with beta-distributed dependent variables. Psychological Methods 11:54–71.  
 Warton, D. I., and F. K. C. Hui. 2011. The arcsine is asinine: the analysis of proportions in ecology. Ecology 92:3–10.  
+
 
 
 

@@ -269,7 +269,9 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 #' @param display a vector of characters defining what to plot
 #' @param ellipse a character string passed to the \code{type} argument of \code{ggplot2::stat_ellipse()}. If \code{NA}, no ellipse is plotted.
 #' @param group a vector in the same length and order as the sites data used to fit the model that is used to color the site points
+#' @param group2 a vector in the same length and order as the sites data used to fit the model that is used to determine the shape of the site points
 #' @param sites_alpha the transparency of the sites plotted as points
+#' @param site_size the size pf the site points
 #' @param species_color the color of the species labels
 #' @param species_alpha the transparency of the species plotted as text
 #' @return a ggplot object
@@ -301,7 +303,9 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        display = c("sites", "species", "biplot", "centroids"),
                        ellipse = NA,
                        group = NULL,
+                       group2 = NULL,
                        sites_alpha = 1,
+                       site_size = 2,
                        species_color = "violetred",
                        species_alpha = 1){
   display <- match.arg(display,several.ok = TRUE)
@@ -337,8 +341,20 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
 
   if("sites" %in% display){
     if(!is.null(group)){
-      s$sites <- cbind(s$sites, "group" = group)
-      g <- g + ggplot2::geom_point(data = s$sites, ggplot2::aes(color = group), alpha = sites_alpha)
+      if(!is.null(group2)){
+        s$sites <- cbind(s$sites, "group" = group, "group2" = group2)
+        g <- g + ggplot2::geom_point(data = s$sites,
+                                     ggplot2::aes(color = group, shape = group2),
+                                     alpha = sites_alpha,
+                                     size = site_size)
+      } else {
+        s$sites <- cbind(s$sites, "group" = group)
+        g <- g + ggplot2::geom_point(data = s$sites,
+                                     ggplot2::aes(color = group),
+                                     alpha = sites_alpha,
+                                     size = site_size)
+      }
+
     } else {
       g <- g + ggplot2::geom_point(data = s$sites,color = "deepskyblue", alpha = sites_alpha)
     }
@@ -525,3 +541,15 @@ as_named_vector <- function(x, id_col = 1, val_col = 2){
   names(z) <- x[,id_col,drop = TRUE]
   return(z)
 }
+
+
+
+#' @title Herbivory data example
+#' @description Real proportion herbivory data from a field survey of *Hesperis matronalis* and agar artificial diet blocks fed to caterpillar a single *Spodoptera exigua* caterpillar. The minimum non-zero proportion herbivory is 0.5%.
+#' @format ## `herb_data_example`
+#' A list of two vectors
+#' \describe{
+#'   \item{field}{Field survey data of *H. matronalis* leaf proportion chewing damage}
+#'   \item{lab}{Proportion chewing damage on agar blocks in a lab setting (limited regional herbivore pool)}
+#' }
+"herb_data_example"

@@ -10,6 +10,7 @@ plot_distributions(
   by = 0.1,
   plot_smooth = TRUE,
   ecdf.xlim = c(0, 1),
+  return_transformed = FALSE,
   ...
 )
 }
@@ -23,6 +24,8 @@ plot_distributions(
 \item{plot_smooth}{if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram.}
 
 \item{ecdf.xlim}{the x-axis bounds of the ECDF plot.}
+
+\item{return_transformed}{if \code{TRUE}, return a zoomed-in histogram.}
 
 \item{...}{additional arguments passed to \code{stats::plot.ecdf()}}
 }
