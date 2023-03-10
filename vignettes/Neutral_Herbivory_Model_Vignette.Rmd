@@ -552,7 +552,7 @@ graphics::segments(x0 = 0,x1 = 3.3, y0 = 0.3, y1 = 0.3, col = "black", lty = "da
 
 ```
 
-Here, I plotted the proportion of crop above the 20% injury threshold under different mean herbivory intensities. The red line corresponds to 20% mean herbivory. We can see that roughly a third of crop experience herbivory greater than the injury threshold if management action is only taken when the mean
+Here, I plotted the proportion of crop above the 20% injury threshold under different mean herbivory intensities. The red line corresponds to 20% mean herbivory. We can see that roughly a third of crops experience herbivory greater than the injury threshold if management action is only taken when the mean
 herbivory reaches 20%.  
 
 
@@ -574,7 +574,7 @@ Kendall, B. E., C. J. Briggs, W. W. Murdoch, P. Turchin, S. P. Ellner, E. McCaul
 McGill, B. 2003. Strong and weak tests of macroecological theory. Oikos 102:679–685.  
 McGill, B. J., B. A. Maurer, and M. D. Weiser. 2006. Empirical Evaluation of Neutral Theory. Ecology 87:1411–1423.  
 Moller, A. P., and M. D. Jennions. 2002. How Much Variance Can Be Explained by Ecologists and Evolutionary Biologists? Oecologia 132:492–500.  
-Ospina, R., and S. L. P. Ferrari. 2008. Inflated beta distributions. Statistical Papers 51:111.
+Ospina, R., and S. L. P. Ferrari. 2008. Inflated beta distributions. Statistical Papers 51:111.  
 Platt, J. R. 1964. Strong Inference. Science 146:347–353.  
 Smithson, M., and J. Verkuilen. 2006. A better lemon squeezer? Maximum-likelihood regression with beta-distributed dependent variables. Psychological Methods 11:54–71.  
 Warton, D. I., and F. K. C. Hui. 2011. The arcsine is asinine: the analysis of proportions in ecology. Ecology 92:3–10.  
