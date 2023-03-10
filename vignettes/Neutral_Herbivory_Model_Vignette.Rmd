@@ -177,7 +177,7 @@ allo_fit
 allo_fit2 <- fit_allo_herb(x,
               optim.vars = c("mean.phi.T","a"),
               init = c(10, 1),
-              by = 0.0001,
+              by = 0.001,
               method = "Nelder-Mead",
               cores = 1, # setting cores > 1, enables parallel
               id = "This lablel is passed to the object") 
@@ -430,13 +430,13 @@ Currently, the following generic methods are supported for the fitted object: `c
 
 # Applications
 
-## Benchmarking Your $r^2$
+## Benchmarking your $r^2$
 
-|            Here, I show how one can use the neutral herbivory model to conduct simulations to benchmark observed $r^2$ of herbivory from experiments. The motivation is that in ecology, we tend to observe very low variance explained ($r^2$) and it is unclear how to interpret the size of the magnitude itself. For instance, a meta-analysis by Moller and Jennions (2002) reports most studies have an r2 between 1.99 and 7.05%. This might be expected if the process we are measuring has a lot of baked in process variance. For instance, flipping a set of $n$ perfectly fair coins ($p = 0.5$) once would yield a variance of $0.25n$ in the number of heads. If we let the set of coins to differ in their probability of getting heads (i.e. $\mathbb{Var}[P] > 0$), we would see greater variance in the number of heads $H$, but some of the total variance would still be from the process itself. More precisely, $$\mathbb{Var}[H] = \mathbb{Var}[\mathbb{E}[H|P]] + \mathbb{E}[\mathbb{Var}[H|P]]$$. 
+|            Here, I show how one can use the neutral herbivory model to conduct simulations to benchmark observed $r^2$ of herbivory from experiments. The motivation is that in ecology, we tend to observe very low variance explained ($r^2$) and it is unclear how to interpret the size of the magnitude itself. For instance, a meta-analysis by Moller and Jennions (2002) reports most studies have an $r^2$ between 1.99 and 7.05%. This might be expected if the process we are measuring has a lot of baked in process variance. For instance, flipping a set of $n$ perfectly fair coins ($p = 0.5$) once would yield a variance of $0.25n$ in the number of heads. If we let the set of coins  differ in their probability of getting heads (i.e. $\mathbb{Var}[P] > 0$), we would see greater variance in the number of heads $H$, but some of the total variance would still be from the process itself. More precisely, $$\mathbb{Var}[H] = \mathbb{Var}[\mathbb{E}[H|P]] + \mathbb{E}[\mathbb{Var}[H|P]].$$ 
 
 If as functional ecologists, we wish to explain the variation of the number of heads with the variation of the quality of the coins, we would expect to obtain an $r^2$ value of $$r^2 = \frac{ \mathbb{Var}[\mathbb{E}[H|P]]}{\mathbb{Var}[H]}.$$ 
 
-This is very nice because if we know (or assume) the data generating process and have a good prior for how much variability there is in trait mediated effect on our variable of interest (i.e. $\mathbb{E}[H|P]]$), we can calculate the maximum proportion of variance that can be explained (upper bound of $r^2$). This upper bound can then be used as a bench mark to understand the actual $r^2$ you observe in a study. 
+This is very nice because if we know (or assume) the data generating process and have a good prior for how much variability there is in trait mediated effect on our variable of interest (i.e. $\mathbb{Var}[\mathbb{E}[H|P]]$), we can calculate the maximum proportion of variance that can be explained (upper bound of $r^2$). This upper bound can then be used as a bench mark to understand the actual $r^2$ you observe in a study. 
 
 |            For example, let there be two equally abundant plant phenotypes in a landscape. One phenotype has a high rate of being attacked $\lambda = 1$, while the other phenotype has a low rate of being attacked $\lambda = 0.1$. For most ecologically realistic scenarios, this is a pretty big effect size (Carmona et al. 2011). If we assume that the neutral herbivory model approximate the data generating process well, then we can simulate the maximum proportion variance explained due to traits. In this case, if a trait we study (e.g. leaf N content) has a marginal $r^2$ of 3%, that is already roughly half of all the variance that can be explained! 
 
@@ -471,7 +471,7 @@ var(predict(lm(y~x))) / var(y)
 
 ```{r}
 # Histogram of included example data set
-plot_distributions(herb_data_example, by = 0.05)
+plot_distributions(herb_data_example, by = 0.05,type = "hist")
 
 ```
 
@@ -532,7 +532,7 @@ compare_dist_list(list("lab" = lab_herb_fit,
 ```
 
 
-## Economic Injury Threshold
+## Economic injury threshold
 
 |            Here, I show how one can use the neutral herbivory model to inform pest management decisions. The motivation is that the injury threshold is often based on mean level of herbivory, but individual plants (the actual production unit) sustains different levels of herbivory and this leads to under or over estimation of yield. Suppose a crop (e.g. soybeans) has an injury threshold of 20%, we can use the distribution function to calculate the proportion of plants above the injury threshold. Let's assume that all plants have one leaf. 
 

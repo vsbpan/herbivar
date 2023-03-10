@@ -15,7 +15,7 @@ rep_data.frame<-function(x,n){
 
 
 #' @export
-id.screener<-function(data,variable = c("percHerbPlant",
+.id_screener<-function(data,variable = c("percHerbPlant",
                                         "percLf",
                                         "leaf",
                                         "plant"),
@@ -90,7 +90,7 @@ id.screener<-function(data,variable = c("percHerbPlant",
 
 
 #' @export
-get_data_list<-function(data,
+.get_data_list<-function(data,
                          variable = c("percHerbPlant",
                                       "percLf",
                                       "leaf",
