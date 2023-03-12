@@ -4,14 +4,14 @@
 \alias{LRT}
 \title{Likelihood Ratio Test (LRT)}
 \usage{
-LRT(model_candidate, model_null)
+LRT(model_candidate, model_ref)
 }
 \arguments{
-\item{model_candidate, model_null}{objects for which the log likelihood can be extracted via \code{stats::logLik()}. Model_null must have more degrees of freedom than model_candidate.}
+\item{model_candidate, model_ref}{objects for which the log likelihood can be extracted via \code{stats::logLik()}. 'model_ref' must have more degrees of freedom than 'model_candidate' for the function to not throw an error. 'model_candidate' should be nested within 'model_ref' for the test to be valid.}
 }
 \value{
 a data.frame of the LRT
 }
 \description{
-Perform likelihood ratio test
+Perform likelihood ratio test.
 }

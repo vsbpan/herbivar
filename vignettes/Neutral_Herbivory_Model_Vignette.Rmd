@@ -109,7 +109,7 @@ P(\phi_T | \lambda) \approx \sum_{k=0}^{k_{max}} P(\phi_T|k)P(k|\lambda)
 $$ 
 $k_{max} = 50$ by default as with sufficiently large $k$, $P(k|\lambda)$ becomes vanishingly small. The function throws a warning when the error tolerance set by the argument `k.max.tolerance` is exceeded, at which point the user should increase the default `k.max` setting. The calculation of $P(\phi_T|k)$ is trickier and involves utilizing the convolution theorem and finding the $k^{th}$ power of the Fourier transformed $P(\phi)$ function. To avoid overflow and improve computational efficiency, convolutions with $k > 100$  are approximated with a normal distribution instead, given the central limit theorem. This limit can be toggled via the `k.fft.limit` setting. More details of the calculation can be found in the help file (`?dalloT`) or the SI appendix of Pan et al. (2023). Broadly speaking, the important thing to note is that increasing the simulation resolution via the arguments `n.sim` or `by` increases the precision of the estimates. This can become important when fitting models to data, the optimizer can fail to find the likelihood peak, yielding inaccurate maximum likelihood estimates and convergence issues as a result. Reducing the resolution below the default values is generally not recommended.    
 
-|            The computational challenge of increasing the numerical approximation resolution is partially alleviated by the parallel computing feature implemented in *herbivar*. This feature can be assess via functions with the argument `cores` and `parallel`. Setting `prallel = TRUE` and `cores` above 1 would enable the feature when the function detects that computational efficiency gain may be acquired. In general, functions like `dalloT()` are fast enough to not gain that much from parallel computing, unless the numerical approximation solution is set very high (0.00001 < by). Even then, the gain in efficiency is only very modest. However, this feature would become important when fitting the neutral model to data in which repeated evaluations of the log likelihood function is required, but the overhead of setting up the parallel sessions is only paid once. 
+|            The computational challenge of increasing the numerical approximation resolution is partially alleviated by the parallel computing feature implemented in *herbivar*. This feature can be access via functions with the argument `cores` and `parallel`. Setting `prallel = TRUE` and `cores` above 1 would enable the feature when the function detects that computational efficiency gain may be acquired. In general, functions like `dalloT()` are fast enough to not gain that much from parallel computing, unless the numerical approximation solution is set very high (0.00001 < by). Even then, the gain in efficiency is only very modest. However, this feature would become important when fitting the neutral model to data in which repeated evaluations of the log likelihood function is required, but the overhead of setting up the parallel sessions is only paid once. 
 
 ```{r}
 # Generate sum numbers
@@ -217,7 +217,7 @@ P(x; p_0, p_1,\alpha,\beta) = \Bigg\{ \begin{array}{cc}
 \end{array}
 $$
 
-It can be considered as an extension to the beta distribution commonly used to model proportion herbivory. The parameters $\alpha$ and $\beta$ correspond to the same parameters in a beta distribution. The additional parameters $p_0$ and $p_1$, model the probability of zeros and ones. Using this extension properly models the presence of 0s and 1s in proportion herbivory data without the need for arbitrary transformations (Smithson & Verkuilen 2006, Warton & Hui 2011). Still, in practice, the large number of family parameters and computational limitations may render these transformations more desired. Users can use the function `adjust_prop()` to select from a list of transformation methods.  
+It can be considered as an extension to the beta distribution commonly used to model proportion herbivory. The parameters $\alpha$ and $\beta$ correspond to the same parameters in a beta distribution. The additional parameters $p_0$ and $p_1$, model the probability of zeros and ones. Using this extension properly models the presence of 0s and 1s in proportion herbivory data without the need for arbitrary transformations (Smithson & Verkuilen 2006, Warton & Hui 2011). Still, in practice, the large number of family parameters and computational limitations may render these transformations more desired. Users can use the function `adjust_prop()` to select from a list of transformation methods. The recent ordered beta regression of Kubinec (2022), which models the bounds as censored sections of a single continuous latent variable is another nice solution. It is available as `family = ordbeta()` in the *glmmTMB* package. It should be noted however, that when a single mean is estimated (i.e. intercept only model), the ordered beta regression is equivalent to a reparamterized ZOIB.  
 
 |            The hurdle-truncated-log-normal distribution has the density function, 
 $$
@@ -335,12 +335,12 @@ vegan::rda(probed.data[,-1] ~ probed.data$distribution)
 
 |            Here, I show how one can compete a candidate model against multiple alternative hypotheses. Using the fitted objects from `fit_allo_herb()` and `fit_generic_null()`, we can do likelihood based model selection through the functions `AIC()`, `AICc()`, `BIC()`, and `LRT()`. These functions are also compatible with any model objects for which the log likelihood and other information can be extracted through the generic method `logLik()`. 
 
-|            The likelihood ratio test performed via `LRT()` tests whether a candidate model has a greater likelihood than a null model. It is important to keep in mind that the null model must have fewer degrees of freedom than the candidate model.
+|            The likelihood ratio test performed via `LRT()` tests whether a candidate model has a greater likelihood than a reference model. It is important to keep in mind that the candidate model should be nested within the reference model. As below, the two models are not nested, so the function throws a warning. 
 ```{r}
 # Likelihood ratio test
-# The HTLN model is the candidate model and the neutral herbivory model is the null.
+# The HTLN model is the candidate model and the neutral herbivory model is the reference model
 LRT(model_candidate = htlnorm_fit,
-    model_null = allo_fit)
+    model_ref = allo_fit)
 ```
 
 
@@ -467,7 +467,7 @@ var(predict(lm(y~x))) / var(y)
 
 ## Detection of unexpected deviations
 
-|            Here, I show how one can detect unexpected deviations from neutrality in two real herbivory data sets. The example data sets can be assessed through `herbivar::herb_data_example`. The first data set (`field`) comes from 200 *Hesperis matronalis* leaves I collected along the North Country Trail around Kellogg Biological Station in June. The second data set (`lab`) comes from 100 artificial agar blocks I fed to a single *Spodoptera exigua* caterpillar. In both cases, I scanned the leaves or agar blocks and used the `leaf_herb()` function to measure the proportion chewing damage. The minimum non-zero proportion herbivory is 0.5%. Because the regional herbivore pool is limited, we expect to see greater deviation of the `lab` herbivory distribution from the neutral herbivory distribution.  
+|            Here, I show how one can detect unexpected deviations from neutrality in two real herbivory data sets. The example data sets can be accessed through `herbivar::herb_data_example`. The first data set (`field`) comes from 200 *Hesperis matronalis* leaves I collected along the North Country Trail around Kellogg Biological Station in June. The second data set (`lab`) comes from 100 artificial agar blocks I fed to a single *Spodoptera exigua* caterpillar. In both cases, I scanned the leaves or agar blocks and used the `leaf_herb()` function to measure the proportion chewing damage. The minimum non-zero proportion herbivory is 0.5%. Because the regional herbivore pool is limited, we expect to see greater deviation of the `lab` herbivory distribution from the neutral herbivory distribution.  
 
 ```{r}
 # Histogram of included example data set
@@ -571,6 +571,7 @@ JE(model = function(x){100 -100*x^4},
 
 Carmona, D., M. J. Lajeunesse, and M. T. J. Johnson. 2011. Plant traits that predict resistance to herbivores. Functional Ecology 25:358–367.  
 Kendall, B. E., C. J. Briggs, W. W. Murdoch, P. Turchin, S. P. Ellner, E. McCauley, R. M. Nisbet, and S. N. Wood. 1999. Why Do Populations Cycle? A Synthesis of Statistical and Mechanistic Modeling Approaches. Ecology 80:1789–1805.  
+Kubinec, R. 2022. Ordered Beta Regression: A Parsimonious, Well-Fitting Model for Continuous Data with Lower and Upper Bounds. Political Analysis:1–18.  
 McGill, B. 2003. Strong and weak tests of macroecological theory. Oikos 102:679–685.  
 McGill, B. J., B. A. Maurer, and M. D. Weiser. 2006. Empirical Evaluation of Neutral Theory. Ecology 87:1411–1423.  
 Moller, A. P., and M. D. Jennions. 2002. How Much Variance Can Be Explained by Ecologists and Evolutionary Biologists? Oecologia 132:492–500.  
