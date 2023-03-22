@@ -505,7 +505,7 @@ probes = probes) %>%
 ```
 
 
-As we can see, the two distributions (red vs blue) separately nicely in the first two principal components. More interestingly, we can see that the observed distribution of the `lab` data set is very different from the neutral distributions as we expects (circles = observed; triangles = neutral prediction). On the other hand, the observed distribution of the `field` data set appears indistinguishable from the neutral distributions. Looking at the species scores more closely, it seems that the observed `lab` herbivory distribution has a much lower maximum herbivory and Lorenz asymmetry coefficient (lac) value compared to the neutral expectation. 
+As we can see, the two distributions (red vs blue) separately nicely in the first two principal components. More interestingly, we can see that the observed distribution of the `lab` data set is very different from the neutral distributions as we expect (circles = observed; triangles = neutral prediction). On the other hand, the observed distribution of the `field` data set appears indistinguishable from the neutral distributions. Looking at the species scores more closely, it seems that the observed `lab` herbivory distribution has a much lower maximum herbivory and Lorenz asymmetry coefficient (lac) value compared to the neutral expectation. 
 
 ```{r}
 # Reduce the dimension of probes with PCA and plot

@@ -412,34 +412,34 @@ hellinger_trans <- function(x){
   sqrt(x/rs)
 }
 
-#' @title Partial R2 of Fitted Model Predictor
-#' @description Generic method of finding the partial R2 of a specified predictor variable by finding the change in r2 when the predictor variable is set to zero.
+#' @title Delta R2 of Fitted Model Predictor
+#' @description Generic method of finding the delta R2 of a specified predictor variable by finding the change in r2 when the predictor variable is set to zero.
 #' @param object a supported model fit object
-#' @param var the name of the variable for which to assess the partial R2
+#' @param var the name of the variable for which to assess the delta R2
 #' @param ... additional parameters
-#' @return the partial r2
+#' @return the delta r2
 #' @export
-r2_partial <- function(object, var, ...){
-  UseMethod("r2_partial")
+r2_delta <- function(object, var, ...){
+  UseMethod("r2_delta")
 }
 
 
 
 
-#' @title Partial R2 of Fitted 'brmsfit' Model Predictor
-#' @description Calculate the Bayesian partial R2 of a specified predictor variable by finding the change in r2 when the predictor variable is set to zero.
+#' @title Delta R2 of Fitted 'brmsfit' Model Predictor
+#' @description Calculate the Bayesian delta R2 of a specified predictor variable by finding the change in r2 when the predictor variable is set to zero.
 #' @param object A 'brmsfit' object
-#' @param var the name of the variable for which to assess the partial R2
+#' @param var the name of the variable for which to assess the delta R2
 #' @param summary if \code{TRUE} (default), the posterior draws are summarized
 #' @param robust if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate
 #' @param probs The lower and upper interval of posterior summary
 #' @param ndraws The number of posterior samples used in the simulation, passed to the \code{'ndraws'} argument of \code{brms:::posterior_epred.brmsfit()}. If \code{NULL} (default), all samples are used.
 #' @param draw_ids An integer vector specifying the posterior draws to be used. If \code{NULL} (default), all draws are used.
 #' @param ... additional arguments
-#' @return a matrix of partial r2 draws or a vector of partial r2 summary.
-#' @rdname r2_partial.brmsfit
+#' @return a matrix of delta r2 draws or a vector of delta r2 summary.
+#' @rdname r2_delta.brmsfit
 #' @export
-r2_partial.brmsfit<-function(object, var, summary = TRUE,
+r2_delta.brmsfit<-function(object, var, summary = TRUE,
                              robust = FALSE, probs = c(0.025,0.975),
                              ndraws = NULL, draw_ids = NULL,
                              ...){
@@ -464,39 +464,41 @@ r2_partial.brmsfit<-function(object, var, summary = TRUE,
   var_ypred.og <- matrixStats::rowVars(ypred.og)
   var_e <- matrixStats::rowVars(-1 * sweep(ypred, 2, y))
   var_e.og <- matrixStats::rowVars(-1 * sweep(ypred.og, 2, y))
-  partial_r2 <- as.matrix(var_ypred.og / (var_ypred.og + var_e.og) - var_ypred /(var_ypred + var_e) )
+  r2_full <- as.matrix(var_ypred.og / (var_ypred.og + var_e.og))
+  r2_reduced <- as.matrix(var_ypred /(var_ypred + var_e))
+  delta_r2 <- as.matrix(r2_full - r2_reduced)
 
   if(summary){
-    partial_r2 <- brms::posterior_summary(partial_r2, probs = probs, robust = robust)
+    delta_r2 <- brms::posterior_summary(delta_r2, probs = probs, robust = robust)
   }
-  rownames(partial_r2) <- rep("partial_R2", nrow(partial_r2))
-  return(partial_r2)
+  rownames(delta_r2) <- rep("delta_R2", nrow(delta_r2))
+  return(delta_r2)
 }
 
 
-#' @title Partial R2 of All Fitted Model Predictors
-#' @description Generic method of finding the partial R2 of all predictor variables by finding the change in r2 when the predictor variable is set to zero.
+#' @title Delta R2 of All Fitted Model Predictors
+#' @description Generic method of finding the delta R2 of all predictor variables by finding the change in r2 when the predictor variable is set to zero.
 #' @param object a supported model fit object
-#' @param ... additional parameters passed to \code{r2_partial()}
-#' @return a data.frame of partial R2 values
+#' @param ... additional parameters passed to \code{r2_delta()}
+#' @return a data.frame of delta R2 values
 #' @export
-r2_partial_all <- function(object, ...){
-  UseMethod("r2_partial_all")
+r2_delta_all <- function(object, ...){
+  UseMethod("r2_delta_all")
 }
 
 
-#' @title Partial R2 of All Fitted 'brmsfit' Model Predictors
-#' @description Calculate the Bayesian partial R2 of all predictor variables by finding the change in r2 when the predictor variable is set to zero.
+#' @title Delta R2 of All Fitted 'brmsfit' Model Predictors
+#' @description Calculate the Bayesian delta R2 of all predictor variables by finding the change in r2 when the predictor variable is set to zero.
 #' @param object A 'brmsfit' object
 #' @param summary if \code{TRUE} (default), the posterior draws are summarized
 #' @param robust if \code{TRUE} (default is FALSE), the median instead of the mean is returned as the estimate
 #' @param probs The lower and upper interval of posterior summary
 #' @param ndraws The number of posterior samples used in the simulation, passed to the \code{'ndraws'} argument of \code{brms:::posterior_epred.brmsfit()}. If \code{NULL} (default), all samples are used.
 #' @param draw_ids An integer vector specifying the posterior draws to be used. If \code{NULL} (default), all draws are used.
-#' @param ... additional arguments passed to \code{r2_partial()}
-#' @return a data.frame of partial R2 values
+#' @param ... additional arguments passed to \code{r2_delta()}
+#' @return a data.frame of delta R2 values
 #' @export
-r2_partial_all.brmsfit <- function(object, summary = TRUE,
+r2_delta_all.brmsfit <- function(object, summary = TRUE,
                                    robust = FALSE, probs = c(0.025,0.975),
                                    ndraws = NULL, draw_ids = NULL, ...){
   vars <- names(object$data)[-1]
@@ -507,11 +509,11 @@ r2_partial_all.brmsfit <- function(object, summary = TRUE,
 
 
   z <- lapply(vars, function(v){
-    r2_partial(object,v, summary = summary, robust = robust, probs = probs,
+    r2_delta(object,v, summary = summary, robust = robust, probs = probs,
                ndraws = ndraws, draw_ids = draw_ids, ...)
   }) %>% do.call(ifelse(summary, "rbind", "cbind"),.) %>%
     as.data.frame()
-  z.resid <- unlist(r2_partial(object, var = vars, summary = FALSE,
+  z.resid <- unlist(r2_delta(object, var = vars, summary = FALSE,
                                robust = robust, probs = probs,
                                ndraws = ndraws, draw_ids = draw_ids, ...))
   z.resid <- 1 - z.resid
