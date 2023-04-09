@@ -10,7 +10,7 @@
   max.phi = 1,
   a = 14/9,
   n.sim = 1000,
-  truncate = T
+  truncate = TRUE
 )
 }
 \arguments{

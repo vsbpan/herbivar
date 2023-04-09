@@ -112,7 +112,7 @@ $k_{max} = 50$ by default as with sufficiently large $k$, $P(k|\lambda)$ becomes
 |            The computational challenge of increasing the numerical approximation resolution is partially alleviated by the parallel computing feature implemented in *herbivar*. This feature can be access via functions with the argument `cores` and `parallel`. Setting `prallel = TRUE` and `cores` above 1 would enable the feature when the function detects that computational efficiency gain may be acquired. In general, functions like `dalloT()` are fast enough to not gain that much from parallel computing, unless the numerical approximation solution is set very high (0.00001 < by). Even then, the gain in efficiency is only very modest. However, this feature would become important when fitting the neutral model to data in which repeated evaluations of the log likelihood function is required, but the overhead of setting up the parallel sessions is only paid once. 
 
 ```{r}
-# Generate sum numbers
+# Generate some numbers
 x <- ralloT(10000, lambda = 3)
 
 # Check number of computer cores available

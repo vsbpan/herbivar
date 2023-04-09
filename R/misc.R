@@ -460,10 +460,10 @@ r2_delta.brmsfit<-function(object, var, summary = TRUE,
   ypred <- brms::posterior_epred(object, newdata = pred.data,
                                  allow_new_levels = TRUE, ndraws = ndraws, draw_ids = draw_ids)
   ypred.og <- brms::posterior_epred(object, ndraws = ndraws, draw_ids = draw_ids)
-  var_ypred <- matrixStats::rowVars(ypred)
-  var_ypred.og <- matrixStats::rowVars(ypred.og)
-  var_e <- matrixStats::rowVars(-1 * sweep(ypred, 2, y))
-  var_e.og <- matrixStats::rowVars(-1 * sweep(ypred.og, 2, y))
+  var_ypred <- Rfast::rowVars(ypred)
+  var_ypred.og <- Rfast::rowVars(ypred.og)
+  var_e <- Rfast::rowVars(-1 * Rfast::eachrow(ypred,y,"-"))
+  var_e.og <- Rfast::rowVars(-1 * Rfast::eachrow(ypred.og,y,"-"))
   r2_full <- as.matrix(var_ypred.og / (var_ypred.og + var_e.og))
   r2_reduced <- as.matrix(var_ypred /(var_ypred + var_e))
   delta_r2 <- as.matrix(r2_full - r2_reduced)
@@ -532,17 +532,7 @@ r2_delta_all.brmsfit <- function(object, summary = TRUE,
 
 
 
-#' @title Turn data frame to named vector
-#' @description Turn data frame to named vector
-#' @param x the data.frame
-#' @param id_col the index or column name (as a character string) of the names
-#' @param val_col the index or column name (as a character string) of the values
-#' @return a named vector
-as_named_vector <- function(x, id_col = 1, val_col = 2){
-  z <- x[,val_col,drop = TRUE]
-  names(z) <- x[,id_col,drop = TRUE]
-  return(z)
-}
+
 
 
 
@@ -555,3 +545,8 @@ as_named_vector <- function(x, id_col = 1, val_col = 2){
 #'   \item{lab}{Proportion chewing damage on agar blocks in a lab setting (limited regional herbivore pool)}
 #' }
 "herb_data_example"
+
+
+
+
+

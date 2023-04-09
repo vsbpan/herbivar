@@ -130,17 +130,23 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
 #' @return a vector of numeric values
 #' @export
 .allometry.herb.quasi.sim<-function(mean.phi.T,min.phi=0.005,max.phi=1,a=14/9,
-                                   n.sim=1000,truncate=T){
+                                   n.sim=1000,truncate=TRUE){
   #Forward approximate simulation (not exact!)
   lambda<-get_lambda(mean.phi.T = mean.phi.T,min.phi = min.phi, max.phi = max.phi, a = a)
-  k<-rpois(n.sim,lambda)
-  phi_T<-vapply(X = k,
-                FUN = function(x) sum(
-                  rallo(n = x,
-                        min.phi = min.phi,
-                        max.phi = max.phi,
-                        a = a)),
-                FUN.VALUE = numeric(1))
+  k <- rpois(n.sim,lambda)
+  phi_T_non_zero <- Rfast::group(
+    rallo(n = sum(k),
+          min.phi = min.phi,
+          max.phi = max.phi,
+          a = a),
+    rep(seq_len(n.sim), k),
+    method = "sum"
+  )
+
+  phi_T <- k
+  phi_T[phi_T>0] <- phi_T_non_zero
+
+
   if(truncate){
     phi_T[phi_T>1]<-1 # Cut off phi_T if goes over 1. May underestimate mean.phi.T
   }
@@ -445,11 +451,11 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
   if(parallel &&
      (50000 < fft.vec.length)){ # Only long fft.vec benefits from parallel
     cond.prob.mat <- foreach::foreach(i=k, .combine = cbind) %dopar%{
-      (Re(fft(fft.vec^i,inverse = T))/fft.vec.length)
+      (Re(fft(fft.vec^i,inverse = TRUE))/fft.vec.length)
     }
   } else {
     cond.prob.mat<-sapply(k,function(x){
-      (Re(fft(fft.vec^x,inverse = T))/fft.vec.length)
+      (Re(fft(fft.vec^x,inverse = TRUE))/fft.vec.length)
     })
   }
   return(cond.prob.mat)

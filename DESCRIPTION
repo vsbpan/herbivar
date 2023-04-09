@@ -27,7 +27,8 @@ Imports:
     parallel,
     extraDistr,
     EBImage, 
-    spatstat.geom
+    spatstat.geom,
+    Rfast
 Suggests: 
     spatstat,
     ineq, 

@@ -1004,3 +1004,19 @@ gen_mean <- function(x, p, na.rm = FALSE){
 }
 
 
+# Cohen, J. E., and M. Xu. 2015. Random sampling of skewed distributions implies Taylor’s power law of fluctuation scaling. Proceedings of the National Academy of Sciences 112:7749–7754.
+
+# TL_approx <- function(x, na.rm = FALSE){
+#   if(na.rm){
+#     x <- x[!is.na(x)]
+#   }
+#   gamma1 <- Skew(x, method = 1)
+#   CV <- cv(x, method = "standard")
+#   kappa <- Kurt(x, method = 1)
+#   b.hat <- gamma1 / CV
+#   a.log <- log(var(x)) - gamma1 / CV * log(mean(x))
+#   b.se <- sqrt((kappa -1 - gamma1^2) / ((length(x) - 2) * CV^2))
+#   return(c("b.hat" = b.hat, "b.se" = b.se, "b.lower" = b.hat - b.se * 1.96,
+#            "b.upper" = b.hat + b.se * 1.96, "a.log" = a.log))
+# }
+

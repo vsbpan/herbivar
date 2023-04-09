@@ -594,10 +594,8 @@ nn_dist <- function(object, # expect a matrix with two columns or split_herb
                                     "greater","lesser"),
                     silent = FALSE){
   if(inherits(object, "split_herb")){
-    r<-dist(object$hole_centroid) %>%
-      as.matrix() %>% apply(.,1,function(x){
-        min(x[x>0])
-      })
+    r<-Rfast::rowMins(Rfast::upper_tri(Rfast::Dist(object$hole_centroid),
+                                       suma = FALSE, diag = FALSE), value = TRUE)
     rho <- object$n_holes / object$leaf_area["px"]
     names(rho) <- NULL
     r_E_bar <- 0.5 / sqrt(rho)
@@ -670,8 +668,9 @@ pair_dist<-function(object){
         stop("Object needs to be a n x 2 matrix")
     }
   }
-  cen.dist<- dist(object)
-  out <- data.frame(t(utils::combn(attr(cen.dist,"Size"),2)),as.vector(cen.dist))
+  cen.dist <- Rfast::upper_tri(Rfast::Dist(object), suma = FALSE, diag = FALSE)
+  out <- data.frame(t(Rfast::comb_n(nrow(object), 2)),
+                    cen.dist)
   names(out) <- c("cent1","cent2","dist")
   return(out)
 }

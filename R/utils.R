@@ -197,12 +197,12 @@ bind_vec <- function(x,margin = 1L, keep_row_names = TRUE, row_names_as_col = FA
 }
 
 #' @title First Order Second Moment Method
-#' @description Compute the variance of a transformed random variable using first order Taylor's aproximation.
+#' @description Compute the variance of a transformed random variable using first order Taylor's approximation (Delta method).
 #' @param x The expectation of the random variable
 #' @param var The variance of the random variable
 #' @param trans A function by which the random variable is transformed
 #' @details
-#' The first order second moment method can be used to approximate the variance of a transformed random variable provided that we know the first derivitive of the transformation function, the mean, and variance of the random variable:
+#' The first order second moment method can be used to approximate the variance of a transformed random variable provided that we know the first derivative of the transformation function, the mean, and variance of the random variable:
 #' \deqn{\mathbb{Var}[f(X)] \approx f'(\mathbb{E}[X])^2 \mathbb{Var}[X]}
 #'
 #' @return a numeric value
@@ -224,3 +224,49 @@ FOSM <- function(x,var,trans){
   var.trans <- eval(deriv.expression)^2 * var
   return(var.trans)
 }
+
+
+#' @title Turn data frame to named vector
+#' @description Turn data frame to named vector
+#' @param x the data.frame
+#' @param id_col the index or column name (as a character string) of the names
+#' @param val_col the index or column name (as a character string) of the values
+#' @return a named vector
+as_named_vector <- function(x, id_col = 1, val_col = 2){
+  z <- x[,val_col,drop = TRUE]
+  names(z) <- x[,id_col,drop = TRUE]
+  return(z)
+}
+
+seq_interval <- function(x, length.out = 300){
+  seq(min(x),max(x), length.out = length.out)
+}
+
+
+
+ordered_stat <- function(x, n){
+  x <- sort(x)
+
+  if(n %% 1 > 0){
+    stop("n must be a non-zero integer")
+  }
+
+  if(n > 0){
+    x[n]
+  } else {
+    x[length(x) + n]
+  }
+}
+
+melt <- function(x, drop = FALSE){
+  x.dim <- dim(x)
+  l <- lapply(x.dim, seq.int)
+  names(l) <- c("x","y","z","w","m","n","q","p","r","s","t","u","v")[seq_along(l)]
+  d <- do.call("expand.grid", l)
+  if(drop){
+    d <- d[,x.dim > 1]
+  }
+  d$val <- c(x)
+  return(d)
+}
+

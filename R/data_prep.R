@@ -148,11 +148,10 @@ rep_data.frame<-function(x,n){
   if(summarise_plant){
     rand.list <- lapply(rand.list,
                         function(x){
-                          unname(tapply(x$herb,
+                          unname(Rfast::group(x$herb,
                                         (x$group),
-                                        function(z) {
-                                          mean(z, na.rm = TRUE)
-                                        })
+                                        method = "mean"
+                                        )
                           )
                         })
 

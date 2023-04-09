@@ -17,9 +17,9 @@ FOSM(x, var, trans)
 a numeric value
 }
 \description{
-Compute the variance of a transformed random variable using first order Taylor's aproximation.
+Compute the variance of a transformed random variable using first order Taylor's approximation (Delta method).
 }
 \details{
-The first order second moment method can be used to approximate the variance of a transformed random variable provided that we know the first derivitive of the transformation function, the mean, and variance of the random variable:
+The first order second moment method can be used to approximate the variance of a transformed random variable provided that we know the first derivative of the transformation function, the mean, and variance of the random variable:
 \deqn{\mathbb{Var}[f(X)] \approx f'(\mathbb{E}[X])^2 \mathbb{Var}[X]}
 }

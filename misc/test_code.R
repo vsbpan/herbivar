@@ -634,3 +634,69 @@ probes_d %>%
   group_by(source,type) %>%
   summarise_all(mean)
 
+
+
+# Cohen, J. E., and M. Xu. 2015. Random sampling of skewed distributions implies Taylor’s power law of fluctuation scaling. Proceedings of the National Academy of Sciences 112:7749–7754.
+
+
+
+
+TL_approx <- function(x, na.rm = FALSE){
+  if(na.rm){
+    x <- x[!is.na(x)]
+  }
+  gamma1 <- Skew(x, method = 1)
+  CV <- cv(x, method = "standard")
+  kappa <- Kurt(x, method = 1)
+  b.hat <- gamma1 / CV
+  a.log <- log(var(x)) - gamma1 / CV * log(mean(x))
+  b.se <- sqrt((kappa -1 - gamma1^2) / ((length(x) - 2) * CV^2))
+  return(c("b.hat" = b.hat, "b.se" = b.se, "b.lower" = b.hat - b.se * 1.96,
+           "b.upper" = b.hat + b.se * 1.96, "a.log" = a.log))
+}
+
+
+test_TL_approx <- function(x){
+  if(is.character(x)){
+    x <- parse(text = x)
+  } else {
+    x <- substitute(x)
+  }
+  analytical_out <- TL_approx(eval(x))
+  MC_out <- replicate(1000, eval(x)) %>%
+    apply(2, function(z){
+      c("v" = log(var(z)), "m" = log(mean(z)))
+    }) %>%
+    t() %>%
+    as.data.frame() %>%
+    lm() %>%
+    coef()
+  list("analytical" = analytical_out, "MC" = MC_out)
+}
+
+undebug(test_TL_approx)
+
+
+
+test_TL_approx(ralloT(1000,0.05))
+
+
+
+
+library(herbivar)
+
+microbenchmark::microbenchmark(
+  "a" = herbivar:::.allometry.herb.quasi.sim(0.1, n.sim = 1000),
+  "b" = allometry.herb.quasi.sim(0.1, n.sim = 1000)
+)
+
+ralloT(1000, 0.1)
+
+allometry.herb.quasi.sim<-compiler::cmpfun(allometry.herb.quasi.sim)
+
+
+
+
+
+
+
