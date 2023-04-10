@@ -449,14 +449,12 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 .convolve.dist <- function(k, fft.vec, parallel = FALSE){
   fft.vec.length<-length(fft.vec)
   if(parallel &&
-     (50000 < fft.vec.length)){ # Only long fft.vec benefits from parallel
-    cond.prob.mat <- foreach::foreach(i=k, .combine = cbind) %dopar%{
-      (Re(fft(fft.vec^i,inverse = TRUE))/fft.vec.length)
-    }
+     (500000 < fft.vec.length)){ # Only long fft.vec benefits from parallel
+    cond.prob.mat <- Re((foreach::foreach(i=k, .combine = cbind) %dopar%{
+      stats::fft(fft.vec^i, inverse = TRUE)
+    })) / fft.vec.length
   } else {
-    cond.prob.mat<-sapply(k,function(x){
-      (Re(fft(fft.vec^x,inverse = TRUE))/fft.vec.length)
-    })
+    cond.prob.mat <- Re(stats::mvfft(outer(fft.vec, k, "^"), inverse = TRUE)) / fft.vec.length
   }
   return(cond.prob.mat)
 }

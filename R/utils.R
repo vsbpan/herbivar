@@ -270,3 +270,18 @@ melt <- function(x, drop = FALSE){
   return(d)
 }
 
+unmelt <- function(x){
+  nm <- colnames(x)
+
+  if(!("val" %in% nm)){
+    stop("Expects 'val' as a column in 'x'.")
+  }
+
+  nm <- nm[nm != "val"]
+
+  array(
+    x[do.call("order", as.list(x[rev(nm)])), "val"],
+    dim = Rfast::colMaxs(as.matrix(x[,nm]), value = TRUE)
+  )
+}
+

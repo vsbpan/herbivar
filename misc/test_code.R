@@ -685,18 +685,22 @@ test_TL_approx(ralloT(1000,0.05))
 
 library(herbivar)
 
-microbenchmark::microbenchmark(
-  "a" = herbivar:::.allometry.herb.quasi.sim(0.1, n.sim = 1000),
-  "b" = allometry.herb.quasi.sim(0.1, n.sim = 1000)
-)
 
-ralloT(1000, 0.1)
-
-allometry.herb.quasi.sim<-compiler::cmpfun(allometry.herb.quasi.sim)
+k<-1:30
 
 
+img <- image_example()
+
+
+thin(grayscale(img), method = "mean") %>% plot()
+
+debug(thin)
 
 
 
+
+img %>%
+  thin(20, method = "mad") %>%
+  plot()
 
 

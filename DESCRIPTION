@@ -40,7 +40,6 @@ Suggests:
     devtools,
     purrr,
     brms,
-    matrixStats,
     numDeriv,
     philentropy, 
     scales,

@@ -387,19 +387,91 @@ mat2ppp <- function(mat){
 #' @description reduce pixel density
 #' @param object an object of class 'cimg', 'pixset', 'matrix', or 'array'
 #' @param thin a numeric value indicating the square root of the factor by which to reduce pixel density. Default is 3, which reduces pixel density by 9 times.
+#' @param method "drop" (default) keeps one out of every thin^2 pixels. Otherwise, the set of pixels are summarized via "drop", "mean", "min","max","mad","var", "all","any", or "sum" which is passed to the 'method' argument of\code{Rfast::group()}
 #' @return an object of the same class
 #' @export
-thin <- function(object, thin = 3){
+thin <- function(object, thin = 3, method = c("drop", "mean",
+                                              "min","max","mad","var",
+                                              "all","any", "sum")){
   px.size <- attr(object,"px.size")
-  indices<-c(T,rep(F,(thin-1)))
-  x<-rep(indices,floor(dim(object)[1]/thin))
-  y<-rep(indices,floor(dim(object)[2]/thin))
+  method <- match.arg(method)
 
+  n.x <- floor(nrow(object)/thin)
+  n.y <- floor(ncol(object)/thin)
   if(is.matrix(object)){
-    out<-object[x,y]
-  } else if(is.cimg(object) || is.pixset(object)){
-    out<-object[x,y,,,drop=FALSE]
+    z.index <- 1
+    col.index <- 1
+  } else {
+    z.index <- seq_len(dim(object)[3])
+    col.index <- seq_len(dim(object)[4])
   }
+
+  if(method == "drop"){
+    indices<-c(TRUE,rep(FALSE,(thin-1)))
+    x <- rep(indices, n.x)
+    y <- rep(indices, n.y)
+
+    if(is.matrix(object)){
+      out<-object[x, y]
+    } else if(is.cimg(object) || is.pixset(object)){
+      out <- object[x, y, , ,drop = FALSE]
+    }
+  } else {
+    method <- switch(method,
+                     "sum" = "sum",
+                     "var" = "var",
+                     "mad" = "mad",
+                     "mean" = "mean",
+                     "all" = "all",
+                     "any" = "any",
+                     "min" = "min",
+                     "max" = "max")
+
+    if(is.matrix(object)){
+      object <- object[seq_len(n.x * thin), seq_len(n.y * thin), drop = FALSE]
+    } else {
+      object <- object[seq_len(n.x * thin), seq_len(n.y * thin), , , drop = FALSE]
+    }
+
+
+
+    x.index <- Rfast::Sort.int(rep(seq_len(n.x), thin))
+    x.new.len <- length(x.index)
+    y.index <- Rfast::Sort.int(rep(seq_len(n.y), thin))
+    y.new.len <- length(y.index)
+    z.index.len <- length(z.index)
+    col.index.len <- length(col.index)
+    tot.len <- prod(dim(object))
+    group_code <- as.factor(
+      paste(rep(x.index, tot.len / x.new.len),
+            rep(rep(Rfast::Sort.int(rep(y.index, x.new.len)),z.index.len),
+                col.index.len),
+            rep(Rfast::Sort.int(rep(z.index, x.new.len * y.new.len)), col.index.len),
+            Rfast::Sort.int(rep(col.index, tot.len / col.index.len)),
+            sep = "-"
+      )
+    )
+
+    val <- Rfast::group(c(object),
+                 as.numeric(group_code),
+                 method = method
+                 )
+    o <- do.call("rbind",strsplit(levels(group_code), "-")) %>%
+      apply(2, as.numeric) %>%
+      as.data.frame() %>%
+      with(order(V4, V3, V2,V1))
+
+    if(is.matrix(object)){
+      out <- matrix(val[o], nrow = n.x, ncol = n.y)
+    } else {
+      out <- array(val[o], dim = c(n.x, n.y, z.index.len, col.index.len))
+      out <- switch(class(object)[1],
+             "cimg" = as.cimg(out),
+             "pixset" = as.pixset(out),
+             "array" = as.array(out))
+    }
+  }
+
   px.size$size <- px.size$size * thin
 
   if(length(px.size$size)==0){

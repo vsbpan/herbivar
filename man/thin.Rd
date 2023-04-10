@@ -4,12 +4,18 @@
 \alias{thin}
 \title{Reduce Pixel Density}
 \usage{
-thin(object, thin = 3)
+thin(
+  object,
+  thin = 3,
+  method = c("drop", "mean", "min", "max", "mad", "var", "all", "any", "sum")
+)
 }
 \arguments{
 \item{object}{an object of class 'cimg', 'pixset', 'matrix', or 'array'}
 
 \item{thin}{a numeric value indicating the square root of the factor by which to reduce pixel density. Default is 3, which reduces pixel density by 9 times.}
+
+\item{method}{"drop" (default) keeps one out of every thin^2 pixels. Otherwise, the set of pixels are summarized via "drop", "mean", "min","max","mad","var", "all","any", or "sum" which is passed to the 'method' argument of\code{Rfast::group()}}
 }
 \value{
 an object of the same class

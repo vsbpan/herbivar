@@ -26,7 +26,7 @@ stopCluster<-function(...){parallel::stopCluster(...)}
 
 
 #' @export
-Gini<-function(x, ...) {
+Gini<-function(x, fast = TRUE, unbiased = TRUE, ...) {
   if(any(is.na(x))){
     if(na.rm){
       x <- x[!is.na(x)]
@@ -37,18 +37,41 @@ Gini<-function(x, ...) {
   if(any(x < 0)){
     warning("Vector contains negative one or more values. Interpert with caution.")
   }
-  DescTools::Gini(x, ...)
+  if(fast){
+    if(unbiased){
+      n <- length(x)
+      return(n / (n-1) * Rfast::ginis(as.matrix(x)))
+    } else {
+      return(Rfast::ginis(as.matrix(x)))
+    }
+  } else {
+    return(DescTools::Gini(x, ...))
+  }
 }
 
 
 #' @export
-Skew<-function(x, weights = NULL, na.rm = FALSE, method = 1, ...) {
-  DescTools::Skew(x, weights = weights, na.rm = na.rm, method = method, ...)
+Skew<-function(x, weights = NULL, na.rm = FALSE, method = 1, fast = TRUE, ...) {
+  if(method == 1 && fast){
+    if(na.rm){
+      x <- x[!is.na(x)]
+    }
+    Rfast::skew(x)
+  } else {
+    DescTools::Skew(x, weights = weights, na.rm = na.rm, method = method, ...)
+  }
 }
 
 #' @export
-Kurt<-function(x, weights = NULL, na.rm = FALSE, method = 1, ...) {
-  DescTools::Kurt(x, weights = weights, na.rm = na.rm, method = method, ...) + 3
+Kurt<-function(x, weights = NULL, na.rm = FALSE, method = 1, fast = TRUE, ...) {
+  if(method == 1 && fast){
+    if(na.rm){
+      x <- x[!is.na(x)]
+    }
+    Rfast::kurt(x)
+  } else {
+    DescTools::Kurt(x, weights = weights, na.rm = na.rm, method = method, ...) + 3
+  }
 }
 
 #' @export
