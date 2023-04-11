@@ -11,7 +11,7 @@
 
 \item{fft.vec}{a Fourier transformed vector on the frequency domain}
 
-\item{parallel}{if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 50000, as no computational efficiency would be gained.}
+\item{parallel}{if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 500000, as no computational efficiency would be gained.}
 }
 \value{
 A \code{length(fft.vec)} x \code{length(k)} matrix of conditional probabilities

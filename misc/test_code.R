@@ -685,3 +685,50 @@ test_TL_approx(ralloT(1000,0.05))
 
 library(herbivar)
 
+
+library(Rcpp)
+
+
+
+
+
+x <- runif(1000)
+
+
+microbenchmark::microbenchmark(
+  "R" = outer(x,x, "^"),
+  "S" = outer(x,x, Vectorize("^"))
+)
+
+x <- rbinom(1000, 1, 0.5)
+
+
+f1 <- function(x){
+  ifelse(x, 1, 10)
+}
+
+f2 <- function(x){
+  1 + as.numeric(!x) * 9
+}
+
+all.equal(f1(x), f2(x))
+
+
+cond.prob.mat[c(1,2),]
+
+outer(phi.T.index, k, Vectorize(FUN = function(phi.T.index,
+                                     k) {
+  cond.prob.mat[phi.T.index, (k + 1)]
+})) -> z
+
+
+x <- c(1:10)
+y <- c(1:10)
+
+x <- rallo(10000)
+
+
+
+
+
+

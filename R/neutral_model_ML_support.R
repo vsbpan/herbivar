@@ -144,11 +144,11 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
   )
 
   phi_T <- k
-  phi_T[phi_T>0] <- phi_T_non_zero
+  phi_T[phi_T > 0] <- phi_T_non_zero
 
 
   if(truncate){
-    phi_T[phi_T>1]<-1 # Cut off phi_T if goes over 1. May underestimate mean.phi.T
+    phi_T[phi_T > 1] <- 1 # Cut off phi_T if goes over 1. May underestimate mean.phi.T
   }
   return(phi_T)
 }
@@ -443,7 +443,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 #' \deqn{P(\phi_T^k) = \overbrace{P(\phi)*P(\phi)*...*P(\phi)}^{\text{k times}} = \mathcal{F}^{-1} [\mathcal{F}[P(\phi)]^k]}
 #' @param k a vector of integers indicating the number of convolutions to apply to a Fourier transformed vector
 #' @param fft.vec a Fourier transformed vector on the frequency domain
-#' @param parallel if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 50000, as no computational efficiency would be gained.
+#' @param parallel if \code{TRUE} (default is \code{FALSE}), convolve \code{fft.vec} in parallel. Automatically turned off if \code{length(ff.vec)} is less than 500000, as no computational efficiency would be gained.
 #' @return A \code{length(fft.vec)} x \code{length(k)} matrix of conditional probabilities
 #' @export
 .convolve.dist <- function(k, fft.vec, parallel = FALSE){
@@ -505,7 +505,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
   } else {
     cond.prob.mat<-.convolve.dist(k = k,
                                  fft.vec =  fft.vec,
-                                 parallel = parallel)[seq_along(phi),]
+                                 parallel = parallel)[seq_along(phi), , drop = FALSE]
     # Returns a matrix. Row is phi.T and column is k.
     # Values over the upper boundary are cut off with the indexing
   }
@@ -514,25 +514,19 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
 
 
   # Cut off probabilities added back to phi=1
-  cond.prob.mat[nrow(cond.prob.mat),]<-cond.prob.mat[nrow(cond.prob.mat),]+1-colSums(cond.prob.mat)
+  cond.prob.mat[nrow(cond.prob.mat),] <- cond.prob.mat[nrow(cond.prob.mat), , drop = FALSE] + 1 - colSums(cond.prob.mat)
   #cond.prob.mat <- cond.prob.mat/ colSums(cond.prob.mat)
 
   if(is.null(phi.T.index)){
     #Check if there is pre-calculated indices
-    phi.T.index<-findInterval(x = phi.T, vec = phi)
+    phi.T.index <- findInterval(x = phi.T, vec = phi)
   }
 
-  # For each pairwise combination of phi.T and k, index the corresponding probability and returns a matrix
-  prob.mat<-outer(phi.T.index, k,
-                  Vectorize(
-                    FUN = function(phi.T.index, k){
-                      cond.prob.mat[
-                        phi.T.index,
-                        (k+1)]
-                    })) # slow
-  prob.mat[(phi.T>1)|(phi.T<0)|(phi.T > 0 & phi.T < min.phi),]<-0 # Set values outside of bounds to zero
+  # For each phi.T, index the corresponding probability vector for each conditional on k and return a matrix
+  prob.mat <- cond.prob.mat[phi.T.index, , drop = FALSE]
+  prob.mat[(phi.T > 1)|(phi.T != 0 & phi.T < min.phi),] <- 0 # Set values outside of bounds to zero
 
-  prob.mat[prob.mat<0]<-0 # Fix some numeric errors
+  prob.mat[prob.mat < 0] <- 0 # Fix some numeric errors
   if(log){
     prob.mat<-log(prob.mat)
   }
@@ -567,7 +561,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     warning("Approximation may be unreliable; increase k.max")
   }
   if(log){
-    prob<-log(prob)
+    prob <- log(prob)
   }
 
   return(prob) # Out puts a vector of P(k | lambda)
@@ -731,9 +725,10 @@ fit_allo_herb<-function(data.vec,
   }
 
   if(cores > 1){
-    parallel <- TRUE
-    cluster <- makeCluster(cores)
-    doParallel::registerDoParallel(cluster)
+    parallel <- FALSE # No performance gain with new code update. Need to work on later.
+    # parallel <- TRUE
+    # cluster <- makeCluster(cores)
+    # doParallel::registerDoParallel(cluster)
 
   } else {
     parallel <- FALSE
