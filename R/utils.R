@@ -238,14 +238,23 @@ as_named_vector <- function(x, id_col = 1, val_col = 2){
   return(z)
 }
 
+#' @title Evenly spaced sequences between the range of a vector
+#' @description Generate evenly spaced sequences between the range of a vector \code{x} using \code{seq()}
+#' @param x the vector
+#' @param length.out the length of output vector
+#' @return a numeric vector
 seq_interval <- function(x, length.out = 300){
   seq(min(x),max(x), length.out = length.out)
 }
 
 
-
+#' @title Ordered statistics
+#' @description Find the nth ordered statistics
+#' @param x the vector
+#' @param n the nth order
+#' @return an atomic numeric vector
 ordered_stat <- function(x, n){
-  x <- sort(x)
+  x <- Rfast::Sort(x, na.last = NA)
 
   if(n %% 1 > 0){
     stop("n must be a non-zero integer")
@@ -258,6 +267,11 @@ ordered_stat <- function(x, n){
   }
 }
 
+#' @title Reshape an array to long format
+#' @description Reshape an array to long format where each row correspond to the index of a value in the nth dimension. The value is stored in the 'val' column. Supports up to a 13 dimension array.
+#' @param x the array with dimension less than 14.
+#' @param drop if \code{TRUE}, default is \code{FALSE}, dimensions with length one is removed.
+#' @return a data.frame with \code{prod(dim(x))} number of rows and \code{length(dim(x)) + 1} number of columns.
 melt <- function(x, drop = FALSE){
   x.dim <- dim(x)
   l <- lapply(x.dim, seq.int)
@@ -270,6 +284,10 @@ melt <- function(x, drop = FALSE){
   return(d)
 }
 
+#' @title Reshape an array in long format to an array
+#' @description Reshape an array in the long format where each row correspond to the index of a value in the nth dimension and the value is stored in the 'val' column into an nth dimensional array.
+#' @param x a matrix or data.frame with named columns. The value of each cell is stored as a 'val' column.
+#' @return an array
 unmelt <- function(x){
   nm <- colnames(x)
 
@@ -284,4 +302,11 @@ unmelt <- function(x){
     dim = Rfast::colMaxs(as.matrix(x[,nm]), value = TRUE)
   )
 }
+
+
+unique_len <- function(x){
+  length(unique(x))
+}
+
+
 

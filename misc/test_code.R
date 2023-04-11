@@ -685,22 +685,3 @@ test_TL_approx(ralloT(1000,0.05))
 
 library(herbivar)
 
-
-k<-1:30
-
-
-img <- image_example()
-
-
-thin(grayscale(img), method = "mean") %>% plot()
-
-debug(thin)
-
-
-
-
-img %>%
-  thin(20, method = "mad") %>%
-  plot()
-
-

@@ -521,7 +521,7 @@ analyze_holes <- function(object, min_prop = 10^-4, plot = FALSE,
                         lapply(
                           imlist,
                           FUN = function(x) {
-                            (colMeans(which(x[, , 1, 1] > 0.99, arr.ind = T)))
+                            (colMeans(which(x[, , 1, 1] > 0.99, arr.ind = TRUE)))
                           }
                         ))
 
@@ -762,7 +762,7 @@ hole_perimeter <- function(mat, non_leaf_border = FALSE, px.size = NA){
     mat3 <- mat[,-1]
     mat4 <- mat[,-ncol(mat)]
 
-    border_NA_perim <- sum((((is.na(mat1) & (mat2 > 0.99)) | (is.na(mat2) & (mat1 > 0.99)))[,-1]) | (((is.na(mat3) & (mat4 > 0.99)) | (is.na(mat4) & (mat3 > 0.99)))[-1,]),na.rm = T)
+    border_NA_perim <- sum((((is.na(mat1) & (mat2 > 0.99)) | (is.na(mat2) & (mat1 > 0.99)))[,-1]) | (((is.na(mat3) & (mat4 > 0.99)) | (is.na(mat4) & (mat3 > 0.99)))[-1,]),na.rm = TRUE)
 
     perim_out <- perim_total - border_NA_perim
   } else {

@@ -778,7 +778,7 @@ fit_allo_herb<-function(data.vec,
     return(nll.out)
   }
 
-    ML.fit<-optim2(init = init,
+  ML.fit <- optim2(init = init,
                   fn = nll,
                   method = method,
                   lower = lower,
