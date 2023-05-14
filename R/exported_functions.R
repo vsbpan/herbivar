@@ -26,7 +26,7 @@ stopCluster<-function(...){parallel::stopCluster(...)}
 
 
 #' @export
-Gini<-function(x, fast = TRUE, unbiased = TRUE, ...) {
+Gini<-function(x, na.rm = FALSE, fast = TRUE, unbiased = TRUE, ...) {
   if(any(is.na(x))){
     if(na.rm){
       x <- x[!is.na(x)]

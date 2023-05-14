@@ -236,9 +236,10 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
   }
 
   if(cores>1){
-    parallel <- TRUE
-    cluster <- makeCluster(cores)
-    doParallel::registerDoParallel(cluster)
+    parallel <- FALSE
+    # parallel <- TRUE
+    # cluster <- makeCluster(cores)
+    # doParallel::registerDoParallel(cluster)
 
   } else {
     parallel <- FALSE
@@ -455,6 +456,7 @@ qalloT<-function(p, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     })) / fft.vec.length
   } else {
     cond.prob.mat <- Re(stats::mvfft(outer(fft.vec, k, "^"), inverse = TRUE)) / fft.vec.length
+    #Bottle neck of dalloT(); mvfft() takes 2/3 of the time, outer() takes 1/3
   }
   return(cond.prob.mat)
 }
