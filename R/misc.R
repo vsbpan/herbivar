@@ -268,10 +268,11 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 #' @param scaling scaling argument passed to \code{vegan::scores()}
 #' @param display a vector of characters defining what to plot
 #' @param ellipse a character string passed to the \code{type} argument of \code{ggplot2::stat_ellipse()}. If \code{NA}, no ellipse is plotted.
-#' @param group a vector in the same length and order as the sites data used to fit the model that is used to color the site points
-#' @param group2 a vector in the same length and order as the sites data used to fit the model that is used to determine the shape of the site points
+#' @param group a vector with the same length and order as the sites data used to fit the model that is used to color the site points.
+#' @param group2 a vector with the same length and order as the sites data used to fit the model that is used to determine the shape of the site points
 #' @param sites_alpha the transparency of the sites plotted as points
-#' @param site_size the size pf the site points
+#' @param sites_size the size pf the site points
+#' @param group_as_aes if \code{TRUE} (default is TRUE), \code{group} is passed as an aesthetics via \code{ggplot2::aes()}.
 #' @param species_color the color of the species labels
 #' @param species_alpha the transparency of the species plotted as text
 #' @return a ggplot object
@@ -305,7 +306,8 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        group = NULL,
                        group2 = NULL,
                        sites_alpha = 1,
-                       site_size = 2,
+                       sites_size = 2,
+                       group_as_aes = TRUE,
                        species_color = "violetred",
                        species_alpha = 1){
   display <- match.arg(display,several.ok = TRUE)
@@ -343,16 +345,35 @@ get_biplot <- function(x, choices = c(1,2), scaling = 2,
     if(!is.null(group)){
       if(!is.null(group2)){
         s$sites <- cbind(s$sites, "group" = group, "group2" = group2)
-        g <- g + ggplot2::geom_point(data = s$sites,
-                                     ggplot2::aes(color = group, shape = group2),
-                                     alpha = sites_alpha,
-                                     size = site_size)
+
+        if(group_as_aes){
+          g <- g + ggplot2::geom_point(data = s$sites,
+                                       ggplot2::aes(color = group, shape = group2),
+                                       alpha = sites_alpha,
+                                       size = sites_size)
+        } else {
+          g <- g + ggplot2::geom_point(data = s$sites,
+                                       ggplot2::aes(shape = group2),
+                                       color = group,
+                                       alpha = sites_alpha,
+                                       size = sites_size)
+        }
+
       } else {
         s$sites <- cbind(s$sites, "group" = group)
-        g <- g + ggplot2::geom_point(data = s$sites,
-                                     ggplot2::aes(color = group),
-                                     alpha = sites_alpha,
-                                     size = site_size)
+
+        if(group_as_aes){
+          g <- g + ggplot2::geom_point(data = s$sites,
+                                       ggplot2::aes(color = group),
+                                       alpha = sites_alpha,
+                                       size = sites_size)
+        } else {
+          g <- g + ggplot2::geom_point(data = s$sites,
+                                       color = group,
+                                       alpha = sites_alpha,
+                                       size = sites_size)
+        }
+
       }
 
     } else {

@@ -513,7 +513,7 @@ vegan::rda(scale(probes_d[,probes])) %>%
   get_biplot(group = probes_d$source,
              group2 = probes_d$type,
              ellipse = "t",
-             site_size = ifelse(probes_d$type == "observed", 5, 2)) +
+             sites_size = ifelse(probes_d$type == "observed", 5, 2)) +
   ggplot2::scale_shape_manual(values = c(19,2)) + 
   ggplot2::labs(shape = "type", 
        color = "source")

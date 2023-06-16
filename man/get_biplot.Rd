@@ -13,7 +13,8 @@ get_biplot(
   group = NULL,
   group2 = NULL,
   sites_alpha = 1,
-  site_size = 2,
+  sites_size = 2,
+  group_as_aes = TRUE,
   species_color = "violetred",
   species_alpha = 1
 )
@@ -29,13 +30,15 @@ get_biplot(
 
 \item{ellipse}{a character string passed to the \code{type} argument of \code{ggplot2::stat_ellipse()}. If \code{NA}, no ellipse is plotted.}
 
-\item{group}{a vector in the same length and order as the sites data used to fit the model that is used to color the site points}
+\item{group}{a vector with the same length and order as the sites data used to fit the model that is used to color the site points.}
 
-\item{group2}{a vector in the same length and order as the sites data used to fit the model that is used to determine the shape of the site points}
+\item{group2}{a vector with the same length and order as the sites data used to fit the model that is used to determine the shape of the site points}
 
 \item{sites_alpha}{the transparency of the sites plotted as points}
 
-\item{site_size}{the size pf the site points}
+\item{sites_size}{the size pf the site points}
+
+\item{group_as_aes}{if \code{TRUE} (default is TRUE), \code{group} is passed as an aesthetics via \code{ggplot2::aes()}.}
 
 \item{species_color}{the color of the species labels}
 
