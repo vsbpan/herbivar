@@ -310,3 +310,64 @@ unique_len <- function(x){
 
 
 
+unscale <- function(x){
+  function(z){
+    mean(x) + sd(x) * z
+  }
+}
+
+add_quote <- function(x){
+  paste0("'",x,"'")
+}
+
+
+plot_colors <- function(x, label = NULL, label_size = 3,
+                        boarder_color = "black", background = "grey",
+                        linear = FALSE){
+
+  if(linear){
+    n <- length(x)
+    d <- expand.grid(
+      "x" = seq_len(n),
+      "y" = 1
+    )
+  } else {
+    n <- ceiling(sqrt(length(x)))
+    d <- expand.grid(
+      "x" = seq_len(n),
+      "y" = seq_len(n)
+    )
+  }
+
+  if(is.null(label)){
+    label <- x
+  } else {
+    if(all(isFALSE(label)) || all(is.na(label))){
+      label <- ""
+    }
+  }
+
+  if(is.null(boarder_color) || isFALSE(boarder_color)){
+    boarder_color <- NA
+  }
+
+  n_no_col <- (nrow(d) - length(x))
+  if(length(label) == 1){
+    label <- rep(label, length(x))
+  }
+
+  d <- cbind(d, "hex" = c(x, rep(background,n_no_col)), "lab" = c(label, rep("",n_no_col)))
+
+  g <- ggplot2::ggplot(d,
+                  ggplot2::aes(x = x, y = -y)) +
+    ggplot2::geom_tile(fill = d$hex, color = boarder_color) +
+    ggplot2::geom_text(label = d$lab, size = label_size) +
+    ggplot2::theme_void()
+
+  return(g)
+}
+
+
+
+
+
