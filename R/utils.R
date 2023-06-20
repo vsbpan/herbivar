@@ -368,8 +368,8 @@ plot_colors <- function(x, label = NULL, label_size = 3,
 }
 
 
-bin <- function(x, by = 1, value = TRUE){
-  z <- seq(min(x), max(x), by = by)
+bin <- function(x, by = 1, value = TRUE, range = c(min(x), max(x))){
+  z <- seq(range[1], range[2], by = by)
   out <- findInterval(x, z)
   if(value){
     return(z[out])
