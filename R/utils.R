@@ -368,6 +368,31 @@ plot_colors <- function(x, label = NULL, label_size = 3,
 }
 
 
+bin <- function(x, by = 1, value = TRUE){
+  z <- seq(min(x), max(x), by = by)
+  out <- findInterval(x, z)
+  if(value){
+    return(z[out])
+  } else {
+    return(out)
+  }
+}
 
+beta_conjugate <- function(alpha, beta, interval = 0.95, prior = c(1,1)){
+  a <- alpha + prior[1]
+  b <- beta + prior[2]
+
+  lower_prob <- (1 - interval) / 2
+  upper_prob <- interval + lower_prob
+
+  out <- data.frame("estimate" = a / (a+b),
+                    "std" = sqrt(
+                      (a * b) / ((a + b)^2 * (a + b + 1))
+                    ),
+                    "lower" = stats::qbeta(lower_prob, shape1 = a, shape2 = b),
+                    "upper" = stats::qbeta(upper_prob, shape1 = a, shape2 = b)
+                    )
+  return(out)
+}
 
 
