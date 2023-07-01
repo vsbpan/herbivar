@@ -16,9 +16,9 @@ fit_allo_herb(
   param.vals = c(mean.phi.T = 0.1, min.phi = 0.005, max.phi = 1, a = 14/9),
   param.val.trans = c(mean.phi.T = function(x) {
      x/100
- }, min.phi = function(x)
-    {
-     x/100
+ }, min.phi = function(x) {
+ 
+       x/100
  }, max.phi = function(x) {
      x/100
  }, a = function(x) {

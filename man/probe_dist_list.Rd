@@ -6,8 +6,8 @@
 \usage{
 probe_dist_list(
   data_list,
-  probes = c("mean", "var", "cv", "Gini", "max", "min", "median", "Skew", "Kurt",
-    "q25", "q75", "N", "lac"),
+  probes = c("mean", "var", "cv", "Gini", "max", "min", "median", "Skew", "Kurt", "q25",
+    "q75", "N", "lac"),
   trivial.rm = TRUE,
   na.rm = FALSE,
   add.id = FALSE

@@ -6,8 +6,8 @@
 \usage{
 probe_dist(
   x,
-  probes = c("mean", "var", "cv", "Gini", "max", "min", "median", "Skew", "Kurt",
-    "q25", "q75", "N", "lac"),
+  probes = c("mean", "var", "cv", "Gini", "max", "min", "median", "Skew", "Kurt", "q25",
+    "q75", "N", "lac"),
   na.rm = FALSE
 )
 }

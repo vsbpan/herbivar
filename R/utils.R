@@ -395,4 +395,17 @@ beta_conjugate <- function(alpha, beta, interval = 0.95, prior = c(1,1)){
   return(out)
 }
 
+nearest_bin <- function(x, grid, value = TRUE){
+  grid_o <- order(grid)
+  grid <- grid[grid_o]
+  cuts <- c(-Inf, grid[-1]-diff(grid)/2, Inf)
+  index <- findInterval(x, cuts)
+
+  if(value){
+    return(grid[index])
+  } else {
+    return(grid_o[index])
+  }
+}
+
 
