@@ -409,3 +409,15 @@ nearest_bin <- function(x, grid, value = TRUE){
 }
 
 
+overlaps_zero <- function(...){
+  l <- list(...)
+
+
+  ifelse(var(
+    do.call("c", lapply(l, sign))
+  ) == 0,
+  FALSE,
+  TRUE)
+}
+
+

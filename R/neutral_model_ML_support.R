@@ -963,6 +963,11 @@ AICc <- function(object, ..., k = 2){
   if(length(dots) == 1){
     logLik <- logLik(object)
     n <- attributes(logLik)$nobs
+
+    if(is.null(n)){
+      n <- stats::nobs(object)
+    }
+
     df <- attributes(logLik)$df
     aicc<-as.numeric(logLik) * -2 + k*df*(n/(n-df-1))
     if(n <= (df+1)){
@@ -974,6 +979,12 @@ AICc <- function(object, ..., k = 2){
                    lapply(unname(dots), function(x){
                      loglik <- logLik(eval(x))
                      n <- attributes(loglik)$nobs
+
+
+                     if(is.null(n)){
+                       n <- stats::nobs(eval(x))
+                     }
+
                      df <- attributes(loglik)$df
                      aicc<-as.numeric(loglik) * -2 + k*df*(n/(n-df-1))
                      if(n <= (df+1)){
