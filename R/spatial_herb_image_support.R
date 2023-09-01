@@ -588,7 +588,15 @@ plot.split_herb <- function(x, prompt = TRUE, ...){
   }
 }
 
-
+#' @title Compute nearest neighbor distance and perform Clark-Evans test
+#' @description
+#' Compute nearest neighbor distance and perform Clark-Evans (1954) test
+#' @param object a matrix with two columns (x and y coordinates) or a 'split_herb' object
+#' @param alternative the alternative hypothesis
+#' @param silent If \code{TRUE}, the result of the test is not printed
+#' @return If \code{silent = TRUE}, the nearest neighbor distances are returned along with the result of the Clark-Evans test. If \code{silent = TRUE}, only the nearest neighbor distances are returned.
+#' @references
+#' Clark, P. J., and F. C. Evans. 1954. Distance to Nearest Neighbor as a Measure of Spatial Relationships in Populations. Ecology 35:445–453.
 nn_dist <- function(object, # expect a matrix with two columns or split_herb
                     alternative = c("two.sided","clustered", "regular",
                                     "greater","lesser"),

@@ -1,11 +1,11 @@
-#'
-slide_show<-function(data_list,expression,sleep.time=1,length=1){
-  for (i in seq_len(length)){
-    eval(parse(text=expression))
-    Sys.sleep(sleep.time)
-    cat(i,"/",length,      "\r")
-  }
-}
+
+# slide_show<-function(data_list,expression,sleep.time=1,length=1){
+#   for (i in seq_len(length)){
+#     eval(parse(text=expression))
+#     Sys.sleep(sleep.time)
+#     cat(i,"/",length,      "\r")
+#   }
+# }
 
 
 #' @title Adjust Proportion Data
@@ -295,10 +295,13 @@ summarise_vec <- function(x, interval = 0.95, na.rm = FALSE){
 #'
 #' get_biplot(m, group = probed.data$z) # Triplot
 #'
-#' # The function returns a ggplot object, so you can modify the plot as you would normally with ggplot()
-#' get_biplot(m, group = probed.data$z) + ggplot2::labs(color = "z") # Change color label
+#' # The function returns a ggplot object,
+#' # so you can modify the plot as you would normally with ggplot()
+#' get_biplot(m, group = probed.data$z) +
+#'    ggplot2::labs(color = "z") # Change color label
 #'
-#' get_biplot(m, group = probed.data$z, ellipse = "t") + ggplot2::scale_color_brewer(type = "qual")
+#' get_biplot(m, group = probed.data$z, ellipse = "t") +
+#'    ggplot2::scale_color_brewer(type = "qual")
 #'
 get_biplot <- function(x, choices = c(1,2), scaling = 2,
                        display = c("sites", "species", "biplot", "centroids"),

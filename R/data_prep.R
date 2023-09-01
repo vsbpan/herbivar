@@ -1,5 +1,10 @@
 
-
+#' @title Duplicate data.frame n times
+#' @description
+#' Duplicate the rows of a data.frame n times
+#' @param x the data.frame
+#' @param n an interger
+#' @return a data.frame
 #' @export
 rep_data.frame<-function(x,n){
   if(inherits(x,"data.frame")){

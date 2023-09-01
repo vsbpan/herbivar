@@ -69,9 +69,12 @@ m <- vegan::rda(std_probes ~ z, data = probed.data)
 
 get_biplot(m, group = probed.data$z) # Triplot
 
-# The function returns a ggplot object, so you can modify the plot as you would normally with ggplot()
-get_biplot(m, group = probed.data$z) + ggplot2::labs(color = "z") # Change color label
+# The function returns a ggplot object,
+# so you can modify the plot as you would normally with ggplot()
+get_biplot(m, group = probed.data$z) +
+   ggplot2::labs(color = "z") # Change color label
 
-get_biplot(m, group = probed.data$z, ellipse = "t") + ggplot2::scale_color_brewer(type = "qual")
+get_biplot(m, group = probed.data$z, ellipse = "t") +
+   ggplot2::scale_color_brewer(type = "qual")
 
 }

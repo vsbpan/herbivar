@@ -1,22 +1,39 @@
-
+#' @title Find derivative
+#' @description Find the first or second derivative of the supplied \code{x} and \code{y} vectors using finite difference method.
+#' @param x,y a vector of numeric values
+#' @return a numeric vector
+#' @rdname derivative
+#' @export
 derivative <- function(x, y) diff(y) / diff(x)
 
 
-mid_pts <- function(x) x[-1] - diff(x)/2
-
-mid_pts2 <- function(x) mid_pts(mid_pts(x))
-
+#' @rdname derivative
+#' @export
 derivative2 <- function(x,y) derivative(mid_pts(x), derivative(x, y))
 
-count_inflection_pts<-function(v){
-  num<-sum(diff(sign(v[abs(v) > 0.5])) != 0 )
-  return(num)
-}
+#' @title Find the middle points
+#' @description Find the middle points or the middle points of the middle points of the supplied vector
+#' @param x a vector of numeric values
+#' @return a numeric vector
+#' @rdname midpt
+#' @export
+mid_pts <- function(x) x[-1] - diff(x)/2
 
-center_mass<-function(x,y){
-  y<-y-min(y)
-  sum(x*y/sum(y))
-}
+
+#' @rdname midpt
+#' @export
+mid_pts2 <- function(x) mid_pts(mid_pts(x))
+
+
+# count_inflection_pts<-function(v){
+#   num<-sum(diff(sign(v[abs(v) > 0.5])) != 0 )
+#   return(num)
+# }
+#
+# center_mass<-function(x,y){
+#   y<-y-min(y)
+#   sum(x*y/sum(y))
+# }
 
 #' @title Non-linear Averaging Simulation
 #' @description Estimate Jensen's effect via direct simulation or Jensen's effect potential via second order Taylor approximation.

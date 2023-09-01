@@ -979,6 +979,7 @@ LRT <- function(model_candidate, model_ref){
 #' @description Calculate generalized mean for a vector \code{x}. If \eqn{p = 0}, the function returns the geometric mean. If \eqn{p = -1}, the function returns the harmonic mean. If \eqn{p = 1} or \eqn{p = 2}, the arithmetic mean or the root mean square (quadratic mean) is returned. If \eqn{p = \infty} or \eqn{p = -\infty}, the function returns the maximum or minimum respectively. For other values of \eqn{p}, the power mean is returned. For large values of \eqn{|p|}, the function can be numerically unstable.
 #' @param x a vector of numeric data
 #' @param p a numeric value of length 1 choosing the type of mean computed.
+#' @param na.rm if \code{TRUE} (default is \code{FALSE}), the missing values are removed.
 #' @return a numeric value of length 1
 gen_mean <- function(x, p, na.rm = FALSE){
   if(na.rm){

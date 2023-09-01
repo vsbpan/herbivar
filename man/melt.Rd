@@ -7,7 +7,7 @@
 melt(x, drop = FALSE)
 }
 \arguments{
-\item{x}{the array with dimension less than 14.}
+\item{x}{the array}
 
 \item{drop}{if \code{TRUE}, default is \code{FALSE}, dimensions with length one is removed.}
 }
@@ -15,5 +15,5 @@ melt(x, drop = FALSE)
 a data.frame with \code{prod(dim(x))} number of rows and \code{length(dim(x)) + 1} number of columns.
 }
 \description{
-Reshape an array to long format where each row correspond to the index of a value in the nth dimension. The value is stored in the 'val' column. Supports up to a 13 dimension array.
+Reshape an array to long format where each row correspond to the index of a value in the nth dimension. The value is stored in the 'val' column.
 }

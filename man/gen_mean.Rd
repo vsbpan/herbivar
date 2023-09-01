@@ -10,6 +10,8 @@ gen_mean(x, p, na.rm = FALSE)
 \item{x}{a vector of numeric data}
 
 \item{p}{a numeric value of length 1 choosing the type of mean computed.}
+
+\item{na.rm}{if \code{TRUE} (default is \code{FALSE}), the missing values are removed.}
 }
 \value{
 a numeric value of length 1

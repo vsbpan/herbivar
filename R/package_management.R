@@ -2,7 +2,14 @@
 #' @param silent if \code{TRUE}, no message will be displayed, but returned invisibly
 #' @return a character string
 herbivar.version <- function(silent = FALSE){
-  out <- as.character(utils::packageDate("herbivar"))
+  out <-
+    paste0(
+      utils::packageVersion("herbivar"),
+  " (",
+    as.character(utils::packageDate("herbivar")),
+  ")"
+  )
+
   if(!silent){
     print(out)
     message("Still in development; use with caution!")
@@ -24,6 +31,11 @@ herbivar.version <- function(silent = FALSE){
       sep = "")
 }
 
+#' @title Detach the 'herbivar' package
+#' @description
+#' Unload the 'herbivar' package
+#' @param x placeholder
+#' @return \code{NULL}
 detach.herbivar <- function(x){
   message("detatching package. . . ")
   if("herbivar" %in% (.packages())){
@@ -34,7 +46,7 @@ detach.herbivar <- function(x){
   }
 }
 
-.reinstall.herbivar <- function(package_path = "C:/R_Projects/Package_Building/herbivar_0.1.0.tar.gz"){
+.reinstall.herbivar <- function(package_path = "C:/R_Projects/Package_Building/herbivar_0.2.0.tar.gz"){
   load.herbivar <- "herbivar" %in% (.packages())
   detach.herbivar()
   install.packages(package_path, repos = NULL, type="source")

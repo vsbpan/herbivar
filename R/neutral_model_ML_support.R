@@ -312,7 +312,7 @@ dalloT<-function(x, mean.phi.T = NULL, min.phi = 0.005, max.phi = 1, a = 14/9, l
     try({
       if(!is.null(cluster)){
         doParallel::stopImplicitCluster()
-        stopCluster(cluster)
+        parallel::stopCluster(cluster)
       }
     })
   ) # Stop all connections on exit
@@ -822,7 +822,7 @@ fit_allo_herb<-function(data.vec,
     try({
       if(!is.null(cluster)){
         doParallel::stopImplicitCluster()
-        stopCluster(cluster)
+        parallel::stopCluster(cluster)
       }
     })
   ) # Stop all connections on exit

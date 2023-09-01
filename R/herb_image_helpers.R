@@ -223,22 +223,22 @@ split2mat <- function(split_herb){
 }
 
 
-#' @author Simon Barthelme
-#' @note The code for the function obtained from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/gettingstarted.html}. accessed date 2022-07-25.
-get_centers <- function(im, thr="99%", approx.res = 10000, km = c(1L, 2L)){
-  dt <- imhessian(im) %$%
-    { xx*yy - xy^2 } %>%
-    threshold2(thr, approx.res = approx.res, km = km) %>%
-    label()
-  as.data.frame(dt) %>% subset(value>0) %>% dplyr::group_by(value) %>% dplyr::summarise(mx=mean(x),my=mean(y))
-}
+# #' @author Simon Barthelme
+# #' @note The code for the function obtained from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/gettingstarted.html}. accessed date 2022-07-25.
+# get_centers <- function(im, thr="99%", approx.res = 10000, km = c(1L, 2L)){
+#   dt <- imhessian(im) %$%
+#     { xx*yy - xy^2 } %>%
+#     threshold2(thr, approx.res = approx.res, km = km) %>%
+#     label()
+#   as.data.frame(dt) %>% subset(value>0) %>% dplyr::group_by(value) %>% dplyr::summarise(mx=mean(x),my=mean(y))
+# }
 
 
-#' @author Simon Barthelme
-#' @note The code for the function obtained from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/gettingstarted.html}. accessed date 2022-07-25.
-hessdet <- function(im,scale=1){
-  isoblur(im,scale) %>% imhessian %$% { scale^2*(xx*yy - xy^2) }
-}
+# #' @author Simon Barthelme
+# #' @note The code for the function obtained from Simon Barthelme's vignette \link{https://cran.r-project.org/web/packages/imager/vignettes/gettingstarted.html}. accessed date 2022-07-25.
+# hessdet <- function(im,scale=1){
+#   isoblur(im,scale) %>% imhessian %$% { scale^2*(xx*yy - xy^2) }
+# }
 
 
 #' @title Attach Pixel Size Attribute

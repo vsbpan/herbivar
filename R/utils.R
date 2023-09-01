@@ -1,11 +1,11 @@
-#' @export
-combine_data_lists<-function(data_list,data_list2){
-  for (i in seq_along(data_list2)){
-    data_list2[[i]]<-data_list2[[i]][names(data_list[[1]])]
-  }
-  out<-c(data_list,data_list2)
-  return(out)
-}
+# #' @export
+# combine_data_lists<-function(data_list,data_list2){
+#   for (i in seq_along(data_list2)){
+#     data_list2[[i]]<-data_list2[[i]][names(data_list[[1]])]
+#   }
+#   out<-c(data_list,data_list2)
+#   return(out)
+# }
 
 
 .herb_data_check <- function(x, min.phi, allow.zero, allow.one = TRUE, coerce.to.zero = FALSE){
@@ -268,21 +268,36 @@ ordered_stat <- function(x, n){
 }
 
 #' @title Reshape an array to long format
-#' @description Reshape an array to long format where each row correspond to the index of a value in the nth dimension. The value is stored in the 'val' column. Supports up to a 13 dimension array.
-#' @param x the array with dimension less than 14.
+#' @description Reshape an array to long format where each row correspond to the index of a value in the nth dimension. The value is stored in the 'val' column.
+#' @param x the array
 #' @param drop if \code{TRUE}, default is \code{FALSE}, dimensions with length one is removed.
 #' @return a data.frame with \code{prod(dim(x))} number of rows and \code{length(dim(x)) + 1} number of columns.
-melt <- function(x, drop = FALSE){
+melt <- function (x, drop = FALSE){
   x.dim <- dim(x)
-  l <- lapply(x.dim, seq.int)
-  names(l) <- c("x","y","z","w","m","n","q","p","r","s","t","u","v")[seq_along(l)]
+  l <- lapply(
+    seq.int(length(x.dim)),
+    function(i, name, dim_n){
+      temp <- name[[i]]
+      if(is.null(temp)){
+        temp <- seq.int(dim_n[[i]])
+      }
+      return(temp)
+    },
+    name = dimnames(x),
+    dim_n = x.dim
+  )
+  names(l) <- paste0("dim", seq_along(l))
+
+
+
   d <- do.call("expand.grid", l)
-  if(drop){
-    d <- d[,x.dim > 1]
+  if (drop) {
+    d <- d[, x.dim > 1]
   }
   d$val <- c(x)
   return(d)
 }
+
 
 #' @title Reshape an array in long format to an array
 #' @description Reshape an array in the long format where each row correspond to the index of a value in the nth dimension and the value is stored in the 'val' column into an nth dimensional array.
@@ -304,23 +319,42 @@ unmelt <- function(x){
 }
 
 
+#' @title Length of unique elements
+#' @description Find the length of unique elements
+#' @param x a vector
+#' @return a numeric value
 unique_len <- function(x){
   length(unique(x))
 }
 
 
-
+#' @title Unscale variable
+#' @description Generate a function from a vector that can back transform a Z-score transformed vector to its original scale.
+#' @param x a vector
+#' @return a function
 unscale <- function(x){
   function(z){
     mean(x) + sd(x) * z
   }
 }
 
+#' @title Add quotes around a character string
+#' @description Add quotes around a character string
+#' @param x a vector
+#' @return an atomic character vector
 add_quote <- function(x){
   paste0("'",x,"'")
 }
 
-
+#' @title Plot colors
+#' @description Display the color or hex code via \code{ggplot2::geom_tile()}
+#' @param x a vector of hex code or acceptable ggplot color names
+#' @param label if \code{NULL} (default), the supplied character string via \code{x} is overlayed on the colored tiles. If \code{NA} or \code{FALSE}, nothing is displayed
+#' @param label_size The size of the label
+#' @param boarder_color The color of the boarder of the tiles
+#' @param background The color of the background
+#' @param linear If \code{TRUE}, the tiles are displayed in one row. Default is \code{FALSe}.
+#' @return A ggplot
 plot_colors <- function(x, label = NULL, label_size = 3,
                         boarder_color = "black", background = "grey",
                         linear = FALSE){
@@ -368,6 +402,13 @@ plot_colors <- function(x, label = NULL, label_size = 3,
 }
 
 
+#' @title Bin values
+#' @description Find the closest lower bin of a vector
+#' @param x a vector of numeric values
+#' @param by the spacing between the bins
+#' @param value If \code{TRUE}, return the bin value, otherwise return the bin id
+#' @param range A numeric vector specifying the lower and upper limit of the bins
+#' @return a numeric vector
 bin <- function(x, by = 1, value = TRUE, range = c(min(x), max(x))){
   z <- seq(range[1], range[2], by = by)
   out <- findInterval(x, z)
@@ -378,6 +419,18 @@ bin <- function(x, by = 1, value = TRUE, range = c(min(x), max(x))){
   }
 }
 
+
+
+#' @title Generate uncertainty intervals for binary data using conjugate prior
+#' @description Generate uncertainty intervals for binary data using conjugate prior (beta distribution)
+#' @param alpha The number of successes
+#' @param beta The number of failure
+#' @param interval A numeric value indicating the intervals for upper and lower bounds (default to 0.95).
+#' @param prior A numeric vector of the alpha and beta value of the conjugate prior. Default is the Bayes-Laplace prior (Tuyl et al. 2008) \eqn{\alpha = 1, \beta = 1}. Other popular choices include 'neutral' prior (Kerman 2011) \eqn{\alpha = 1/3, \beta = 1/3}, and the Jeffreys prior \eqn{\alpha = 0.5, \beta = 0.5}.
+#' @references
+#' Kerman, J. 2011. Neutral noninformative and informative conjugate beta and gamma prior distributions. Electronic Journal of Statistics 5:1450–1470.
+#' Tuyl, F., R. Gerlach, and K. Mengersen. 2008. A Comparison of Bayes-Laplace, Jeffreys, and Other Priors: The Case of Zero Events. The American Statistician 62:40–44.
+#' @return a numeric vector
 beta_conjugate <- function(alpha, beta, interval = 0.95, prior = c(1,1)){
   a <- alpha + prior[1]
   b <- beta + prior[2]
@@ -395,6 +448,13 @@ beta_conjugate <- function(alpha, beta, interval = 0.95, prior = c(1,1)){
   return(out)
 }
 
+
+#' @title Find nearest bin
+#' @description Find the closest bin of a vector
+#' @param x a vector of numeric values
+#' @param grid the vector of the bins
+#' @param value If \code{TRUE}, return the bin value, otherwise return the bin id
+#' @return a numeric vector
 nearest_bin <- function(x, grid, value = TRUE){
   grid_o <- order(grid)
   grid <- grid[grid_o]
@@ -408,7 +468,10 @@ nearest_bin <- function(x, grid, value = TRUE){
   }
 }
 
-
+#' @title Check if values overlaps zero
+#' @description Check if values overlaps zero and returns a logical value
+#' @param ... Numeric vectors of any length
+#' @return an atomic logical value
 overlaps_zero <- function(...){
   l <- list(...)
 
