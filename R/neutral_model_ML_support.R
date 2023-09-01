@@ -134,14 +134,15 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
   #Forward approximate simulation (not exact!)
   lambda<-get_lambda(mean.phi.T = mean.phi.T,min.phi = min.phi, max.phi = max.phi, a = a)
   k <- rpois(n.sim,lambda)
-  phi_T_non_zero <- Rfast::group(
+
+  phi_T_non_zero <- unname(tapply(
     rallo(n = sum(k),
-          min.phi = min.phi,
-          max.phi = max.phi,
-          a = a),
+                  min.phi = min.phi,
+                  max.phi = max.phi,
+                  a = a),
     rep(seq_len(n.sim), k),
-    method = "sum"
-  )
+    FUN = sum
+  ))
 
   phi_T <- k
   phi_T[phi_T > 0] <- phi_T_non_zero

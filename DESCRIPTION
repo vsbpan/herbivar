@@ -46,6 +46,7 @@ Suggests:
     stringr,
     insight,
     kSamples, 
+    data.table,
     spatstat.explore
 VignetteBuilder: knitr
 Encoding: UTF-8
