@@ -1,7 +1,7 @@
 Package: herbivar
 Type: Package
 Title: Quantitative Tools for Variance Explicit Ecology and Herbivory
-Version: 0.2.0
+Version: 0.2.1
 Authors@R: 
     person("Vincent", "Pan", , email = "vsbpan@gmail.com",
              role = c("aut", "cre"), comment = c(ORCID = "0000-0001-9892-7805"))
