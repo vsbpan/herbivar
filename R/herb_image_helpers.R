@@ -619,7 +619,7 @@ color_index <- function(img, index = "all",plot = TRUE){
     slice_eval(...,FUN = "min")
   }
   ind$Equation <- gsub("min","min2",gsub("max","max2",ind$Equation))
-  if(index == "all"){
+  if(any(index == "all")){
     index <- ind$Index
   } else {
     if(!any(index %in% ind$Index)){
