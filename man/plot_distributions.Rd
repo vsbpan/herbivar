@@ -9,7 +9,7 @@ plot_distributions(
   type = c("ecdf", "hist"),
   by = 0.1,
   plot_smooth = TRUE,
-  ecdf.xlim = c(0, 1),
+  xlim = c(0, 1),
   return_transformed = FALSE,
   ...
 )
@@ -21,11 +21,11 @@ plot_distributions(
 
 \item{by}{the bin size}
 
-\item{plot_smooth}{if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram.}
+\item{plot_smooth}{if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram on the log scale.}
 
-\item{ecdf.xlim}{the x-axis bounds of the ECDF plot.}
+\item{xlim}{the x-axis bounds.}
 
-\item{return_transformed}{if \code{TRUE}, return a zoomed-in histogram.}
+\item{return_transformed}{if \code{TRUE}, return a zoomed-in histogram on the log scale.}
 
 \item{...}{additional arguments passed to \code{stats::plot.ecdf()}}
 }

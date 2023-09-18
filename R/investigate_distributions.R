@@ -383,13 +383,13 @@ probe_dist_list<-function(data_list, probes = c("mean","var","cv","Gini",
 #' @param data_list a list of numeric vectors
 #' @param type a character vector indicating which plots to display. Acceptable options are "ecdf" and "hist".
 #' @param by the bin size
-#' @param return_transformed if \code{TRUE}, return a zoomed-in histogram.
-#' @param plot_smooth if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram.
-#' @param ecdf.xlim the x-axis bounds of the ECDF plot.
+#' @param return_transformed if \code{TRUE}, return a zoomed-in histogram on the log scale.
+#' @param plot_smooth if \code{TRUE} (default), display smoothed line(s) for zoomed-in histogram on the log scale.
+#' @param xlim the x-axis bounds.
 #' @param ... additional arguments passed to \code{stats::plot.ecdf()}
 #' @export
 plot_distributions<-function(data_list, type = c("ecdf","hist"),
-                             by = 0.1, plot_smooth = TRUE, ecdf.xlim=c(0,1),
+                             by = 0.1, plot_smooth = TRUE, xlim = c(0,1),
                              return_transformed = FALSE,
                              ...){
   if(any(type%in%"ecdf")){
@@ -397,7 +397,7 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
       data_list[[i]] %>%
         round(digits = floor(log10(by)*-1)) %>%
         stats::ecdf() %>%
-        stats::plot.ecdf(col=i, add = c(i>1),xlim = ecdf.xlim,...)
+        stats::plot.ecdf(col=i, add = c(i>1),xlim = xlim,...)
     }
   }
   suppressMessages({
@@ -405,7 +405,7 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
     data.tally.list<-vector(mode="list",length=length(data_list))
     for (i in seq_along(data_list)){
       data.tally.list[[i]]<-graphics::hist(data_list[[i]],
-                                 breaks = seq(0,1,by=by),
+                                 breaks = seq(xlim[1],xlim[2], by = by),
                                  plot = FALSE)
       data.tally.list[[i]]<-data.frame(
         x=data.tally.list[[i]]$mids,
@@ -419,8 +419,8 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
       dplyr::mutate(y=y/sum(y)) %>%
       ggplot2::ggplot(ggplot2::aes(x=x,y=(y),group=type))+
       ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
-      ggplot2::labs(y="Pr(Prop. herbivory)",
-                    x="Prop. herbivory",
+      ggplot2::labs(y="Pr(X)",
+                    x="X",
                     color="Data",
                     fill="Data")+
       ggplot2::theme_bw(base_size=15)
@@ -429,10 +429,10 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
       g<-tally.data %>%
         dplyr::group_by(type) %>%
         dplyr::mutate(y=y/sum(y)) %>%
-        ggplot2::ggplot(ggplot2::aes(x=x,y=(y)^0.1,group=type))+
+        ggplot2::ggplot(ggplot2::aes(x=x,y=log(y),group=type))+
         ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
-        ggplot2::labs(y="Pr(Prop. herbivory)^0.1",
-                      x="Prop. herbivory",
+        ggplot2::labs(y="ln(Pr(X))",
+                      x="X",
                       color="Data",
                       fill="Data")+
         ggplot2::theme_bw(base_size=15)
