@@ -50,7 +50,7 @@ detach.herbivar <- function(x){
 
 .reinstall.herbivar <- function(package_path = paste0(
   "C:/R_Projects/Package_Building/herbivar_",
-  gsub(" \\(.*","",herbivar::herbivar.version()),
+  as.character(utils::packageVersion("herbivar")),
   ".tar.gz"
 )){
   load.herbivar <- "herbivar" %in% (.packages())

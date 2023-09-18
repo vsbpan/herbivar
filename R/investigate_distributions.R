@@ -379,7 +379,7 @@ probe_dist_list<-function(data_list, probes = c("mean","var","cv","Gini",
 }
 
 #' @title Generate Empirical Cumulative Distribution and Histogram Plot
-#' @description Generate ECDF and histogram plot for each vector in a list
+#' @description Generate ECDF and histogram plot for each vector in a list. If the range specified by \code{xlim} does not contain all the values in the data vector, an error will be returned.
 #' @param data_list a list of numeric vectors
 #' @param type a character vector indicating which plots to display. Acceptable options are "ecdf" and "hist".
 #' @param by the bin size
@@ -402,7 +402,17 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
   }
   suppressMessages({
   if(any(type%in%"hist")){
-    data.tally.list<-vector(mode="list",length=length(data_list))
+    data.tally.list <- vector(mode="list",length=length(data_list))
+
+    if(is.null(names(data_list))){
+      names(data_list) <- paste0("dist",seq_along(data_list))
+    } else {
+      if(any(duplicated(names(data_list)))){
+        stop("data_list contains duplicated names. Histogram label is ambiguous.")
+      }
+    }
+
+
     for (i in seq_along(data_list)){
       data.tally.list[[i]]<-graphics::hist(data_list[[i]],
                                  breaks = seq(xlim[1],xlim[2], by = by),
@@ -417,7 +427,7 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
     g2<-tally.data %>%
       dplyr::group_by(type) %>%
       dplyr::mutate(y=y/sum(y)) %>%
-      ggplot2::ggplot(ggplot2::aes(x=x,y=(y),group=type))+
+      ggplot2::ggplot(ggplot2::aes(x = x,y = y,group=type))+
       ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
       ggplot2::labs(y="Pr(X)",
                     x="X",
@@ -428,8 +438,9 @@ plot_distributions<-function(data_list, type = c("ecdf","hist"),
     if(return_transformed){
       g<-tally.data %>%
         dplyr::group_by(type) %>%
-        dplyr::mutate(y=y/sum(y)) %>%
-        ggplot2::ggplot(ggplot2::aes(x=x,y=log(y),group=type))+
+        dplyr::mutate(y = log(y/sum(y))) %>%
+        dplyr::filter(is.finite(y)) %>%
+        ggplot2::ggplot(ggplot2::aes(x = x, y = y, group = type))+
         ggplot2::geom_col(ggplot2::aes(fill=type,color=NULL),alpha=0.5,position = "dodge") +
         ggplot2::labs(y="ln(Pr(X))",
                       x="X",

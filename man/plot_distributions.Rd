@@ -30,5 +30,5 @@ plot_distributions(
 \item{...}{additional arguments passed to \code{stats::plot.ecdf()}}
 }
 \description{
-Generate ECDF and histogram plot for each vector in a list
+Generate ECDF and histogram plot for each vector in a list. If the range specified by \code{xlim} does not contain all the values in the data vector, an error will be returned.
 }
