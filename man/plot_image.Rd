@@ -2,9 +2,30 @@
 % Please edit documentation in R/spatial_herb_image_support.R
 \name{plot.cimg}
 \alias{plot.cimg}
+\alias{plot.pixset}
 \title{Plot Image Using Base Graphics Using Missing Value Handling}
 \usage{
 \method{plot}{cimg}(
+  x,
+  frame,
+  xlim = c(1, width(x)),
+  ylim = c(height(x), 1),
+  xlab = "x",
+  ylab = "y",
+  rescale = TRUE,
+  colourscale = NULL,
+  colorscale = NULL,
+  interpolate = FALSE,
+  axes = TRUE,
+  main = "",
+  xaxs = "i",
+  yaxs = "i",
+  asp = 1,
+  col.na = grDevices::rgb(0, 0, 0, 0),
+  ...
+)
+
+\method{plot}{pixset}(
   x,
   frame,
   xlim = c(1, width(x)),
@@ -41,7 +62,7 @@
 
 \item{colourscale, colorscale}{an optional colour scale (default is gray or rgb)}
 
-\item{interpolate}{should the image be plotted with antialiasing (default \code{TRUE})}
+\item{interpolate}{should the image be plotted with antialiasing (default \code{FALSE})}
 
 \item{axes}{whether to draw axes (default \code{TRUE})}
 
@@ -56,8 +77,8 @@
 \item{...}{additional arguments passed to \code{plot.default()}}
 }
 \description{
-plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cimg()} for more details.
+plot image the same way as \code{imager::plot.cimg()}. The only differences are that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values and \code{interpolate} is set to \code{FALSE} by default. see \code{?imager::plot.cimg()} for more details.
 }
 \note{
-The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
+The code for the function is obtained from Simon Barthelme's \code{imager:::plot.cimg()} and \code{imager:::plot.pixset()}. version 0.42.13.
 }

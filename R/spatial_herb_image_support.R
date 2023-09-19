@@ -913,7 +913,7 @@ plot.singleton <- function (x, ...){
 
 
 #' @title Plot Image Using Base Graphics Using Missing Value Handling
-#' @description plot image the same way as \code{imager::plot.cimg()}. The only difference is that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values. see \code{?imager::plot.cimg()} for more details.
+#' @description plot image the same way as \code{imager::plot.cimg()}. The only differences are that the \code{rescale} is automatically set to \code{FALSE} when the image contains missing pixel values and \code{interpolate} is set to \code{FALSE} by default. see \code{?imager::plot.cimg()} for more details.
 #' @param x the image
 #' @param frame which frame to display, if the image has depth > 1
 #' @param xlim x plot limits (default: 1 to width)
@@ -922,7 +922,7 @@ plot.singleton <- function (x, ...){
 #' @param ylab y axis label
 #' @param rescale rescale pixel values so that their range is \eqn{[0,1]}
 #' @param colourscale,colorscale an optional colour scale (default is gray or rgb)
-#' @param interpolate should the image be plotted with antialiasing (default \code{TRUE})
+#' @param interpolate should the image be plotted with antialiasing (default \code{FALSE})
 #' @param axes whether to draw axes (default \code{TRUE})
 #' @param main main title
 #' @param xaxs,yaxs The style of axis interval calculation to be used for the axes. See \code{?par()}
@@ -930,7 +930,8 @@ plot.singleton <- function (x, ...){
 #' @param asp aspect ratio.
 #' @param ... additional arguments passed to \code{plot.default()}
 #' @return NULL
-#' @note The code for the function is obtained from Simon Barthelme's \code{imager:::plot.singleton()}. version 0.42.13.
+#' @note The code for the function is obtained from Simon Barthelme's \code{imager:::plot.cimg()} and \code{imager:::plot.pixset()}. version 0.42.13.
+#' @rdname plot_image
 #' @export
 plot.cimg <- function(x, frame, xlim = c(1, width(x)),
                       ylim = c(height(x), 1), xlab = "x", ylab = "y",
@@ -986,6 +987,24 @@ plot.cimg <- function(x, frame, xlim = c(1, width(x)),
   invisible(x)
 }
 
+#' @rdname plot_image
+#' @export
+plot.pixset <- function(x, frame, xlim = c(1, width(x)),
+                        ylim = c(height(x), 1), xlab = "x", ylab = "y",
+                        rescale = TRUE, colourscale = NULL,
+                        colorscale = NULL, interpolate = FALSE, axes = TRUE, main = "",
+                        xaxs = "i", yaxs = "i", asp = 1, col.na = grDevices::rgb(0, 0, 0, 0),
+                        ...){
+  plot(as.cimg(x),
+       frame = frame, xlim = xlim,
+       ylim = ylim, xlab = xlab, ylab = ylab,
+       rescale = rescale, colourscale = colourscale,
+       colorscale = colorscale, interpolate = interpolate, axes = axes, main = main,
+       xaxs = xaxs, yaxs = yaxs, asp = asp, col.na = col.na,
+       ...)
+}
+
+
 #' @title Plot image list
 #' @description plot image list via \code{spatstat.geom::plot.imlist()}
 #' @param x an object of class 'imlist'
@@ -996,6 +1015,10 @@ plot.cimg <- function(x, frame, xlim = c(1, width(x)),
 plot.imlist <- function(x,main = "", interpolate = FALSE, ...){
   spatstat.geom::plot.imlist(x,plotcommand = "plot", main = main, interpolate = interpolate, ...)
 }
+
+
+
+
 
 
 # ss <- function(k, mat.dist, method = "silhouette", nboot = 10){
