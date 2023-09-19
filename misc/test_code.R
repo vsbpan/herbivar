@@ -692,7 +692,7 @@ library(Rcpp)
 
 plot_distributions(
  list(
-    rnorm(100),
+  "zz" = rnorm(100),
   rnorm(100),
    "z" = rnorm(100)
  ), xlim = c(-10,10), return_transformed = TRUE, by = 1

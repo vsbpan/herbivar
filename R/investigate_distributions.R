@@ -1015,6 +1015,34 @@ gen_mean <- function(x, p, na.rm = FALSE){
   return(m)
 }
 
+#' @title Weighted central moments
+#' @description
+#' Computes weighed central moments
+#' @param x a vector of numeric values
+#' @param w weights of the same length as x
+#' @param biased if \code{TRUE}, returns biased estimate
+#' @return an atomic numeric value
+#' @rdname wt_moments
+#' @export
+var_wt <- function(x, w, biased = FALSE){
+  stopifnot(length(x) == length(w))
+
+  if(biased){
+    correction <- sum(w)
+  } else {
+    correction <- sum(w) / (sum(w)^2 - sum(w^2))
+  }
+  sum((mean_wt(x,w) - x)^2 * w) / correction
+}
+
+#' @rdname wt_moments
+#' @export
+mean_wt <- function(x, w){
+  stopifnot(length(x) == length(w))
+
+  sum(w * x) / sum(w)
+}
+
 
 # Cohen, J. E., and M. Xu. 2015. Random sampling of skewed distributions implies Taylor’s power law of fluctuation scaling. Proceedings of the National Academy of Sciences 112:7749–7754.
 

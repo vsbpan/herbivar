@@ -484,3 +484,25 @@ overlaps_zero <- function(...){
 }
 
 
+#' @title Pre-compile custom functions
+#' @description Pre-compile all custom functions in the global environment
+#' @param ... additional arguments
+#' @return NULL
+pre_cmp_fun <- function(...){
+  invisible(sapply(
+    ls(globalenv()),
+    function(x){
+      z <- get(x)
+      if(is.function(z)){
+        assign(x, compiler::cmpfun(z), envir = globalenv())
+      }
+    }
+  ))
+  message("Done!")
+}
+
+
+
+
+
+
