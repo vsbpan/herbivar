@@ -4,12 +4,14 @@
 \alias{plot.imlist}
 \title{Plot image list}
 \usage{
-\method{plot}{imlist}(x, main = "", interpolate = FALSE, ...)
+\method{plot}{imlist}(x, main = "", main.panel = NULL, interpolate = FALSE, ...)
 }
 \arguments{
 \item{x}{an object of class 'imlist'}
 
 \item{main}{a character string for the plot title}
+
+\item{main.panel}{a vector of character string for the panel title}
 
 \item{interpolate}{a logical value indicating whether to interpolate the raster}
 

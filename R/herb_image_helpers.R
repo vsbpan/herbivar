@@ -683,3 +683,19 @@ rotate_90 <- function(img){
 
   return(f(aperm(img, c(2,1,3,4))))
 }
+
+#' @title Convert pixset into a colored cimg
+#' @description
+#' Convert pixset into a colored cimg
+#' @param img the pixset
+#' @param n number of color spectra, defaults to 3.
+#' @return a colored cimg object
+as.cimg_color <- function(img, n = 3){
+  imager::imappend(
+    imlist = lapply(seq_len(n),function(x) img) %>% imager::as.imlist(),
+    axis = "c") %>%
+    as.cimg()
+}
+
+
+

@@ -1009,11 +1009,16 @@ plot.pixset <- function(x, frame, xlim = c(1, width(x)),
 #' @description plot image list via \code{spatstat.geom::plot.imlist()}
 #' @param x an object of class 'imlist'
 #' @param main a character string for the plot title
+#' @param main.panel a vector of character string for the panel title
 #' @param interpolate a logical value indicating whether to interpolate the raster
 #' @param ... additional arguments passed to \code{spatstat.geom::plot.imlist()}
 #' @return \code{NULL}
-plot.imlist <- function(x,main = "", interpolate = FALSE, ...){
-  spatstat.geom::plot.imlist(x,plotcommand = "plot", main = main, interpolate = interpolate, ...)
+plot.imlist <- function(x,main = "", main.panel = NULL, interpolate = FALSE, ...){
+  spatstat.geom::plot.imlist(x,
+                             plotcommand = "plot",
+                             main = main,
+                             interpolate = interpolate,
+                             main.panel = main.panel, ...)
 }
 
 
