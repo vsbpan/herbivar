@@ -668,22 +668,6 @@ grow_edge <- function(object, background = NA){
 
 
 
-#' @title Rotate array by 90 degrees
-#' @description
-#' Rotate an array, cimg, or pixset by 90 degrees.
-#' @param img the image
-#' @return an object of the same class
-rotate_90 <- function(img){
-  f <- switch(
-    class(img)[1],
-    "cimg" = as.cimg,
-    "pixset" = as.pixset,
-    "array" = as.array
-  )
-
-  return(f(aperm(img, c(2,1,3,4))))
-}
-
 #' @title Convert pixset into a colored cimg
 #' @description
 #' Convert pixset into a colored cimg

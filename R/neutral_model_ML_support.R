@@ -159,7 +159,7 @@ qallo <- function(p, min.phi = 0.005, max.phi = 1, a = 14/9,
 #' @description Density, distribution function, quantile function, and random generation for the neutral herbivory distribution based on allometric scaling laws.
 #' @details
 #' The neutral herbivory distribution is a type of compound Poisson distribution taking the form:
-#' \deqn{\phi_{Ti} = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha},} when \eqn{\alpha \neq 1} and
+#' \deqn{\phi_{Ti}(k_i) = \sum^{k_i}_{j=1} \phi_j,} if \eqn{\phi_{Ti} \leq 1}, otherwise \deqn{\phi_{Ti} = 1,} where \deqn{P(\phi) = \frac{1-\alpha}{\phi_M^{1-\alpha} - \phi_m^{1-\alpha}} \phi^{-\alpha},} when \eqn{\alpha \neq 1} and
 #' \deqn{P(\phi) = \frac{1}{\ln{\phi_M} - \ln{\phi_m}} \phi^{-1},} when \eqn{\alpha = 1} and \deqn{k \sim Pois(\lambda = \frac{\overline{\phi_{T}'}}{\overline{\phi}})}
 #' \eqn{\overline{\phi_{T}'}} is the mean herbivory of the distribution when herbivores are not plant limited. That is, if \eqn{\overline{\phi_{T}}}, which has support \eqn{[x, \infty]}, is not truncated to \eqn{[0, 1]}. \eqn{\overline{\phi_{T}}} and \eqn{\overline{\phi_{T}'}} are often close to each other. For more details on the 'bite size' distribution see \code{?rallo}.
 #'

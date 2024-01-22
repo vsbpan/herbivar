@@ -71,7 +71,7 @@ if(suppressMessages(!require(herbivar))){
 |            The neutral herbivory model is a type of compound Poisson distribution, where the cumulative proportion herbivory $\phi_T$ with support over $[0,1]$ is a sum of $k$ individual 'bites' $\phi$ with a cut-off.  
 
 $$
-\phi_T = \Bigg\{ \begin{array}{cc}
+\phi_T (k) = \Bigg\{ \begin{array}{cc}
      \begin{array}{cc}
       \sum_i^k \phi_i & \sum_i^k \phi_i \leq 1 \\
       1 & \sum_i^k \phi_i > 1
